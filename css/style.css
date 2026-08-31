@@ -40,6 +40,18 @@ button {
   padding: clamp(10px, 3vh, 24px) 16px;
 }
 
+.screen {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+}
+
+.screen[hidden] {
+  display: none;
+}
+
+.menu-card,
 .quiz-card {
   position: relative;
   display: flex;
@@ -52,6 +64,129 @@ button {
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 24px 70px rgba(42, 83, 132, 0.16);
+}
+
+.menu-card {
+  min-height: min(620px, 92dvh);
+}
+
+.brand {
+  max-width: none;
+  margin-bottom: 12px;
+  color: #173f78;
+  font-size: clamp(2.6rem, 10vw, 4.4rem);
+}
+
+.menu-heading {
+  max-width: none;
+  margin-bottom: 12px;
+}
+
+.menu-introduction {
+  margin: 0 0 24px;
+  color: #52647d;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.menu-choice {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 86px;
+  padding: 14px;
+  border: 2px solid #c9d9ed;
+  border-radius: 18px;
+  color: #17345d;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.menu-choice:hover {
+  border-color: #3778ca;
+  background: #f3f8ff;
+  transform: translateY(-1px);
+}
+
+.menu-choice:focus-visible,
+.back-button:focus-visible {
+  outline: 4px solid rgba(27, 111, 220, 0.25);
+  outline-offset: 2px;
+}
+
+.menu-choice strong,
+.menu-choice small {
+  display: block;
+}
+
+.menu-choice strong {
+  line-height: 1.3;
+}
+
+.menu-choice small {
+  margin-top: 5px;
+  color: #687b95;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.choice-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
+  color: #fff;
+  background: #1f6fc4;
+  font-size: 1.8rem;
+  font-weight: 850;
+}
+
+.rule-icon {
+  background: #7a55c7;
+}
+
+.choice-arrow {
+  color: #6c83a2;
+  font-size: 2rem;
+}
+
+.coming-soon {
+  margin: 20px 0 0;
+  color: #8291a5;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.back-button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 24px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #173f78;
+  background: #e7f1ff;
+  cursor: pointer;
+  font-size: 1.45rem;
+  font-weight: 850;
+}
+
+.back-button:hover {
+  background: #d5e8ff;
+}
+
+.quiz-back {
+  position: absolute;
+  top: clamp(16px, 3vh, 28px);
+  right: clamp(16px, 4vw, 28px);
+  margin: 0;
 }
 
 .eyebrow,
@@ -77,6 +212,10 @@ h1 {
   font-size: clamp(1.55rem, 5vh, 2.65rem);
   line-height: 1.08;
   letter-spacing: -0.035em;
+}
+
+h1:focus {
+  outline: none;
 }
 
 .example {
@@ -223,6 +362,7 @@ h1 {
     padding: 0;
   }
 
+  .menu-card,
   .quiz-card {
     min-height: 100vh;
     min-height: 100dvh;
@@ -232,6 +372,10 @@ h1 {
     border: 0;
     border-radius: 0;
     box-shadow: none;
+  }
+
+  .menu-card {
+    min-height: 100dvh;
   }
 }
 
