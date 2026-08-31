@@ -16,19 +16,19 @@
     <main class="app-shell">
       <section class="quiz-card" aria-labelledby="question-heading">
         <p class="eyebrow">Math Class</p>
-        <p class="progress">Fråga 1</p>
+        <p class="progress" id="progress">Fråga 1 av 3</p>
 
-        <h1 id="question-heading">Vilken regel gäller för att multiplicera med 100?</h1>
+        <h1 id="question-heading">Vilken regel gäller för att multiplicera med 10?</h1>
 
-        <div class="example" aria-label="Sju gånger hundra">
-          <span>7</span>
+        <div class="example" id="example" aria-label="Sju gånger tio">
+          <span id="example-number">7</span>
           <span aria-hidden="true">×</span>
-          <span>100</span>
+          <span id="example-multiplier">10</span>
         </div>
 
         <p class="instruction" id="answer-instruction">Välj det alternativ som beskriver regeln.</p>
 
-        <div class="answers" role="group" aria-labelledby="answer-instruction">
+        <div class="answers" id="answers" role="group" aria-labelledby="answer-instruction">
           <button class="answer-button" type="button" data-zeroes="1">
             Lägg till 1 nolla
           </button>
@@ -50,12 +50,11 @@
 
         <div class="explanation" id="explanation" hidden>
           <h2>Så fungerar regeln</h2>
-          <p>
-            När du multiplicerar ett heltal med 100 lägger du till två nollor efter talet.
-            Därför blir <strong>7 × 100 = 700</strong>.
-          </p>
-          <p class="rule">Regeln är: lägg till 2 nollor.</p>
+          <p id="explanation-message"></p>
+          <p class="rule" id="explanation-rule"></p>
         </div>
+
+        <p class="swipe-hint" aria-hidden="true">Svep upp eller ned för nästa uppgift</p>
       </section>
     </main>
   </body>
