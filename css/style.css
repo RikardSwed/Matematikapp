@@ -11,10 +11,15 @@
 }
 
 body {
+  overflow: hidden;
   min-width: 320px;
   min-height: 100vh;
   min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   margin: 0;
+  overscroll-behavior: none;
+  touch-action: none;
   background:
     radial-gradient(circle at 15% 15%, rgba(255, 210, 118, 0.5), transparent 28rem),
     radial-gradient(circle at 90% 85%, rgba(95, 184, 255, 0.35), transparent 30rem),
@@ -29,13 +34,20 @@ button {
   display: grid;
   min-height: 100vh;
   min-height: 100dvh;
+  height: 100dvh;
   place-items: center;
-  padding: 24px 16px;
+  overflow: hidden;
+  padding: clamp(10px, 3vh, 24px) 16px;
 }
 
 .quiz-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   width: min(100%, 560px);
-  padding: clamp(24px, 6vw, 44px);
+  max-height: 100%;
+  padding: clamp(18px, 4vh, 38px) clamp(20px, 6vw, 44px);
   border: 1px solid rgba(57, 93, 141, 0.13);
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.94);
@@ -61,8 +73,8 @@ button {
 
 h1 {
   max-width: 18ch;
-  margin: 18px 0 24px;
-  font-size: clamp(1.75rem, 7vw, 2.65rem);
+  margin: clamp(10px, 2vh, 18px) 0 clamp(12px, 2.5vh, 24px);
+  font-size: clamp(1.55rem, 5vh, 2.65rem);
   line-height: 1.08;
   letter-spacing: -0.035em;
 }
@@ -72,12 +84,12 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: clamp(18px, 6vw, 34px);
-  min-height: 118px;
-  margin: 0 0 26px;
+  min-height: clamp(76px, 14vh, 118px);
+  margin: 0 0 clamp(12px, 2.5vh, 26px);
   border-radius: 22px;
   color: #173f78;
   background: #e7f1ff;
-  font-size: clamp(2.1rem, 10vw, 3.6rem);
+  font-size: clamp(2rem, 7vh, 3.6rem);
   font-weight: 850;
 }
 
@@ -95,7 +107,7 @@ h1 {
 .answer-button,
 .explanation-button {
   width: 100%;
-  min-height: 56px;
+  min-height: clamp(46px, 7vh, 56px);
   border: 2px solid #c9d9ed;
   border-radius: 16px;
   color: #17345d;
@@ -142,8 +154,8 @@ h1 {
 
 .feedback,
 .explanation {
-  margin-top: 20px;
-  padding: 18px;
+  margin-top: clamp(12px, 2vh, 20px);
+  padding: clamp(14px, 2.5vh, 18px);
   border-radius: 18px;
   background: #f3f6fa;
 }
@@ -182,18 +194,68 @@ h1 {
   font-weight: 800;
 }
 
+.swipe-hint {
+  margin: clamp(12px, 2.5vh, 22px) 0 0;
+  color: #7386a0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.quiz-card.changing {
+  animation: change-question 220ms ease-out;
+}
+
+@keyframes change-question {
+  from {
+    opacity: 0.35;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 420px) {
   .app-shell {
-    align-items: start;
+    align-items: stretch;
     padding: 0;
   }
 
   .quiz-card {
     min-height: 100vh;
     min-height: 100dvh;
+    height: 100dvh;
+    justify-content: center;
+    overflow: hidden;
     border: 0;
     border-radius: 0;
     box-shadow: none;
+  }
+}
+
+@media (max-height: 650px) {
+  .eyebrow,
+  .progress {
+    font-size: 0.7rem;
+  }
+
+  .progress {
+    margin-top: 4px;
+  }
+
+  .instruction {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  .answers {
+    gap: 7px;
+  }
+
+  .swipe-hint {
+    margin-top: 8px;
   }
 }
 
