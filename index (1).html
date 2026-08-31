@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#eef6ff" />
+    <meta
+      name="description"
+      content="En enkel matteapp där du tränar på regler för multiplikation."
+    />
+    <title>Math Class</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/app.js" defer></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="quiz-card" aria-labelledby="question-heading">
+        <p class="eyebrow">Math Class</p>
+        <p class="progress">Fråga 1</p>
+
+        <h1 id="question-heading">Vilken regel gäller för att multiplicera med 100?</h1>
+
+        <div class="example" aria-label="Sju gånger hundra">
+          <span>7</span>
+          <span aria-hidden="true">×</span>
+          <span>100</span>
+        </div>
+
+        <p class="instruction" id="answer-instruction">Välj det alternativ som beskriver regeln.</p>
+
+        <div class="answers" role="group" aria-labelledby="answer-instruction">
+          <button class="answer-button" type="button" data-zeroes="1">
+            Lägg till 1 nolla
+          </button>
+          <button class="answer-button" type="button" data-zeroes="2">
+            Lägg till 2 nollor
+          </button>
+          <button class="answer-button" type="button" data-zeroes="3">
+            Lägg till 3 nollor
+          </button>
+        </div>
+
+        <div class="feedback" id="feedback" aria-live="polite" hidden>
+          <h2 id="feedback-heading"></h2>
+          <p id="feedback-message"></p>
+          <button class="explanation-button" id="explanation-button" type="button" hidden>
+            Visa förklaring
+          </button>
+        </div>
+
+        <div class="explanation" id="explanation" hidden>
+          <h2>Så fungerar regeln</h2>
+          <p>
+            När du multiplicerar ett heltal med 100 lägger du till två nollor efter talet.
+            Därför blir <strong>7 × 100 = 700</strong>.
+          </p>
+          <p class="rule">Regeln är: lägg till 2 nollor.</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
