@@ -1,4 +1,12 @@
 const answerButtons = document.querySelectorAll(".answer-button");
+const screens = document.querySelectorAll(".screen");
+const homeScreen = document.querySelector("#home-screen");
+const modeScreen = document.querySelector("#mode-screen");
+const quizScreen = document.querySelector("#quiz-screen");
+const openMultiplicationButton = document.querySelector("#open-multiplication");
+const openRulesButton = document.querySelector("#open-rules");
+const backToHomeButton = document.querySelector("#back-to-home");
+const backToModeButton = document.querySelector("#back-to-mode");
 const quizCard = document.querySelector(".quiz-card");
 const progress = document.querySelector("#progress");
 const questionHeading = document.querySelector("#question-heading");
@@ -23,6 +31,31 @@ const questions = [
 let currentQuestionIndex = 0;
 let touchStartY = null;
 let wheelLocked = false;
+let activeScreen = "home";
+
+function showScreen(screenName) {
+  const targetScreen = {
+    home: homeScreen,
+    mode: modeScreen,
+    quiz: quizScreen,
+  }[screenName];
+
+  screens.forEach((screen) => {
+    const isTarget = screen === targetScreen;
+    screen.hidden = !isTarget;
+    screen.classList.toggle("is-active", isTarget);
+  });
+
+  activeScreen = screenName;
+
+  if (screenName === "quiz") {
+    currentQuestionIndex = 0;
+    renderQuestion();
+  }
+
+  const heading = targetScreen.querySelector("h1");
+  window.setTimeout(() => heading.focus({ preventScroll: true }), 0);
+}
 
 function currentQuestion() {
   return questions[currentQuestionIndex];
@@ -113,6 +146,7 @@ explanationButton.addEventListener("click", showExplanation);
 document.addEventListener(
   "touchstart",
   (event) => {
+    if (activeScreen !== "quiz") return;
     touchStartY = event.touches[0].clientY;
   },
   { passive: true },
@@ -121,6 +155,7 @@ document.addEventListener(
 document.addEventListener(
   "touchend",
   (event) => {
+    if (activeScreen !== "quiz") return;
     if (touchStartY === null) return;
 
     const touchEndY = event.changedTouches[0].clientY;
@@ -138,6 +173,7 @@ document.addEventListener(
   "wheel",
   (event) => {
     event.preventDefault();
+    if (activeScreen !== "quiz") return;
     if (wheelLocked || Math.abs(event.deltaY) < 20) return;
 
     wheelLocked = true;
@@ -149,4 +185,7 @@ document.addEventListener(
   { passive: false },
 );
 
-renderQuestion();
+openMultiplicationButton.addEventListener("click", () => showScreen("mode"));
+openRulesButton.addEventListener("click", () => showScreen("quiz"));
+backToHomeButton.addEventListener("click", () => showScreen("home"));
+backToModeButton.addEventListener("click", () => showScreen("mode"));
