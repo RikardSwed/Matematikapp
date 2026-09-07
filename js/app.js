@@ -1,5 +1,6 @@
 const screens = document.querySelectorAll(".screen");
 const homeScreen = document.querySelector("#home-screen");
+const numbersScreen = document.querySelector("#numbers-screen");
 const modeScreen = document.querySelector("#mode-screen");
 const settingsScreen = document.querySelector("#settings-screen");
 const updatesScreen = document.querySelector("#updates-screen");
@@ -106,6 +107,7 @@ let wheelLocked = false;
 function showScreen(screenName) {
   const targetScreen = {
     home: homeScreen,
+    numbers: numbersScreen,
     mode: modeScreen,
     settings: settingsScreen,
     updates: updatesScreen,
@@ -312,10 +314,14 @@ modeButtons.forEach((button) => {
 });
 
 document.querySelector("#open-numbers").addEventListener("click", () => {
+  showScreen("numbers");
+});
+document.querySelector("#open-multiplication").addEventListener("click", () => {
   showAvailableModes();
   showScreen("mode");
 });
-document.querySelector("#back-to-home").addEventListener("click", () => showScreen("home"));
+document.querySelector("#back-from-numbers").addEventListener("click", () => showScreen("home"));
+document.querySelector("#back-to-topics").addEventListener("click", () => showScreen("numbers"));
 document.querySelector("#back-to-mode").addEventListener("click", () => showScreen("mode"));
 document.querySelector("#back-from-walkthrough").addEventListener("click", () => showScreen("mode"));
 document.querySelector("#open-settings").addEventListener("click", () => showScreen("settings"));
