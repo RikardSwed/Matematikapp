@@ -15,41 +15,142 @@
   <body>
     <main class="app-shell">
       <section class="screen is-active" id="home-screen" aria-labelledby="home-heading">
-        <div class="menu-card">
+        <div class="menu-card home-card">
+          <button class="settings-button" id="open-settings" type="button" aria-label="Öppna inställningar">
+            <span aria-hidden="true">⚙</span>
+          </button>
           <p class="eyebrow">Välkommen till</p>
           <h1 class="brand" id="home-heading" tabindex="-1">MathClass</h1>
-          <p class="menu-introduction">Vad vill du träna på?</p>
+          <p class="menu-introduction">Välj ett område att träna på.</p>
 
-          <button class="menu-choice" id="open-multiplication" type="button">
-            <span class="choice-icon" aria-hidden="true">×</span>
-            <span>
-              <strong>Multiplicera med 10, 100 och 1000</strong>
-              <small>Träna på att använda nollregeln</small>
-            </span>
-            <span class="choice-arrow" aria-hidden="true">›</span>
-          </button>
-
-          <p class="coming-soon">Fler områden kommer senare.</p>
+          <div class="category-grid">
+            <button class="category-choice is-available" id="open-numbers" type="button">
+              <span class="category-number">1</span>
+              <strong>Tal</strong>
+              <small>Öppna området</small>
+            </button>
+            <button class="category-choice" type="button" disabled>
+              <span class="category-number">2</span>
+              <strong>Geometri</strong>
+              <small>Kommer snart</small>
+            </button>
+            <button class="category-choice" type="button" disabled>
+              <span class="category-number">3</span>
+              <strong>Procent</strong>
+              <small>Kommer snart</small>
+            </button>
+            <button class="category-choice" type="button" disabled>
+              <span class="category-number">4</span>
+              <strong>Statistik</strong>
+              <small>Kommer snart</small>
+            </button>
+            <button class="category-choice" type="button" disabled>
+              <span class="category-number">5</span>
+              <strong>Sannolikhet</strong>
+              <small>Kommer snart</small>
+            </button>
+            <button class="category-choice" type="button" disabled>
+              <span class="category-number">6</span>
+              <strong>Algebra</strong>
+              <small>Kommer snart</small>
+            </button>
+          </div>
         </div>
       </section>
 
       <section class="screen" id="mode-screen" aria-labelledby="mode-heading" hidden>
-        <div class="menu-card">
+        <div class="menu-card mode-card">
           <button class="back-button" id="back-to-home" type="button" aria-label="Tillbaka till hemskärmen">
             <span aria-hidden="true">←</span>
           </button>
-          <p class="eyebrow">Multiplicera med 10, 100 och 1000</p>
+          <p class="eyebrow">Tal · Multiplicera med 10, 100 och 1000</p>
           <h1 class="menu-heading" id="mode-heading" tabindex="-1">Välj träningsläge</h1>
           <p class="menu-introduction">Hur vill du träna?</p>
 
-          <button class="menu-choice" id="open-rules" type="button">
-            <span class="choice-icon rule-icon" aria-hidden="true">?</span>
+          <div class="mode-grid">
+            <button class="mode-choice is-available" type="button" data-mode="walkthrough">
+              <span class="mode-icon walkthrough-icon" aria-hidden="true">▶</span>
+              <span><strong>Genomgång</strong><small>Lär dig metoden steg för steg</small></span>
+            </button>
+            <button class="mode-choice is-available" type="button" data-mode="rules">
+              <span class="mode-icon rule-icon" aria-hidden="true">?</span>
+              <span><strong>Regler</strong><small>Välj vilken regel som gäller</small></span>
+            </button>
+            <button class="mode-choice is-available" type="button" data-mode="calculate">
+              <span class="mode-icon" aria-hidden="true">=</span>
+              <span><strong>Räkna ut</strong><small>Skriv eller välj rätt svar</small></span>
+            </button>
+            <button class="mode-choice is-available" type="button" data-mode="missing">
+              <span class="mode-icon" aria-hidden="true">□</span>
+              <span><strong>Saknat tal</strong><small>Fyll i talet som saknas</small></span>
+            </button>
+            <button class="mode-choice is-available" type="button" data-mode="truefalse">
+              <span class="mode-icon" aria-hidden="true">✓</span>
+              <span><strong>Sant eller falskt</strong><small>Bedöm färdiga påståenden</small></span>
+            </button>
+            <button class="mode-choice is-available" type="button" data-mode="quick">
+              <span class="mode-icon" aria-hidden="true">⏱</span>
+              <span><strong>Snabbträning</strong><small>Svara på flera frågor i följd</small></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="settings-screen" aria-labelledby="settings-heading" hidden>
+        <div class="menu-card settings-card">
+          <button class="back-button" id="back-from-settings" type="button" aria-label="Tillbaka till hemskärmen">
+            <span aria-hidden="true">←</span>
+          </button>
+          <p class="eyebrow">MathClass</p>
+          <h1 class="menu-heading" id="settings-heading" tabindex="-1">Inställningar</h1>
+
+          <div class="settings-row" aria-label="Appversion">
+            <span>Version</span>
+            <strong>0.2.0</strong>
+          </div>
+
+          <button class="menu-choice updates-link" id="open-updates" type="button">
+            <span class="choice-icon updates-icon" aria-hidden="true">↻</span>
             <span>
-              <strong>Regler</strong>
-              <small>Välj vilken regel som gäller</small>
+              <strong>Uppdateringar</strong>
+              <small>Se vad som har lagts till</small>
             </span>
             <span class="choice-arrow" aria-hidden="true">›</span>
           </button>
+        </div>
+      </section>
+
+      <section class="screen" id="updates-screen" aria-labelledby="updates-heading" hidden>
+        <div class="menu-card updates-card">
+          <button class="back-button" id="back-from-updates" type="button" aria-label="Tillbaka till inställningar">
+            <span aria-hidden="true">←</span>
+          </button>
+          <p class="eyebrow">MathClass</p>
+          <h1 class="menu-heading" id="updates-heading" tabindex="-1">Uppdateringar</h1>
+
+          <article class="release-note">
+            <div class="release-heading">
+              <h2>Version 0.2.0</h2>
+              <span>Träningslägen</span>
+            </div>
+            <ul>
+              <li>Sex träningslägen med färdigt innehåll.</li>
+              <li>Stegvis genomgång med extra förklaringar.</li>
+              <li>Innehållsstyrd visning av tillgängliga lägen.</li>
+            </ul>
+          </article>
+
+          <article class="release-note">
+            <div class="release-heading">
+              <h2>Version 0.1.0</h2>
+              <span>Första versionen</span>
+            </div>
+            <ul>
+              <li>Sex matematikområden på hemskärmen.</li>
+              <li>Regelträning för multiplikation med 10, 100 och 1000.</li>
+              <li>Inställningar och uppdateringshistorik.</li>
+            </ul>
+          </article>
         </div>
       </section>
 
@@ -58,15 +159,13 @@
           <button class="back-button quiz-back" id="back-to-mode" type="button" aria-label="Tillbaka till träningslägen">
             <span aria-hidden="true">←</span>
           </button>
-          <p class="eyebrow">Regler</p>
+          <p class="eyebrow" id="mode-label">Regler</p>
           <p class="progress" id="progress">Fråga 1 av 3</p>
 
           <h1 id="question-heading" tabindex="-1">Vilken regel gäller för att multiplicera med 10?</h1>
 
           <div class="example" id="example" aria-label="Sju gånger tio">
-            <span id="example-number">7</span>
-            <span aria-hidden="true">×</span>
-            <span id="example-multiplier">10</span>
+            <span id="example-expression">7 × 10</span>
           </div>
 
           <p class="instruction" id="answer-instruction">Välj det alternativ som beskriver regeln.</p>
@@ -83,6 +182,9 @@
             <button class="explanation-button" id="explanation-button" type="button" hidden>
               Visa förklaring
             </button>
+            <button class="next-button" id="next-question-button" type="button" hidden>
+              Nästa uppgift
+            </button>
           </div>
 
           <div class="explanation" id="explanation" hidden>
@@ -92,6 +194,25 @@
           </div>
 
           <p class="swipe-hint" aria-hidden="true">Svep upp eller ned för nästa uppgift</p>
+        </div>
+      </section>
+
+      <section class="screen" id="walkthrough-screen" aria-labelledby="walkthrough-heading" hidden>
+        <div class="quiz-card walkthrough-card">
+          <button class="back-button quiz-back" id="back-from-walkthrough" type="button" aria-label="Tillbaka till träningslägen">
+            <span aria-hidden="true">←</span>
+          </button>
+          <p class="eyebrow">Genomgång</p>
+          <p class="progress" id="walkthrough-progress">Steg 1 av 4</p>
+          <h1 id="walkthrough-heading" tabindex="-1"></h1>
+          <div class="example walkthrough-example" id="walkthrough-example"></div>
+          <p class="walkthrough-text" id="walkthrough-text"></p>
+          <div class="extra-explanation" id="extra-explanation" aria-live="polite" hidden></div>
+          <div class="walkthrough-actions">
+            <button class="secondary-button" id="previous-step" type="button">Föregående</button>
+            <button class="explanation-button" id="more-explanation" type="button">Förklara mer</button>
+            <button class="next-button" id="next-step" type="button">Nästa</button>
+          </div>
         </div>
       </section>
     </main>
