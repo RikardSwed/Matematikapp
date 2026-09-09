@@ -29,25 +29,17 @@
         <div class="page-card home-card">
           <header class="home-banner">
             <div>
-              <p>Välkommen till</p>
+              <p>Välkommen tillbaka</p>
               <h1 id="home-heading" tabindex="-1">MathClass</h1>
             </div>
-            <button class="settings-button" id="open-settings" type="button" aria-label="Öppna inställningar">⚙</button>
+            <button class="profile-button" id="open-profile" type="button" aria-label="Öppna profil och inställningar">RM</button>
           </header>
 
-          <div class="level-picker">
-            <label for="level-select">Välj nivå</label>
-            <select id="level-select">
-              <option value="high">Högstadiet</option>
-              <option value="middle">Mellanstadiet</option>
-            </select>
+          <div class="home-content">
+            <section class="home-section"><div class="section-heading"><h2>Fortsätt där du slutade</h2></div><button class="featured-card continue-card" id="continue-button" type="button"></button></section>
+            <section class="home-section"><div class="section-heading"><h2>Rekommenderat för dig</h2></div><button class="featured-card recommendation-card" id="recommendation-button" type="button"></button></section>
+            <aside class="wisdom-card"><span aria-hidden="true">✦</span><div><strong>Dagens mattetips</strong><p id="math-wisdom"></p></div></aside>
           </div>
-
-          <div class="section-heading">
-            <h2>Vad vill du träna på?</h2>
-            <p id="home-level-description">Material för högstadiet</p>
-          </div>
-          <div class="category-grid" id="home-categories"></div>
         </div>
       </section>
 
@@ -142,8 +134,9 @@
             <p>Utforska innehållet</p>
             <h1 id="library-heading" tabindex="-1">Bibliotek</h1>
           </header>
-          <p class="dashboard-level" id="library-level"></p>
-          <div class="library-list" id="library-list"></div>
+          <div class="level-picker library-level-picker"><label for="level-select">Välj nivå</label><select id="level-select"><option value="high">Högstadiet</option><option value="middle">Mellanstadiet</option></select></div>
+          <div class="section-heading library-heading"><h2>Matematikområden</h2><p id="library-level"></p></div>
+          <div class="category-grid library-category-grid" id="library-categories"></div>
         </div>
       </section>
 
@@ -151,8 +144,9 @@
         <div class="page-card inner-card">
           <button class="back-button" id="back-from-settings" type="button" aria-label="Tillbaka">←</button>
           <p class="eyebrow">MathClass</p>
-          <h1 id="settings-heading" tabindex="-1">Inställningar</h1>
-          <div class="settings-row"><span>Version</span><strong>0.3.0</strong></div>
+          <h1 id="settings-heading" tabindex="-1">Profil &amp; inställningar</h1>
+          <div class="profile-summary"><span>RM</span><div><strong>Rikard Månsson</strong><small>Profilnamn och initialer kan anpassas senare.</small></div></div>
+          <div class="settings-row"><span>Version</span><strong>0.4.0 · Blå Horisont</strong></div>
           <button class="list-button" id="open-updates" type="button"><span><strong>Uppdateringar</strong><small>Se vad som har lagts till</small></span><b>›</b></button>
         </div>
       </section>
@@ -162,6 +156,7 @@
           <button class="back-button" id="back-from-updates" type="button" aria-label="Tillbaka till inställningar">←</button>
           <p class="eyebrow">MathClass</p>
           <h1 id="updates-heading" tabindex="-1">Uppdateringar</h1>
+          <article class="release-note"><h2>Version 0.4.0 · Blå Horisont</h2><p>Personlig hemskärm, nivåtaggar, sidindelade svep och ett nytt bibliotek.</p></article>
           <article class="release-note"><h2>Version 0.3.0</h2><p>Nivåval, material för alla högstadieområden, nederkantmeny, Framsteg och Bibliotek.</p></article>
           <article class="release-note"><h2>Version 0.2.0</h2><p>Flera träningslägen och stegvisa genomgångar.</p></article>
           <article class="release-note"><h2>Version 0.1.0</h2><p>Första versionen med regelträning inom Tal.</p></article>
@@ -170,9 +165,9 @@
     </main>
 
     <nav class="bottom-nav" aria-label="Huvudmeny">
-      <button class="nav-button is-active" type="button" data-nav="home"><span aria-hidden="true">⌂</span><small>Hem</small></button>
-      <button class="nav-button" type="button" data-nav="progress"><span aria-hidden="true">▥</span><small>Framsteg</small></button>
-      <button class="nav-button" type="button" data-nav="library"><span aria-hidden="true">▤</span><small>Bibliotek</small></button>
+      <button class="nav-button is-active" type="button" data-nav="home"><span class="nav-icon" aria-hidden="true"><b>⌂</b></span><small>Hem</small></button>
+      <button class="nav-button" type="button" data-nav="progress"><span class="nav-icon" aria-hidden="true"><b>↗</b></span><small>Framsteg</small></button>
+      <button class="nav-button" type="button" data-nav="library"><span class="nav-icon" aria-hidden="true"><b>▦</b></span><small>Bibliotek</small></button>
     </nav>
   </body>
 </html>
