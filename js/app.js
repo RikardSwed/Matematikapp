@@ -22,8 +22,8 @@ const modeCatalog = {
   order: { name: "Ordna", description: "Hitta rätt ordning", icon: "↕" },
 };
 
-const q = (prompt, example, choices, correct, explanation) => ({
-  prompt, example, choices, correct, explanation,
+const q = (prompt, example, choices, correct, explanation, levels = ["high"]) => ({
+  prompt, example, choices, correct, explanation, levels,
 });
 
 const topics = {
@@ -123,6 +123,7 @@ const topics = {
 };
 
 Object.values(topics).forEach((topic) => {
+  topic.levels = ["high"];
   topic.modes.quick = [...(topic.modes.calculate || []), ...(topic.modes.truefalse || [])];
 });
 
@@ -137,8 +138,17 @@ const highCategories = [
 
 const curriculum = {
   high: { name: "Högstadiet", categories: highCategories },
-  middle: { name: "Mellanstadiet", categories: highCategories.map((category) => ({ ...category, topicIds: [] })) },
+  middle: { name: "Mellanstadiet", categories: highCategories },
 };
+
+const wisdoms = [
+  "Förklara lösningen högt för dig själv – då märker du snabbt vad du verkligen förstår.",
+  "Ett fel är inte ett misslyckande. Det visar exakt vad du kan träna på härnäst.",
+  "Rita en bild när talen känns abstrakta. En enkel skiss kan göra sambandet tydligt.",
+  "Träna kort och ofta. Tio fokuserade minuter kan ge mer än ett långt pass ibland.",
+  "Kontrollera svaret med en annan metod när du kan. Då tränar du både säkerhet och förståelse.",
+  "Fråga inte bara vad svaret är – fråga varför metoden fungerar.",
+];
 
 let level = localStorage.getItem("mathclass-level") || "high";
 let activeScreen = "home";
@@ -151,6 +161,9 @@ let quickScore = 0;
 let topicsOrigin = "home";
 let settingsOrigin = "home";
 let touchStartY = null;
+let touchCurrentY = null;
+let touchStartedAt = 0;
+let swipeAnimating = false;
 let wheelLocked = false;
 
 function showScreen(name) {
@@ -166,17 +179,32 @@ function showScreen(name) {
 }
 
 function renderHome() {
-  $("#level-select").value = level;
-  $("#home-level-description").textContent = `Material för ${curriculum[level].name.toLowerCase()}`;
-  const container = $("#home-categories");
-  container.replaceChildren();
-  curriculum[level].categories.forEach((category, index) => {
-    const button = document.createElement("button");
-    button.className = "category-button";
-    button.innerHTML = `<span>${index + 1}</span><strong>${category.title}</strong><small>${category.description}</small>`;
-    button.addEventListener("click", () => openCategory(category.id, "home"));
-    container.append(button);
-  });
+  const data = progressData()[level] || {};
+  const available = availableTopics();
+  const latest = data.latestTopicId ? topics[data.latestTopicId] : null;
+  const latestCategory = data.latestCategoryId ? categoryById(data.latestCategoryId) : null;
+  const recommendation = available.find((item) => item.topicId !== data.latestTopicId) || available[0];
+  configureFeaturedButton($("#continue-button"), latestCategory, data.latestTopicId, latest ? latest.title : "Börja träna", latest ? latest.description : `Öppna Bibliotek för material i ${curriculum[level].name.toLowerCase()}.`);
+  configureFeaturedButton($("#recommendation-button"), recommendation?.category, recommendation?.topicId, recommendation ? topics[recommendation.topicId].title : "Nytt material kommer", recommendation ? topics[recommendation.topicId].description : "Det finns ännu inget material för den valda nivån.");
+  $("#math-wisdom").textContent = wisdoms[Math.floor(Math.random() * wisdoms.length)];
+}
+
+function categoryById(id) {
+  return curriculum[level].categories.find((category) => category.id === id);
+}
+
+function topicIdsFor(category) {
+  return category.topicIds.filter((topicId) => topics[topicId].levels.includes(level));
+}
+
+function availableTopics() {
+  return curriculum[level].categories.flatMap((category) => topicIdsFor(category).map((topicId) => ({ category, topicId })));
+}
+
+function configureFeaturedButton(button, category, topicId, title, description) {
+  button.innerHTML = `<strong>${title}</strong><small>${description}</small>`;
+  button.disabled = false;
+  button.onclick = category && topicId ? () => { selectedCategory = category; topicsOrigin = "home"; openTopic(topicId); } : () => { renderLibrary(); showScreen("library"); };
 }
 
 function openCategory(categoryId, origin) {
@@ -187,8 +215,9 @@ function openCategory(categoryId, origin) {
   $("#topics-introduction").textContent = selectedCategory.description;
   const list = $("#topic-list");
   list.replaceChildren();
-  $("#topics-empty").hidden = selectedCategory.topicIds.length > 0;
-  selectedCategory.topicIds.forEach((topicId) => {
+  const availableIds = topicIdsFor(selectedCategory);
+  $("#topics-empty").hidden = availableIds.length > 0;
+  availableIds.forEach((topicId) => {
     const topic = topics[topicId];
     const button = document.createElement("button");
     button.className = "list-button";
@@ -205,7 +234,7 @@ function openTopic(topicId) {
   $("#mode-introduction").textContent = "Välj hur du vill arbeta med momentet.";
   const grid = $("#mode-grid");
   grid.replaceChildren();
-  const available = ["walkthrough", ...Object.keys(selectedTopic.modes).filter((mode) => selectedTopic.modes[mode].length)];
+  const available = ["walkthrough", ...Object.keys(selectedTopic.modes).filter((mode) => modeQuestions(mode).length)];
   available.forEach((mode) => {
     const info = modeCatalog[mode];
     const button = document.createElement("button");
@@ -217,10 +246,15 @@ function openTopic(topicId) {
   showScreen("mode");
 }
 
+function modeQuestions(mode) {
+  return selectedTopic.modes[mode].filter((question) => question.levels.includes(level));
+}
+
 function startMode(mode) {
   currentMode = mode;
   questionIndex = 0;
   quickScore = 0;
+  saveLastVisited();
   if (mode === "walkthrough") {
     walkthroughIndex = 0;
     renderWalkthrough();
@@ -232,7 +266,7 @@ function startMode(mode) {
 }
 
 function renderQuestion() {
-  const questions = selectedTopic.modes[currentMode];
+  const questions = modeQuestions(currentMode);
   const question = questions[questionIndex];
   $("#mode-label").textContent = currentMode === "quick" ? `Snabbträning · ${quickScore} rätt` : modeCatalog[currentMode].name;
   $("#question-progress").textContent = `Fråga ${questionIndex + 1} av ${questions.length}`;
@@ -256,7 +290,7 @@ function renderQuestion() {
 }
 
 function handleAnswer(correct) {
-  const question = selectedTopic.modes[currentMode][questionIndex];
+  const question = modeQuestions(currentMode)[questionIndex];
   $("#answers").hidden = true;
   $("#feedback").hidden = false;
   $("#feedback-heading").textContent = correct ? "Rätt!" : "Inte riktigt";
@@ -269,8 +303,16 @@ function handleAnswer(correct) {
 }
 
 function nextQuestion() {
-  const questions = selectedTopic.modes[currentMode];
+  const questions = modeQuestions(currentMode);
   questionIndex = (questionIndex + 1) % questions.length;
+  if (questionIndex === 0 && currentMode === "quick") quickScore = 0;
+  renderQuestion();
+}
+
+function changeQuestion(direction) {
+  const questions = modeQuestions(currentMode);
+  const step = direction < 0 ? 1 : -1;
+  questionIndex = (questionIndex + step + questions.length) % questions.length;
   if (questionIndex === 0 && currentMode === "quick") quickScore = 0;
   renderQuestion();
 }
@@ -298,6 +340,18 @@ function saveAttempt(correct) {
   data.attempts += 1;
   if (correct) data.correct += 1;
   data.latest = selectedTopic.title;
+  data.latestTopicId = Object.keys(topics).find((id) => topics[id] === selectedTopic);
+  data.latestCategoryId = selectedCategory.id;
+  all[level] = data;
+  localStorage.setItem("mathclass-progress", JSON.stringify(all));
+}
+
+function saveLastVisited() {
+  const all = progressData();
+  const data = all[level] || { attempts: 0, correct: 0, latest: "" };
+  data.latest = selectedTopic.title;
+  data.latestTopicId = Object.keys(topics).find((id) => topics[id] === selectedTopic);
+  data.latestCategoryId = selectedCategory.id;
   all[level] = data;
   localStorage.setItem("mathclass-progress", JSON.stringify(all));
 }
@@ -313,15 +367,16 @@ function renderProgress() {
 
 function renderLibrary() {
   $("#library-level").textContent = curriculum[level].name;
-  const list = $("#library-list");
-  list.replaceChildren();
-  curriculum[level].categories.forEach((category) => {
+  $("#level-select").value = level;
+  const grid = $("#library-categories");
+  grid.replaceChildren();
+  curriculum[level].categories.forEach((category, index) => {
     const button = document.createElement("button");
-    button.className = "list-button";
-    const count = category.topicIds.length;
-    button.innerHTML = `<span><strong>${category.title}</strong><small>${count ? `${count} moment · ${category.description}` : "Material kommer senare"}</small></span><b>›</b>`;
+    button.className = "category-button";
+    const count = topicIdsFor(category).length;
+    button.innerHTML = `<span>${index + 1}</span><strong>${category.title}</strong><small>${count ? `${count} moment` : "Kommer senare"}</small>`;
     button.addEventListener("click", () => openCategory(category.id, "library"));
-    list.append(button);
+    grid.append(button);
   });
 }
 
@@ -329,6 +384,7 @@ $("#level-select").addEventListener("change", (event) => {
   level = event.target.value;
   localStorage.setItem("mathclass-level", level);
   renderHome();
+  renderLibrary();
 });
 
 $("#back-from-topics").addEventListener("click", () => {
@@ -342,7 +398,7 @@ $("#next-question-button").addEventListener("click", nextQuestion);
 $("#previous-step").addEventListener("click", () => { walkthroughIndex = Math.max(0, walkthroughIndex - 1); renderWalkthrough(); });
 $("#next-step").addEventListener("click", () => { if (walkthroughIndex === selectedTopic.walkthrough.length - 1) showScreen("mode"); else { walkthroughIndex += 1; renderWalkthrough(); } });
 $("#more-explanation").addEventListener("click", () => { $("#extra-explanation").hidden = false; $("#more-explanation").hidden = true; });
-$("#open-settings").addEventListener("click", () => { settingsOrigin = "home"; showScreen("settings"); });
+$("#open-profile").addEventListener("click", () => { settingsOrigin = "home"; showScreen("settings"); });
 $("#back-from-settings").addEventListener("click", () => showScreen(settingsOrigin));
 $("#open-updates").addEventListener("click", () => showScreen("updates"));
 $("#back-from-updates").addEventListener("click", () => showScreen("settings"));
@@ -355,19 +411,82 @@ navButtons.forEach((button) => button.addEventListener("click", () => {
   showScreen(target);
 }));
 
-document.addEventListener("touchstart", (event) => { if (activeScreen === "quiz") touchStartY = event.touches[0].clientY; }, { passive: true });
-document.addEventListener("touchend", (event) => {
-  if (activeScreen !== "quiz" || touchStartY === null) return;
-  const distance = Math.abs(event.changedTouches[0].clientY - touchStartY);
+function animatePageChange(direction) {
+  if (swipeAnimating) return;
+  swipeAnimating = true;
+  const card = $("#quiz-screen .quiz-card");
+  const exitY = direction < 0 ? "-110%" : "110%";
+  const enterY = direction < 0 ? "110%" : "-110%";
+  card.classList.remove("is-dragging");
+  card.classList.add("is-snapping");
+  card.style.transform = `translateY(${exitY})`;
+  card.style.opacity = "0";
+  window.setTimeout(() => {
+    changeQuestion(direction);
+    card.classList.remove("is-snapping");
+    card.style.transform = `translateY(${enterY})`;
+    card.style.opacity = "0";
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      card.classList.add("is-snapping");
+      card.style.transform = "translateY(0)";
+      card.style.opacity = "1";
+      window.setTimeout(() => {
+        card.classList.remove("is-snapping");
+        card.style.transform = "";
+        card.style.opacity = "";
+        swipeAnimating = false;
+      }, 240);
+    }));
+  }, 230);
+}
+
+function snapPageBack() {
+  const card = $("#quiz-screen .quiz-card");
+  card.classList.remove("is-dragging");
+  card.classList.add("is-snapping");
+  card.style.transform = "translateY(0)";
+  card.style.opacity = "1";
+  window.setTimeout(() => {
+    card.classList.remove("is-snapping");
+    card.style.transform = "";
+    card.style.opacity = "";
+  }, 240);
+}
+
+document.addEventListener("touchstart", (event) => {
+  if (activeScreen !== "quiz" || swipeAnimating) return;
+  touchStartY = event.touches[0].clientY;
+  touchCurrentY = touchStartY;
+  touchStartedAt = performance.now();
+  $("#quiz-screen .quiz-card").classList.add("is-dragging");
+}, { passive: true });
+
+document.addEventListener("touchmove", (event) => {
+  if (activeScreen !== "quiz" || touchStartY === null || swipeAnimating) return;
+  event.preventDefault();
+  touchCurrentY = event.touches[0].clientY;
+  const delta = Math.max(-180, Math.min(180, touchCurrentY - touchStartY));
+  const card = $("#quiz-screen .quiz-card");
+  card.style.transform = `translateY(${delta}px) scale(${1 - Math.abs(delta) / 5000})`;
+  card.style.opacity = String(1 - Math.abs(delta) / 700);
+}, { passive: false });
+
+document.addEventListener("touchend", () => {
+  if (activeScreen !== "quiz" || touchStartY === null || swipeAnimating) return;
+  const delta = touchCurrentY - touchStartY;
+  const elapsed = Math.max(1, performance.now() - touchStartedAt);
+  const velocity = Math.abs(delta) / elapsed;
   touchStartY = null;
-  if (distance >= 50) nextQuestion();
+  touchCurrentY = null;
+  if (Math.abs(delta) >= 95 || (Math.abs(delta) >= 45 && velocity > .55)) animatePageChange(Math.sign(delta));
+  else snapPageBack();
 }, { passive: true });
 document.addEventListener("wheel", (event) => {
   if (activeScreen !== "quiz") return;
   event.preventDefault();
   if (wheelLocked || Math.abs(event.deltaY) < 20) return;
   wheelLocked = true;
-  nextQuestion();
+  animatePageChange(-Math.sign(event.deltaY));
   setTimeout(() => { wheelLocked = false; }, 450);
 }, { passive: false });
 
