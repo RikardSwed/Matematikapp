@@ -122,7 +122,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .small-banner h1 { font-size: 2.35rem; }
 .library-banner { background: linear-gradient(135deg, #247fd7, #173d83); }
 
-.settings-button {
+.profile-button {
   display: grid;
   width: 46px;
   height: 46px;
@@ -133,8 +133,37 @@ button { -webkit-tap-highlight-color: transparent; }
   color: #fff;
   background: rgba(255,255,255,.16);
   cursor: pointer;
-  font-size: 1.35rem;
+  font-size: .9rem;
+  font-weight: 850;
+  letter-spacing: .04em;
 }
+
+.home-content { padding: 4px clamp(20px, 5vw, 34px) 24px; }
+.home-section { margin-top: 20px; }
+.home-content .section-heading { margin: 0 0 9px; }
+.featured-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 98px;
+  padding: 17px 54px 17px 17px;
+  overflow: hidden;
+  border: 1px solid #b9d5eb;
+  border-radius: 18px;
+  color: #163f6b;
+  background: linear-gradient(135deg, #eef8ff, #ddecff);
+  cursor: pointer;
+  text-align: left;
+}
+.featured-card::after { position: absolute; top: 50%; right: 18px; content: "›"; color: #2878bd; font-size: 2rem; transform: translateY(-50%); }
+.featured-card strong, .featured-card small { display: block; }
+.featured-card strong { font-size: 1.02rem; line-height: 1.3; }
+.featured-card small { margin-top: 6px; color: #607b95; line-height: 1.35; }
+.recommendation-card { border-color: #cbd9f2; background: linear-gradient(135deg, #f6f4ff, #e8efff); }
+.wisdom-card { display: grid; grid-template-columns: 38px 1fr; gap: 12px; margin-top: 20px; padding: 16px; border-radius: 17px; color: #594d20; background: #fff7d9; }
+.wisdom-card > span { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 11px; color: #fff; background: #e3a829; }
+.wisdom-card strong, .wisdom-card p { display: block; }
+.wisdom-card p { margin: 5px 0 0; color: #756838; font-size: .86rem; line-height: 1.45; }
 
 .level-picker {
   display: grid;
@@ -291,6 +320,13 @@ h1:focus { outline: none; }
 .library-item { display: block; }
 .library-item strong, .library-item span { display: block; }
 .library-item span { margin-top: 5px; color: #6f8298; font-size: .82rem; line-height: 1.4; }
+.library-level-picker { margin: 0 0 14px; }
+.library-heading { margin: 12px 0; }
+.library-category-grid { margin: 0; }
+.profile-summary { display: grid; grid-template-columns: 54px 1fr; align-items: center; gap: 13px; margin: 14px 0 17px; padding: 16px; border-radius: 17px; background: #eef6ff; }
+.profile-summary > span { display: grid; width: 54px; height: 54px; place-items: center; border-radius: 50%; color: #fff; background: #176fc6; font-weight: 850; }
+.profile-summary strong, .profile-summary small { display: block; }
+.profile-summary small { margin-top: 4px; color: #71849a; line-height: 1.35; }
 .settings-row { display: flex; justify-content: space-between; margin: 14px 0 18px; padding: 17px; border-radius: 15px; color: #60758d; background: #f1f6fb; }
 .settings-row strong { color: #174b82; }
 .release-note { margin-bottom: 11px; padding: 16px; border: 1px solid #d1e0ed; border-radius: 16px; background: #f7fbff; }
@@ -311,10 +347,16 @@ h1:focus { outline: none; }
   background: rgba(255,255,255,.96);
   backdrop-filter: blur(16px);
 }
-.nav-button { display: grid; place-items: center; align-content: center; gap: 2px; border: 0; color: #74869b; background: transparent; cursor: pointer; }
-.nav-button span { font-size: 1.35rem; line-height: 1; }
+.nav-button { display: grid; place-items: center; align-content: center; gap: 1px; border: 0; border-radius: 16px; color: #74869b; background: transparent; cursor: pointer; }
+.nav-icon { display: grid; width: 34px; height: 30px; place-items: center; border-radius: 12px; font-size: 1.15rem; line-height: 1; transition: width 160ms ease, color 160ms ease, background 160ms ease; }
+.nav-icon b { font-weight: 800; }
 .nav-button small { font-size: .7rem; font-weight: 750; }
 .nav-button.is-active { color: #176fc6; }
+.nav-button.is-active .nav-icon { width: 52px; color: #0755a0; background: #dceeff; }
+
+.quiz-card { will-change: transform, opacity; }
+.quiz-card.is-dragging { transition: none; }
+.quiz-card.is-snapping { transition: transform 230ms cubic-bezier(.2,.8,.2,1), opacity 230ms ease; }
 
 button:focus-visible, select:focus-visible { outline: 4px solid rgba(23,111,198,.22); outline-offset: 2px; }
 
@@ -330,6 +372,9 @@ button:focus-visible, select:focus-visible { outline: 4px solid rgba(23,111,198,
   .home-banner { min-height: 102px; padding-top: 13px; padding-bottom: 13px; }
   .home-banner h1 { font-size: 2.2rem; }
   .level-picker { margin-top: 11px; margin-bottom: 8px; padding: 8px 11px; }
+  .home-section { margin-top: 10px; }
+  .featured-card { min-height: 76px; padding-top: 11px; padding-bottom: 11px; }
+  .wisdom-card { margin-top: 10px; padding: 11px; }
   .section-heading { margin-top: 10px; margin-bottom: 7px; }
   .category-grid { gap: 6px; }
   .category-button { min-height: 70px; padding: 8px; }
