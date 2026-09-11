@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Blå MathClass-ikon med stort M och symboler i en bana">
+  <defs><radialGradient id="b"><stop stop-color="#399cf0"/><stop offset="1" stop-color="#083878"/></radialGradient></defs>
+  <rect width="512" height="512" rx="112" fill="url(#b)"/>
+  <circle cx="256" cy="256" r="188" fill="none" stroke="#8fd2ff" stroke-width="10" stroke-dasharray="20 18" opacity=".8"/>
+  <text x="256" y="337" fill="#fff" font-family="Arial Rounded MT Bold, Arial" font-size="228" font-weight="800" text-anchor="middle">M</text>
+  <g fill="#fff" font-family="Arial" font-size="64" font-weight="700" text-anchor="middle"><text x="112" y="157">+</text><text x="401" y="157">×</text><text x="112" y="405">=</text><text x="401" y="405">÷</text></g>
+</svg>

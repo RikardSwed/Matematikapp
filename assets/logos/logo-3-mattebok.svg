@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">MathClass – M gånger</title>
+  <desc id="description">Klarblå ikon med ett vitt M, ett upphöjt gånger och ett likhetstecken.</desc>
+  <defs>
+    <linearGradient id="bg" x1="38" y1="38" x2="472" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#58b7ff"/>
+      <stop offset="1" stop-color="#0756ad"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M102 340V166l116 112 116-112v174" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="50"/>
+  <circle cx="386" cy="146" r="62" fill="#d9f1ff"/>
+  <path d="m360 120 52 52m0-52-52 52" stroke="#0d62b7" stroke-linecap="round" stroke-width="15"/>
+  <path d="M142 406h228M142 442h228" stroke="#bfe4ff" stroke-linecap="round" stroke-width="15"/>
+</svg>

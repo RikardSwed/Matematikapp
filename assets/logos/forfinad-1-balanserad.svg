@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Balanserad blå MathClass-ikon med stort M">
+  <defs><linearGradient id="a" x1="45" y1="35" x2="470" y2="480"><stop stop-color="#49a4ff"/><stop offset="1" stop-color="#0b3f8a"/></linearGradient></defs>
+  <rect width="512" height="512" rx="112" fill="url(#a)"/>
+  <!-- Symmetrisk M-form: ytterkanterna och mittspetsen speglas exakt kring x=256. -->
+  <path d="M103 386V126h72l81 112 81-112h72v260h-73V239l-80 109-80-109v147z" fill="#fff"/>
+  <g fill="#d5efff" font-family="Arial" font-size="68" font-weight="700" text-anchor="middle"><text x="94" y="126">+</text><text x="418" y="126">×</text><text x="94" y="434">=</text><text x="418" y="434">÷</text></g>
+</svg>

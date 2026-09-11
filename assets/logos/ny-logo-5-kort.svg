@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Tre blå matematiska övningskort">
+  <rect width="512" height="512" rx="112" fill="#0b4c96"/>
+  <g transform="rotate(-10 256 256)"><rect x="78" y="124" width="242" height="286" rx="42" fill="#6fc5ff"/></g>
+  <g transform="rotate(9 256 256)"><rect x="193" y="103" width="242" height="286" rx="42" fill="#dff3ff"/></g>
+  <rect x="135" y="85" width="242" height="300" rx="44" fill="#fff"/>
+  <text x="256" y="254" fill="#1269bd" font-family="Arial Rounded MT Bold, Arial" font-size="132" font-weight="800" text-anchor="middle">M</text>
+  <path d="M181 312h150" stroke="#75c3f4" stroke-linecap="round" stroke-width="18"/>
+  <circle cx="256" cy="350" r="10" fill="#1269bd"/>
+</svg>

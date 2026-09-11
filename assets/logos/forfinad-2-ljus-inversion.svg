@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ljus MathClass-ikon med stort blått M">
+  <rect width="512" height="512" rx="112" fill="#e9f6ff"/>
+  <rect x="24" y="24" width="464" height="464" rx="94" fill="none" stroke="#176fc6" stroke-width="22"/>
+  <text x="256" y="334" fill="#0f5fae" font-family="Arial Rounded MT Bold, Arial" font-size="230" font-weight="800" text-anchor="middle">M</text>
+  <g fill="#328bd2" font-family="Arial" font-size="68" font-weight="700" text-anchor="middle"><text x="94" y="126">+</text><text x="418" y="126">×</text><text x="94" y="434">=</text><text x="418" y="434">÷</text></g>
+</svg>

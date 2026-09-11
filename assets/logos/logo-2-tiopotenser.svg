@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">MathClass – MC-monogram</title>
+  <desc id="description">Mörkblå appikon med monogrammet MC och ett litet plustecken.</desc>
+  <defs>
+    <linearGradient id="bg" x1="54" y1="42" x2="456" y2="468" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#247fd7"/>
+      <stop offset="1" stop-color="#092b63"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="166" fill="none" stroke="#8bd0ff" stroke-width="14"/>
+  <text x="246" y="319" fill="#fff" font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="174" font-weight="800" letter-spacing="-16" text-anchor="middle">MC</text>
+  <circle cx="386" cy="126" r="48" fill="#fff"/>
+  <path d="M386 101v50M361 126h50" stroke="#176fc6" stroke-linecap="round" stroke-width="13"/>
+</svg>

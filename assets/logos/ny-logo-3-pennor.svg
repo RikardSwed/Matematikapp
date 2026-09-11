@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Två blå pennor som bildar ett M">
+  <rect width="512" height="512" rx="112" fill="#e8f5ff"/>
+  <path d="m93 380 52-265 111 166 111-166 52 265" fill="none" stroke="#1269bd" stroke-linecap="round" stroke-linejoin="round" stroke-width="58"/>
+  <path d="m126 92 19 23 28-12-31-49-16 38Zm260 0-19 23-28-12 31-49 16 38Z" fill="#74c5ff"/>
+  <circle cx="256" cy="281" r="27" fill="#fff" stroke="#0b4f9a" stroke-width="12"/>
+  <path d="M181 424h150" stroke="#75c3f4" stroke-linecap="round" stroke-width="20"/>
+</svg>

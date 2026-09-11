@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Abstrakt blå matematisk portal med bokstaven M">
+  <defs><radialGradient id="g" cx="50%" cy="44%" r="66%"><stop stop-color="#3fa6f4"/><stop offset="1" stop-color="#071f51"/></radialGradient></defs>
+  <rect width="512" height="512" rx="112" fill="url(#g)"/>
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#73c8ff" stroke-width="18" stroke-dasharray="62 24"/>
+  <circle cx="256" cy="256" r="124" fill="#fff" opacity=".96"/>
+  <path d="M181 318V198l75 77 75-77v120" fill="none" stroke="#1269bd" stroke-linecap="round" stroke-linejoin="round" stroke-width="34"/>
+  <g fill="#fff"><circle cx="126" cy="155" r="15"/><circle cx="407" cy="185" r="11"/><circle cx="393" cy="375" r="18"/></g>
+</svg>

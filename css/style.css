@@ -121,6 +121,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .small-banner { min-height: 116px; margin: -38px -38px 24px; border-radius: 27px 27px 0 0; }
 .small-banner h1 { font-size: 2.35rem; }
 .library-banner { background: linear-gradient(135deg, #247fd7, #173d83); }
+.upgrade-banner { background: linear-gradient(135deg, #247fd7, #3c4293); }
 
 .profile-button {
   display: grid;
@@ -332,6 +333,9 @@ h1:focus { outline: none; }
 .release-note { margin-bottom: 11px; padding: 16px; border: 1px solid #d1e0ed; border-radius: 16px; background: #f7fbff; }
 .release-note h2 { margin: 0 0 6px; font-size: 1rem; }
 .release-note p { margin: 0; color: #64778e; line-height: 1.45; }
+.pro-panel { margin-top: 0; }
+.pro-list { display: grid; gap: 10px; margin: 20px 0; padding-left: 22px; color: #526a83; }
+.pro-list li::marker { color: #176fc6; }
 
 .bottom-nav {
   position: fixed;
@@ -340,19 +344,19 @@ h1:focus { outline: none; }
   left: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   height: calc(70px + env(safe-area-inset-bottom));
   padding: 5px max(12px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(12px, env(safe-area-inset-left));
   border-top: 1px solid #cbddec;
   background: rgba(255,255,255,.96);
   backdrop-filter: blur(16px);
 }
-.nav-button { display: grid; place-items: center; align-content: center; gap: 1px; border: 0; border-radius: 16px; color: #74869b; background: transparent; cursor: pointer; }
-.nav-icon { display: grid; width: 34px; height: 30px; place-items: center; border-radius: 12px; font-size: 1.15rem; line-height: 1; transition: width 160ms ease, color 160ms ease, background 160ms ease; }
-.nav-icon b { font-weight: 800; }
+.nav-button { display: grid; margin: 3px 2px; place-items: center; align-content: center; gap: 1px; border: 0; border-radius: 13px; color: #74869b; background: transparent; cursor: pointer; transition: color 160ms ease, background 160ms ease; }
+.nav-icon { display: grid; width: 30px; height: 27px; place-items: center; border-radius: 10px; line-height: 1; }
+.nav-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .nav-button small { font-size: .7rem; font-weight: 750; }
-.nav-button.is-active { color: #176fc6; }
-.nav-button.is-active .nav-icon { width: 52px; color: #0755a0; background: #dceeff; }
+.nav-button.is-active { color: #0755a0; background: #dceeff; }
+.upgrade-nav-button { color: #96701d; }
 
 .quiz-card { will-change: transform, opacity; }
 .quiz-card.is-dragging { transition: none; }

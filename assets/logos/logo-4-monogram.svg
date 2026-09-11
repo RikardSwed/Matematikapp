@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">MathClass – klassrutan</title>
+  <desc id="description">Blå appikon med ett M på en ljus skolruta och matematiska tecken.</desc>
+  <defs>
+    <linearGradient id="bg" x1="40" y1="40" x2="472" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#237ed4"/>
+      <stop offset="1" stop-color="#082e70"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="86" y="88" width="340" height="336" rx="58" fill="#eff8ff"/>
+  <path d="M154 326V180l102 96 102-96v146" fill="none" stroke="#1266ba" stroke-linecap="round" stroke-linejoin="round" stroke-width="42"/>
+  <g fill="#4fa7ec" font-family="Arial, sans-serif" font-size="42" font-weight="700">
+    <text x="116" y="144">+</text>
+    <text x="350" y="145">×</text>
+    <text x="116" y="392">=</text>
+    <text x="350" y="393">÷</text>
+  </g>
+</svg>

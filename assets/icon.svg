@@ -1,14 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MathClass">
   <defs>
-    <linearGradient id="bg" x1="52" y1="38" x2="458" y2="474" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="45" y1="35" x2="470" y2="480" gradientUnits="userSpaceOnUse">
       <stop stop-color="#49a4ff"/>
-      <stop offset=".52" stop-color="#176fc6"/>
       <stop offset="1" stop-color="#0b3f8a"/>
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <path d="M116 358V158l140 132 140-132v200" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="54"/>
-  <g fill="#bfe4ff" font-family="Arial, sans-serif" font-size="48" font-weight="700">
-    <text x="78" y="112">+</text><text x="389" y="118">×</text><text x="78" y="431">=</text><text x="390" y="433">÷</text>
+  <!-- Vald balanserad storlek: variant 3, cirka 14 % större än referensen. -->
+  <text x="256" y="367" fill="#fff" font-family="Arial Rounded MT Bold, Trebuchet MS, Arial, sans-serif" font-size="332" font-weight="700" text-anchor="middle">M</text>
+  <g fill="#d5efff" font-family="Arial, sans-serif" font-size="72" font-weight="700" text-anchor="middle">
+    <text x="100" y="130">+</text>
+    <text x="412" y="130">×</text>
+    <text x="100" y="436">=</text>
+    <text x="412" y="436">÷</text>
   </g>
 </svg>

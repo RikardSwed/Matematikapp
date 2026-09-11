@@ -140,13 +140,32 @@
         </div>
       </section>
 
+      <section class="screen" id="upgrade-screen" aria-labelledby="upgrade-heading" hidden>
+        <div class="page-card dashboard-card">
+          <header class="small-banner upgrade-banner">
+            <p>MathClass Pro</p>
+            <h1 id="upgrade-heading" tabindex="-1">Uppgradera</h1>
+          </header>
+          <section class="progress-panel pro-panel">
+            <h2>Mer träning, fler möjligheter</h2>
+            <p>Här kommer du senare att kunna läsa om Pro-versionen och genomföra ett köp.</p>
+          </section>
+          <ul class="pro-list">
+            <li>Fler moment och träningslägen</li>
+            <li>Fördjupad statistik över dina framsteg</li>
+            <li>Personliga rekommendationer</li>
+          </ul>
+          <button class="primary-button" type="button" disabled>Kommer snart</button>
+        </div>
+      </section>
+
       <section class="screen" id="settings-screen" aria-labelledby="settings-heading" hidden>
         <div class="page-card inner-card">
           <button class="back-button" id="back-from-settings" type="button" aria-label="Tillbaka">←</button>
           <p class="eyebrow">MathClass</p>
           <h1 id="settings-heading" tabindex="-1">Profil &amp; inställningar</h1>
           <div class="profile-summary"><span>RM</span><div><strong>Rikard Månsson</strong><small>Profilnamn och initialer kan anpassas senare.</small></div></div>
-          <div class="settings-row"><span>Version</span><strong>0.4.0 · Blå Horisont</strong></div>
+          <div class="settings-row"><span>Version</span><strong>0.5.0 · Blå Krona</strong></div>
           <button class="list-button" id="open-updates" type="button"><span><strong>Uppdateringar</strong><small>Se vad som har lagts till</small></span><b>›</b></button>
         </div>
       </section>
@@ -156,6 +175,7 @@
           <button class="back-button" id="back-from-updates" type="button" aria-label="Tillbaka till inställningar">←</button>
           <p class="eyebrow">MathClass</p>
           <h1 id="updates-heading" tabindex="-1">Uppdateringar</h1>
+          <article class="release-note"><h2>Version 0.5.0 · Blå Krona</h2><p>Ny balanserad appikon med större M samt nederkantmenyn Aktiv ruta med fyra tydliga ikoner och krona för Uppgradera.</p></article>
           <article class="release-note"><h2>Version 0.4.0 · Blå Horisont</h2><p>Personlig hemskärm, nivåtaggar, sidindelade svep och ett nytt bibliotek.</p></article>
           <article class="release-note"><h2>Version 0.3.0</h2><p>Nivåval, material för alla högstadieområden, nederkantmeny, Framsteg och Bibliotek.</p></article>
           <article class="release-note"><h2>Version 0.2.0</h2><p>Flera träningslägen och stegvisa genomgångar.</p></article>
@@ -165,9 +185,10 @@
     </main>
 
     <nav class="bottom-nav" aria-label="Huvudmeny">
-      <button class="nav-button is-active" type="button" data-nav="home"><span class="nav-icon" aria-hidden="true"><b>⌂</b></span><small>Hem</small></button>
-      <button class="nav-button" type="button" data-nav="progress"><span class="nav-icon" aria-hidden="true"><b>↗</b></span><small>Framsteg</small></button>
-      <button class="nav-button" type="button" data-nav="library"><span class="nav-icon" aria-hidden="true"><b>▦</b></span><small>Bibliotek</small></button>
+      <button class="nav-button is-active" type="button" data-nav="home"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg></span><small>Hem</small></button>
+      <button class="nav-button" type="button" data-nav="library"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/><path d="M8 7h8M8 11h6"/></svg></span><small>Bibliotek</small></button>
+      <button class="nav-button" type="button" data-nav="progress"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><small>Framsteg</small></button>
+      <button class="nav-button upgrade-nav-button" type="button" data-nav="upgrade"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 7 4.5 4L12 4l4.5 7L21 7l-2 11H5L3 7Z"/><path d="M5 22h12"/></svg></span><small>Uppgradera</small></button>
     </nav>
   </body>
 </html>

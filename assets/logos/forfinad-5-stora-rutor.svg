@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Blå MathClass-ikon med stort M och stora rutor">
+  <defs><pattern id="grid" width="82" height="82" patternUnits="userSpaceOnUse"><path d="M82 0H0v82" fill="none" stroke="#79c4f5" stroke-width="6"/></pattern><linearGradient id="c" x1="35" y1="35" x2="477" y2="477"><stop stop-color="#2e91df"/><stop offset="1" stop-color="#08417f"/></linearGradient></defs>
+  <rect width="512" height="512" rx="112" fill="url(#c)"/>
+  <rect x="24" y="24" width="464" height="464" rx="92" fill="url(#grid)"/>
+  <text x="256" y="345" fill="#fff" font-family="Arial Rounded MT Bold, Arial" font-size="250" font-weight="800" text-anchor="middle">M</text>
+  <g fill="#e1f5ff" font-family="Arial" font-size="72" font-weight="700" text-anchor="middle"><text x="91" y="132">+</text><text x="421" y="132">×</text><text x="91" y="439">=</text><text x="421" y="439">÷</text></g>
+</svg>

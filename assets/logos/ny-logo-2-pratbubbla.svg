@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Blå pratbubbla med ett matematiskt uttryck">
+  <defs><linearGradient id="b" x1="55" y1="40" x2="450" y2="472"><stop stop-color="#328fea"/><stop offset="1" stop-color="#082f70"/></linearGradient></defs>
+  <rect width="512" height="512" rx="112" fill="url(#b)"/>
+  <path d="M83 111c0-33 27-60 60-60h226c33 0 60 27 60 60v203c0 33-27 60-60 60H239l-92 82 18-82h-22c-33 0-60-27-60-60V111Z" fill="#fff"/>
+  <text x="256" y="252" fill="#176fc6" font-family="Arial Rounded MT Bold, Arial" font-size="104" font-weight="800" text-anchor="middle">x = ?</text>
+  <path d="M164 302h184" stroke="#9ed8ff" stroke-linecap="round" stroke-width="18"/>
+</svg>

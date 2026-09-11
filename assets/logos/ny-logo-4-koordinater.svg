@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Blått koordinatsystem med en stigande graf formad som ett M">
+  <defs><linearGradient id="d" x1="40" y1="35" x2="470" y2="475"><stop stop-color="#247fd7"/><stop offset="1" stop-color="#061f52"/></linearGradient></defs>
+  <rect width="512" height="512" rx="112" fill="url(#d)"/>
+  <g stroke="#76bced" stroke-width="5" opacity=".35"><path d="M96 136h320M96 216h320M96 296h320M96 376h320M136 96v320M216 96v320M296 96v320M376 96v320"/></g>
+  <path d="M94 414V96m0 318h326" stroke="#fff" stroke-linecap="round" stroke-width="16"/>
+  <path d="m127 346 77-145 66 86 105-166" fill="none" stroke="#78d3ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="28"/>
+  <g fill="#fff"><circle cx="127" cy="346" r="16"/><circle cx="204" cy="201" r="16"/><circle cx="270" cy="287" r="16"/><circle cx="375" cy="121" r="16"/></g>
+</svg>
