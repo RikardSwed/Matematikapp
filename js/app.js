@@ -20,6 +20,7 @@ const modeCatalog = {
   truefalse: { name: "Sant eller falskt", description: "Bedöm matematiska påståenden", icon: "✓" },
   quick: { name: "Snabbträning", description: "Flera frågor i följd", icon: "⏱" },
   order: { name: "Ordna", description: "Hitta rätt ordning", icon: "↕" },
+  methods: { name: "Förstå metoden", description: "Välj och förklara ett arbetssätt", icon: "→" },
 };
 
 const q = (prompt, example, choices, correct, explanation, levels = ["high"]) => ({
@@ -27,6 +28,69 @@ const q = (prompt, example, choices, correct, explanation, levels = ["high"]) =>
 });
 
 const topics = {
+  operationLanguage: {
+    title: "Räknesättens språk",
+    description: "Förstå orden term, summa, faktor och kvot.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["Ord för olika roller", "Talens roller", "Matematikord berättar vad talen gör och vad resultatet kallas.", "Skilj på talen du arbetar med och resultatet du får."],
+      ["Lägga ihop och ta skillnaden", "Term → summa eller differens", "Tal som adderas eller subtraheras kallas termer. Resultatet heter summa vid addition och differens vid subtraktion.", "Ordet term hör alltså till två räknesätt. Resultatets namn visar vilket du använder."],
+      ["Multiplicera", "Faktorer → produkt", "Talen som multipliceras kallas faktorer. Resultatet kallas produkt.", "En faktor är en del av beräkningen. Produkten är det du får fram."],
+      ["Dividera", "Täljare, nämnare och kvot", "I en division skriven som ett bråk står täljaren över bråkstrecket och nämnaren under. Resultatet kallas kvot.", "Täljaren är talet som delas. Nämnaren är talet du delar med och får inte vara noll."],
+    ],
+    modes: {
+      rules: [
+        q("Vad heter resultatet?", "Addition", ["Summa", "Produkt", "Term"], 0, "Vid addition lägger du ihop termer. Resultatet kallas summa.", ["high"]),
+        q("Vad heter resultatet?", "Subtraktion", ["Kvot", "Differens", "Faktor"], 1, "Resultatet av en subtraktion kallas differens.", ["high"]),
+        q("Vad heter talen som multipliceras?", "Multiplikation", ["Termer", "Kvoter", "Faktorer"], 2, "Talen som multipliceras är faktorer. Resultatet är en produkt.", ["high"]),
+        q("Vad heter resultatet?", "Division", ["Kvot", "Nämnare", "Differens"], 0, "Kvoten är resultatet av divisionen.", ["high"]),
+        q("Vilket ord passar?", "Tal som adderas", ["Produkter", "Termer", "Faktorer"], 1, "Talen som adderas kallas termer. Även tal i en subtraktion kallas termer.", ["high"]),
+        q("Vilket ord passar?", "Ovanför bråkstrecket", ["Kvot", "Nämnare", "Täljare"], 2, "Täljaren står ovanför bråkstrecket. Nämnaren står under.", ["high"]),
+        q("Vilket ord passar?", "Under bråkstrecket", ["Nämnare", "Produkt", "Täljare"], 0, "Nämnaren står under bråkstrecket och är talet du delar med.", ["high"]),
+        q("Vilket räknesätt menas?", "Bestäm produkten", ["Addition", "Multiplikation", "Division"], 1, "Att bestämma produkten betyder att multiplicera faktorerna.", ["high"]),
+        q("Vilket räknesätt menas?", "Bestäm differensen", ["Multiplikation", "Addition", "Subtraktion"], 2, "Differensen är skillnaden som du får genom subtraktion.", ["high"]),
+        q("Vilken beskrivning stämmer?", "Faktor och produkt", ["Faktorer multipliceras till en produkt", "Produkter adderas till en faktor", "En faktor är alltid resultatet"], 0, "Faktor beskriver talets roll före resultatet. Produkt är resultatets namn.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "En summa är ett resultat", ["Sant", "Falskt"], 0, "Summan är resultatet när termer adderas.", ["high"]),
+        q("Sant eller falskt?", "Termer finns bara i addition", ["Sant", "Falskt"], 1, "Tal som subtraheras kallas också termer.", ["high"]),
+        q("Sant eller falskt?", "Produkt och kvot betyder samma sak", ["Sant", "Falskt"], 1, "Produkt hör till multiplikation. Kvot hör till division.", ["high"]),
+        q("Sant eller falskt?", "Nämnaren är talet du delar med", ["Sant", "Falskt"], 0, "När division skrivs som ett bråk är nämnaren talet du delar med.", ["high"]),
+      ],
+    },
+  },
+  calculationMethods: {
+    title: "Förstå räknemetoder",
+    description: "Välj en metod och förklara varför den fungerar.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["En metod har en anledning", "Gör beräkningen enklare", "En räknemetod ändrar hur du räknar. Den ska bevara resultatet.", "Fråga både vad som ändras och varför svaret blir detsamma."],
+      ["Bevara summan", "Öka en term, minska den andra", "Vid addition kan du öka den ena termen och minska den andra lika mycket.", "Det du lägger till på ett ställe tar du bort på det andra. Summan bevaras."],
+      ["Bevara differensen", "Ändra båda lika mycket", "Vid subtraktion kan du öka båda termerna lika mycket eller minska båda lika mycket.", "Tänk på avståndet mellan två punkter på en tallinje. Om båda flyttas lika långt åt samma håll är avståndet kvar."],
+      ["Bevara produkten", "Dubbla och halvera", "Dubbla den ena faktorn och halvera den andra. Produkten blir densamma.", "Dubbelt så många grupper med hälften så mycket i varje ger samma mängd totalt."],
+      ["Bevara kvoten", "Ändra båda på samma sätt", "Multiplicera täljare och nämnare med samma tal, som inte är noll. Kvoten bevaras.", "Du kan också dividera båda med samma tal, som inte är noll. Att dubbla båda är ett exempel."],
+    ],
+    modes: {
+      methods: [
+        q("Vilken metod beskrivs?", "Lägg ihop ental för sig och tiotal för sig", ["Addera talsort för talsort", "Dubbla och halvera", "Räkna upp med addition"], 0, "Du delar upp termerna efter talsort och lägger sedan ihop delresultaten.", ["high"]),
+        q("Vad bevarar summan?", "Öka den ena termen", ["Öka den andra lika mycket", "Minska den andra lika mycket", "Låt den andra vara oförändrad"], 1, "För att summan ska vara kvar måste du ta bort lika mycket som du lägger till.", ["high"]),
+        q("Vad bevarar differensen?", "Öka den första termen", ["Halvera den andra", "Minska den andra lika mycket", "Öka den andra lika mycket"], 2, "När båda termerna ökar lika mycket är skillnaden mellan dem oförändrad.", ["high"]),
+        q("Vilken metod beskrivs?", "Räkna från det mindre talet till det större", ["Räkna upp med addition", "Multiplicera delarna", "Dubbla båda talen"], 0, "För att hitta skillnaden kan du lägga ihop stegen från det mindre talet till det större.", ["high"]),
+        q("Vad är nästa steg?", "Dela upp en faktor i en summa", ["Multiplicera bara den första delen", "Multiplicera varje del med den andra faktorn", "Addera den andra faktorn till varje del"], 1, "Varje del måste multipliceras med den andra faktorn. Sedan adderar du delprodukterna.", ["high"]),
+        q("Vad bevarar produkten?", "Dubbla den ena faktorn", ["Dubbla den andra", "Låt den andra vara kvar", "Halvera den andra"], 2, "Dubbleringen och halveringen tar ut varandra, så produkten bevaras.", ["high"]),
+        q("Vad bevarar kvoten?", "Dubbla nämnaren", ["Dubbla även täljaren", "Halvera täljaren", "Låt täljaren vara kvar"], 0, "Täljare och nämnare måste ändras med samma faktor för att kvoten ska bevaras.", ["high"]),
+        q("Varför används metoden?", "Skaffa heltal i nämnaren", ["För att alltid göra svaret större", "För att göra divisionen enklare", "För att ta bort täljaren"], 1, "Du kan göra divisionen enklare genom att multiplicera båda talen med samma tiopotens tills nämnaren är ett heltal.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "Dubbla båda faktorerna för att bevara produkten", ["Sant", "Falskt"], 1, "Dubbla och halvera är metoden som bevarar produkten. Att dubbla båda gör inte det.", ["high"]),
+        q("Sant eller falskt?", "Lika stor ökning av båda termerna bevarar differensen", ["Sant", "Falskt"], 0, "Skillnaden är kvar när båda termerna flyttas lika mycket åt samma håll.", ["high"]),
+        q("Sant eller falskt?", "Vid uppdelning räcker det att multiplicera en del", ["Sant", "Falskt"], 1, "Alla delar måste multipliceras med den andra faktorn. Annars saknas en del av produkten.", ["high"]),
+        q("Sant eller falskt?", "En användbar metod kan ge samma svar med enklare steg", ["Sant", "Falskt"], 0, "Metoden hjälper dig att räkna enklare samtidigt som resultatet bevaras.", ["high"]),
+      ],
+    },
+  },
   powers10: {
     title: "Multiplicera med 10, 100 och 1000",
     description: "Förstå nollregeln och räkna med tiopotenser.",
@@ -123,12 +187,14 @@ const topics = {
 };
 
 Object.values(topics).forEach((topic) => {
-  topic.levels = ["high"];
-  topic.modes.quick = [...(topic.modes.calculate || []), ...(topic.modes.truefalse || [])];
+  topic.levels ??= ["high"];
+  topic.modes.quick = topic.languageFocused
+    ? [...(topic.modes.rules || []), ...(topic.modes.methods || []), ...(topic.modes.truefalse || [])]
+    : [...(topic.modes.calculate || []), ...(topic.modes.truefalse || [])];
 });
 
 const highCategories = [
-  { id: "numbers", title: "Tal", description: "Taluppfattning och räknesätt", topicIds: ["powers10"] },
+  { id: "numbers", title: "Tal", description: "Taluppfattning och räknesätt", topicIds: ["operationLanguage", "calculationMethods", "powers10"] },
   { id: "geometry", title: "Geometri", description: "Former, mått och samband", topicIds: ["area"] },
   { id: "percent", title: "Procent", description: "Andelar och förändringar", topicIds: ["percent"] },
   { id: "statistics", title: "Statistik", description: "Data och lägesmått", topicIds: ["statistics"] },
@@ -234,7 +300,7 @@ function openTopic(topicId) {
   $("#mode-introduction").textContent = "Välj hur du vill arbeta med momentet.";
   const grid = $("#mode-grid");
   grid.replaceChildren();
-  const available = ["walkthrough", ...Object.keys(selectedTopic.modes).filter((mode) => modeQuestions(mode).length)];
+  const available = [...(selectedTopic.walkthrough?.length ? ["walkthrough"] : []), ...Object.keys(selectedTopic.modes).filter((mode) => modeQuestions(mode).length)];
   available.forEach((mode) => {
     const info = modeCatalog[mode];
     const button = document.createElement("button");
@@ -268,6 +334,7 @@ function startMode(mode) {
 function renderQuestion() {
   const questions = modeQuestions(currentMode);
   const question = questions[questionIndex];
+  $("#quiz-screen").classList.toggle("language-practice", Boolean(selectedTopic.languageFocused));
   $("#mode-label").textContent = currentMode === "quick" ? `Snabbträning · ${quickScore} rätt` : modeCatalog[currentMode].name;
   $("#question-progress").textContent = `Fråga ${questionIndex + 1} av ${questions.length}`;
   $("#question-heading").textContent = question.prompt;
@@ -318,6 +385,7 @@ function changeQuestion(direction) {
 }
 
 function renderWalkthrough() {
+  $("#walkthrough-screen").classList.toggle("language-practice", Boolean(selectedTopic.languageFocused));
   const step = selectedTopic.walkthrough[walkthroughIndex];
   $("#walkthrough-progress").textContent = `Steg ${walkthroughIndex + 1} av ${selectedTopic.walkthrough.length}`;
   $("#walkthrough-heading").textContent = step[0];
