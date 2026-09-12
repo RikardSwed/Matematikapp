@@ -36,10 +36,26 @@
           </header>
 
           <div class="home-content">
+            <form class="section-search" id="home-search-form" role="search" aria-labelledby="home-search-label">
+              <label id="home-search-label" for="home-search">Sök avsnitt</label>
+              <div class="search-field"><input id="home-search" type="search" placeholder="Sök t.ex. kvot, area eller ekvationer" autocomplete="off" aria-controls="home-search-results" /><button id="home-search-clear" type="button" aria-label="Rensa sökning" hidden>×</button></div>
+              <p class="search-status" id="home-search-status" role="status" hidden></p>
+              <div class="search-results" id="home-search-results" hidden></div>
+            </form>
             <section class="home-section"><div class="section-heading"><h2>Fortsätt där du slutade</h2></div><button class="featured-card continue-card" id="continue-button" type="button"></button></section>
             <section class="home-section"><div class="section-heading"><h2>Rekommenderat för dig</h2></div><button class="featured-card recommendation-card" id="recommendation-button" type="button"></button></section>
             <aside class="wisdom-card"><span aria-hidden="true">✦</span><div><strong>Dagens mattetips</strong><p id="math-wisdom"></p></div></aside>
           </div>
+        </div>
+      </section>
+
+      <section class="screen" id="subcategories-screen" aria-labelledby="subcategories-heading" hidden>
+        <div class="page-card inner-card">
+          <button class="back-button" id="back-from-subcategories" type="button" aria-label="Tillbaka till Bibliotek">←</button>
+          <p class="eyebrow" id="subcategories-eyebrow"></p>
+          <h1 id="subcategories-heading" tabindex="-1"></h1>
+          <p class="page-introduction" id="subcategories-introduction"></p>
+          <div class="topic-list" id="subcategory-list"></div>
         </div>
       </section>
 
@@ -135,6 +151,12 @@
             <h1 id="library-heading" tabindex="-1">Bibliotek</h1>
           </header>
           <div class="level-picker library-level-picker"><label for="level-select">Välj nivå</label><select id="level-select"><option value="high">Högstadiet</option><option value="middle">Mellanstadiet</option></select></div>
+          <form class="section-search" id="library-search-form" role="search" aria-labelledby="library-search-label">
+              <label id="library-search-label" for="library-search">Sök avsnitt</label>
+              <div class="search-field"><input id="library-search" type="search" placeholder="Sök t.ex. kvot, area eller ekvationer" autocomplete="off" aria-controls="library-search-results" /><button id="library-search-clear" type="button" aria-label="Rensa sökning" hidden>×</button></div>
+              <p class="search-status" id="library-search-status" role="status" hidden></p>
+              <div class="search-results" id="library-search-results" hidden></div>
+            </form>
           <div class="section-heading library-heading"><h2>Matematikområden</h2><p id="library-level"></p></div>
           <div class="category-grid library-category-grid" id="library-categories"></div>
         </div>
@@ -165,7 +187,7 @@
           <p class="eyebrow">MathClass</p>
           <h1 id="settings-heading" tabindex="-1">Profil &amp; inställningar</h1>
           <div class="profile-summary"><span>RM</span><div><strong>Rikard Månsson</strong><small>Profilnamn och initialer kan anpassas senare.</small></div></div>
-          <div class="settings-row"><span>Version</span><strong>0.6.0 · Matematikens språk</strong></div>
+          <div class="settings-row"><span>Version</span><strong>0.7.0 · Hitta rätt</strong></div>
           <button class="list-button" id="open-updates" type="button"><span><strong>Uppdateringar</strong><small>Se vad som har lagts till</small></span><b>›</b></button>
         </div>
       </section>
@@ -175,6 +197,7 @@
           <button class="back-button" id="back-from-updates" type="button" aria-label="Tillbaka till inställningar">←</button>
           <p class="eyebrow">MathClass</p>
           <h1 id="updates-heading" tabindex="-1">Uppdateringar</h1>
+          <article class="release-note"><h2>Version 0.7.0 · Hitta rätt</h2><p>Nya underkategorier i alla matematikområden och sökning på Hem och i Bibliotek. Hitta avsnitt via namn och begrepp, och se vilket material som kommer senare.</p></article>
           <article class="release-note"><h2>Version 0.6.0 · Matematikens språk</h2><p>En första provdel med två språkliga moment inom Tal: Räknesättens språk och Förstå räknemetoder. 26 frågor och nio genomgångssteg med fokus på ord, regler och metodförståelse.</p></article>
           <article class="release-note"><h2>Version 0.5.0 · Blå Krona</h2><p>Ny balanserad appikon med större M samt nederkantmenyn Aktiv ruta med fyra tydliga ikoner och krona för Uppgradera.</p></article>
           <article class="release-note"><h2>Version 0.4.0 · Blå Horisont</h2><p>Personlig hemskärm, nivåtaggar, sidindelade svep och ett nytt bibliotek.</p></article>

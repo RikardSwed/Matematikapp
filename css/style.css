@@ -141,6 +141,19 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .home-content { padding: 4px clamp(20px, 5vw, 34px) 24px; }
 .home-section { margin-top: 20px; }
+.section-search { margin: 18px 0; }
+.section-search label { display: block; margin-bottom: 8px; color: #47617d; font-size: .85rem; font-weight: 800; }
+.search-field { display: flex; align-items: center; border: 1px solid #a8c9e5; border-radius: 14px; background: #f5faff; }
+.search-field:focus-within { outline: 3px solid rgba(23,111,198,.22); outline-offset: 2px; }
+.search-field input { width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: 0; border-radius: 14px; outline: none; color: #173f6d; background: transparent; font: inherit; font-size: 16px; }
+.search-field input::placeholder { color: #60758d; font-size: .85rem; }
+.search-field input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.search-field button { flex: 0 0 44px; min-height: 44px; border: 0; border-radius: 12px; color: #164f88; background: transparent; cursor: pointer; font-size: 1.5rem; }
+.search-status { margin: 10px 0; color: #60758d; font-size: .85rem; line-height: 1.4; }
+.search-results { display: grid; gap: 8px; }
+.search-results[hidden] { display: none; }
+.list-button > span { min-width: 0; overflow-wrap: anywhere; }
+.list-button .section-status { margin-top: 8px; color: #176fc6; font-size: .75rem; font-weight: 750; }
 .home-content .section-heading { margin: 0 0 9px; }
 .featured-card {
   position: relative;

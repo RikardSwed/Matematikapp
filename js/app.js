@@ -194,12 +194,208 @@ Object.values(topics).forEach((topic) => {
 });
 
 const highCategories = [
-  { id: "numbers", title: "Tal", description: "Taluppfattning och räknesätt", topicIds: ["operationLanguage", "calculationMethods", "powers10"] },
-  { id: "geometry", title: "Geometri", description: "Former, mått och samband", topicIds: ["area"] },
-  { id: "percent", title: "Procent", description: "Andelar och förändringar", topicIds: ["percent"] },
-  { id: "statistics", title: "Statistik", description: "Data och lägesmått", topicIds: ["statistics"] },
-  { id: "probability", title: "Sannolikhet", description: "Slump och möjliga utfall", topicIds: ["probability"] },
-  { id: "algebra", title: "Algebra", description: "Uttryck och ekvationer", topicIds: ["algebra"] },
+  { id: "numbers", title: "Tal", description: "Taluppfattning och räknesätt", subcategories: [
+  {
+    "id": "number-sense",
+    "title": "Taluppfattning",
+    "description": "Tiosystemet, tallinjen och decimaltal.",
+    "topicIds": [],
+    "keywords": "positionssystem ental tiotal hundratal tiondelar hundradelar storleksordna"
+  },
+  {
+    "id": "operations",
+    "title": "De fyra räknesätten",
+    "description": "Begrepp, räknemetoder och prioriteringsregler.",
+    "topicIds": [
+      "operationLanguage",
+      "calculationMethods"
+    ],
+    "keywords": "addition subtraktion multiplikation division parenteser"
+  },
+  {
+    "id": "rounding",
+    "title": "Avrundning och överslag",
+    "description": "Närmevärden och rimliga uppskattningar.",
+    "topicIds": [],
+    "keywords": "avrunda avrundningssiffra överslagsräkning"
+  },
+  {
+    "id": "decimal-operations",
+    "title": "Tiopotenser och decimalräkning",
+    "description": "Multiplicera och dividera med tio, hundra, tusen och decimaltal.",
+    "topicIds": [
+      "powers10"
+    ],
+    "keywords": "10 100 1000 decimaltecken"
+  },
+  {
+    "id": "negative",
+    "title": "Negativa tal",
+    "description": "Tallinjen, motsatta tal och teckenregler.",
+    "topicIds": [],
+    "keywords": "positiva tal minus"
+  },
+  {
+    "id": "powers-roots",
+    "title": "Potenser och rötter",
+    "description": "Bas, exponent, grundpotensform och kvadratrot.",
+    "topicIds": [],
+    "keywords": "upphöjt kvadrattal roten ur"
+  },
+  {
+    "id": "prefixes",
+    "title": "Prefix",
+    "description": "Namn och beteckningar för stora och små tal.",
+    "topicIds": [],
+    "keywords": "kilo mega giga deci centi milli mikro"
+  }
+] },
+  { id: "geometry", title: "Geometri", description: "Former, mått och samband", subcategories: [
+  {
+    "id": "angles-shapes",
+    "title": "Vinklar och former",
+    "description": "Vinklar, trianglar, fyrhörningar och cirklar.",
+    "topicIds": [],
+    "keywords": "vinkelsumma spetsig rät trubbig diameter radie"
+  },
+  {
+    "id": "perimeter-area",
+    "title": "Omkrets och area",
+    "description": "Sträckan runt en figur och ytan inuti.",
+    "topicIds": [
+      "area"
+    ],
+    "keywords": "rektangel cirkel triangel bas höjd"
+  },
+  {
+    "id": "units",
+    "title": "Längd och enheter",
+    "description": "Mätning och omvandling av längdenheter.",
+    "topicIds": [],
+    "keywords": "meter centimeter millimeter kilometer mil"
+  },
+  {
+    "id": "scale-symmetry",
+    "title": "Skala och symmetri",
+    "description": "Avbildningar, förstoring, förminskning och symmetri.",
+    "topicIds": [],
+    "keywords": "spegling rotation verklighet bild"
+  },
+  {
+    "id": "pythagoras",
+    "title": "Pythagoras sats",
+    "description": "Sambandet mellan sidorna i en rätvinklig triangel.",
+    "topicIds": [],
+    "keywords": "hypotenusa kateter"
+  },
+  {
+    "id": "volume",
+    "title": "Volym och rymdgeometri",
+    "description": "Kroppar, volym och volymenheter.",
+    "topicIds": [],
+    "keywords": "rätblock kub cylinder liter deciliter centiliter milliliter"
+  }
+] },
+  { id: "percent", title: "Procent", description: "Andelar och förändringar", subcategories: [
+  {
+    "id": "fractions",
+    "title": "Bråk",
+    "description": "Andelar, bråkformer och att räkna med bråk.",
+    "topicIds": [],
+    "keywords": "täljare nämnare förkorta förlänga blandad form"
+  },
+  {
+    "id": "percent-basics",
+    "title": "Förstå procent",
+    "description": "Hundradelar och sambandet mellan andel, del och helhet.",
+    "topicIds": [
+      "percent"
+    ],
+    "keywords": "procentform decimalform hälften fjärdedel"
+  },
+  {
+    "id": "percent-change",
+    "title": "Förändring och ränta",
+    "description": "Procentuell förändring, förändringsfaktor och ränta.",
+    "topicIds": [],
+    "keywords": "rabatt ökning minskning lån årsränta"
+  }
+] },
+  { id: "statistics", title: "Statistik", description: "Data och lägesmått", subcategories: [
+  {
+    "id": "tables-charts",
+    "title": "Tabeller och diagram",
+    "description": "Samla, läsa och granska statistiskt material.",
+    "topicIds": [],
+    "keywords": "frekvens frekvenstabell stapeldiagram stolpdiagram cirkeldiagram linjediagram vilseledande"
+  },
+  {
+    "id": "averages",
+    "title": "Lägesmått",
+    "description": "Beskriv och jämför en datamängd.",
+    "topicIds": [
+      "statistics"
+    ],
+    "keywords": "medelvärde median typvärde"
+  }
+] },
+  { id: "probability", title: "Sannolikhet", description: "Slump och möjliga utfall", subcategories: [
+  {
+    "id": "outcomes",
+    "title": "Händelser och utfall",
+    "description": "Chans, risk och enkel sannolikhet.",
+    "topicIds": [
+      "probability"
+    ],
+    "keywords": "gynnsamma möjliga säkert omöjligt tärning mynt"
+  },
+  {
+    "id": "multiple-events",
+    "title": "Flera händelser",
+    "description": "Räkna med sannolikhet i flera steg.",
+    "topicIds": [],
+    "keywords": "återläggning träddiagram"
+  },
+  {
+    "id": "combinations",
+    "title": "Kombinatorik",
+    "description": "Räkna möjliga kombinationer och placeringar.",
+    "topicIds": [],
+    "keywords": "ordning urval handskakning"
+  }
+] },
+  { id: "algebra", title: "Algebra", description: "Uttryck och ekvationer", subcategories: [
+  {
+    "id": "expressions",
+    "title": "Variabler och uttryck",
+    "description": "Bokstäver, mönster, förenkling och parenteser.",
+    "topicIds": [],
+    "keywords": "sifferterm bokstavsterm talföljd"
+  },
+  {
+    "id": "equations",
+    "title": "Likheter och ekvationer",
+    "description": "Balans, okända tal och ekvationslösning.",
+    "topicIds": [
+      "algebra"
+    ],
+    "keywords": "balansmetoden motsatt räknesätt"
+  },
+  {
+    "id": "formulas",
+    "title": "Formler och problemlösning",
+    "description": "Beskriv samband och lös problem i flera steg.",
+    "topicIds": [],
+    "keywords": "hastighet sträcka tid kilopris literpris per redovisa rimlighet"
+  },
+  {
+    "id": "functions",
+    "title": "Koordinater och funktioner",
+    "description": "Koordinatsystem, linjära samband och proportionalitet.",
+    "topicIds": [],
+    "keywords": "origo x-axel y-axel graf lutning startvärde räta linjens ekvation"
+  }
+] },
 ];
 
 const curriculum = {
@@ -220,6 +416,9 @@ let level = localStorage.getItem("mathclass-level") || "high";
 let activeScreen = "home";
 let selectedCategory = null;
 let selectedTopic = null;
+let selectedSubcategory = null;
+let modeOrigin = "topics";
+let subcategoryOrigin = "subcategories";
 let currentMode = null;
 let questionIndex = 0;
 let walkthroughIndex = 0;
@@ -245,6 +444,7 @@ function showScreen(name) {
 }
 
 function renderHome() {
+  renderSearch("home");
   const data = progressData()[level] || {};
   const available = availableTopics();
   const latest = data.latestTopicId ? topics[data.latestTopicId] : null;
@@ -260,7 +460,8 @@ function categoryById(id) {
 }
 
 function topicIdsFor(category) {
-  return category.topicIds.filter((topicId) => topics[topicId].levels.includes(level));
+  const ids = category.subcategories ? category.subcategories.flatMap((group) => group.topicIds) : category.topicIds;
+  return ids.filter((topicId) => topics[topicId]?.levels.includes(level));
 }
 
 function availableTopics() {
@@ -270,34 +471,74 @@ function availableTopics() {
 function configureFeaturedButton(button, category, topicId, title, description) {
   button.innerHTML = `<strong>${title}</strong><small>${description}</small>`;
   button.disabled = false;
-  button.onclick = category && topicId ? () => { selectedCategory = category; topicsOrigin = "home"; openTopic(topicId); } : () => { renderLibrary(); showScreen("library"); };
+  button.onclick = category && topicId ? () => { selectedCategory = category; topicsOrigin = "home"; openTopic(topicId, "home"); } : () => { renderLibrary(); showScreen("library"); };
 }
 
-function openCategory(categoryId, origin) {
-  selectedCategory = curriculum[level].categories.find((item) => item.id === categoryId);
+function sectionButton(title, description, status, onClick) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "list-button";
+  const text = document.createElement("span");
+  const heading = document.createElement("strong");
+  heading.textContent = title;
+  const detail = document.createElement("small");
+  detail.textContent = description;
+  text.append(heading, detail);
+  if (status) {
+    const badge = document.createElement("small");
+    badge.className = "section-status";
+    badge.textContent = status;
+    text.append(badge);
+  }
+  const arrow = document.createElement("b");
+  arrow.textContent = "›";
+  arrow.setAttribute("aria-hidden", "true");
+  button.append(text, arrow);
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function openCategory(categoryId, origin = "library") {
+  selectedCategory = categoryById(categoryId);
   topicsOrigin = origin;
-  $("#topics-eyebrow").textContent = curriculum[level].name;
-  $("#topics-heading").textContent = selectedCategory.title;
-  $("#topics-introduction").textContent = selectedCategory.description;
+  $("#subcategories-eyebrow").textContent = curriculum[level].name;
+  $("#subcategories-heading").textContent = selectedCategory.title;
+  $("#subcategories-introduction").textContent = "Välj en underkategori. Här samlas momenten steg för steg.";
+  const list = $("#subcategory-list");
+  list.replaceChildren();
+  selectedCategory.subcategories.forEach((group) => {
+    const count = topicIdsFor(group).length;
+    list.append(sectionButton(group.title, group.description, count ? `${count} moment att träna` : "Kommer senare", () => openSubcategory(group.id)));
+  });
+  $("#back-from-subcategories").setAttribute("aria-label", origin === "home" ? "Tillbaka till Hem" : "Tillbaka till Bibliotek");
+  showScreen("subcategories");
+}
+
+function openSubcategory(groupId, origin = "subcategories") {
+  selectedSubcategory = selectedCategory.subcategories.find((group) => group.id === groupId);
+  subcategoryOrigin = origin;
+  $("#topics-eyebrow").textContent = `${curriculum[level].name} · ${selectedCategory.title}`;
+  $("#topics-heading").textContent = selectedSubcategory.title;
+  $("#topics-introduction").textContent = selectedSubcategory.description;
+  $("#back-from-topics").setAttribute("aria-label", origin === "subcategories" ? `Tillbaka till ${selectedCategory.title}` : "Tillbaka till sökresultaten");
   const list = $("#topic-list");
   list.replaceChildren();
-  const availableIds = topicIdsFor(selectedCategory);
+  const availableIds = topicIdsFor(selectedSubcategory);
   $("#topics-empty").hidden = availableIds.length > 0;
   availableIds.forEach((topicId) => {
     const topic = topics[topicId];
-    const button = document.createElement("button");
-    button.className = "list-button";
-    button.innerHTML = `<span><strong>${topic.title}</strong><small>${topic.description}</small></span><b>›</b>`;
-    button.addEventListener("click", () => openTopic(topicId));
-    list.append(button);
+    list.append(sectionButton(topic.title, topic.description, "", () => openTopic(topicId)));
   });
   showScreen("topics");
 }
 
-function openTopic(topicId) {
+function openTopic(topicId, origin = "topics") {
   selectedTopic = topics[topicId];
-  $("#mode-eyebrow").textContent = `${selectedCategory.title} · ${selectedTopic.title}`;
-  $("#mode-introduction").textContent = "Välj hur du vill arbeta med momentet.";
+  selectedSubcategory = selectedCategory.subcategories.find((group) => group.topicIds.includes(topicId));
+  modeOrigin = origin;
+  $("#back-from-modes").setAttribute("aria-label", origin === "topics" ? "Tillbaka till momenten" : `Tillbaka till ${origin === "home" ? "Hem" : "Bibliotek"}`);
+  $("#mode-eyebrow").textContent = `${selectedCategory.title} · ${selectedSubcategory.title}`;
+  $("#mode-introduction").textContent = selectedTopic.title;
   const grid = $("#mode-grid");
   grid.replaceChildren();
   const available = [...(selectedTopic.walkthrough?.length ? ["walkthrough"] : []), ...Object.keys(selectedTopic.modes).filter((mode) => modeQuestions(mode).length)];
@@ -434,6 +675,7 @@ function renderProgress() {
 }
 
 function renderLibrary() {
+  renderSearch("library");
   $("#library-level").textContent = curriculum[level].name;
   $("#level-select").value = level;
   const grid = $("#library-categories");
@@ -442,7 +684,7 @@ function renderLibrary() {
     const button = document.createElement("button");
     button.className = "category-button";
     const count = topicIdsFor(category).length;
-    button.innerHTML = `<span>${index + 1}</span><strong>${category.title}</strong><small>${count ? `${count} moment` : "Kommer senare"}</small>`;
+    button.innerHTML = `<span>${index + 1}</span><strong>${category.title}</strong><small>${count ? `${category.subcategories.length} underkategorier · ${count} moment` : "Kommer senare"}</small>`;
     button.addEventListener("click", () => openCategory(category.id, "library"));
     grid.append(button);
   });
@@ -455,10 +697,24 @@ $("#level-select").addEventListener("change", (event) => {
   renderLibrary();
 });
 
-$("#back-from-topics").addEventListener("click", () => {
-  if (topicsOrigin === "library") { renderLibrary(); showScreen("library"); } else showScreen("home");
+function returnToSearch(origin) {
+  showScreen(origin);
+  renderSearch(origin);
+  requestAnimationFrame(() => $(`#${origin}-search`).focus({ preventScroll: true }));
+}
+
+$("#back-from-subcategories").addEventListener("click", () => {
+  if (topicsOrigin === "library") renderLibrary(); else renderHome();
+  showScreen(topicsOrigin);
 });
-$("#back-from-modes").addEventListener("click", () => openCategory(selectedCategory.id, topicsOrigin));
+$("#back-from-topics").addEventListener("click", () => {
+  if (subcategoryOrigin === "subcategories") openCategory(selectedCategory.id, topicsOrigin);
+  else returnToSearch(subcategoryOrigin);
+});
+$("#back-from-modes").addEventListener("click", () => {
+  if (modeOrigin === "topics") openSubcategory(selectedSubcategory.id, subcategoryOrigin);
+  else returnToSearch(modeOrigin);
+});
 $("#back-from-quiz").addEventListener("click", () => showScreen("mode"));
 $("#back-from-walkthrough").addEventListener("click", () => showScreen("mode"));
 $("#explanation-button").addEventListener("click", () => { $("#explanation").hidden = false; $("#explanation-button").hidden = true; $("#next-question-button").hidden = false; });
@@ -557,5 +813,68 @@ document.addEventListener("wheel", (event) => {
   animatePageChange(-Math.sign(event.deltaY));
   setTimeout(() => { wheelLocked = false; }, 450);
 }, { passive: false });
+
+
+function normalizeSearch(text) {
+  return text.toLocaleLowerCase("sv").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function searchSections(query) {
+  const terms = normalizeSearch(query).split(/\s+/).filter(Boolean);
+  if (!terms.length) return [];
+  const entries = curriculum[level].categories.flatMap((category) => category.subcategories.flatMap((group) => {
+    const path = `${category.title} → ${group.title}`;
+    const topicEntries = topicIdsFor(group).map((topicId) => {
+      const topic = topics[topicId];
+      const questions = Object.values(topic.modes).flat().filter((question) => question.levels.includes(level));
+      const vocabulary = questions.flatMap((question) => [question.prompt, question.example, question.choices[question.correct], question.explanation]);
+      return { title: topic.title, description: path, category, group, topicId, ready: true,
+        text: [path, topic.title, topic.description, ...(topic.walkthrough || []).flat(), ...vocabulary].join(" ") };
+    });
+    return [...topicEntries, { title: group.title, description: category.title, category, group, ready: topicEntries.length > 0,
+      text: [category.title, group.title, group.description, group.keywords].join(" ") }];
+  }));
+  return entries.filter((entry) => terms.every((term) => normalizeSearch(entry.text).includes(term)))
+    .sort((a, b) => Number(b.ready) - Number(a.ready) || Number(Boolean(b.topicId)) - Number(Boolean(a.topicId)) || a.title.localeCompare(b.title, "sv"));
+}
+
+function renderSearch(origin) {
+  const input = $(`#${origin}-search`);
+  const results = $(`#${origin}-search-results`);
+  const status = $(`#${origin}-search-status`);
+  $(`#${origin}-search-label`).textContent = `Sök avsnitt · ${curriculum[level].name}`;
+  $(`#${origin}-search-clear`).hidden = !input.value;
+  const query = input.value.trim();
+  results.replaceChildren();
+  results.hidden = !query;
+  status.hidden = !query;
+  if (!query) { status.textContent = ""; return; }
+  const matches = searchSections(query);
+  status.textContent = matches.length ? `${matches.length} ${matches.length === 1 ? "träff" : "träffar"}` : `Inga avsnitt hittades i ${curriculum[level].name.toLowerCase()}. Prova ett annat ord.`;
+  matches.forEach((entry) => {
+    const statusText = entry.topicId ? "Öppna träningslägen" : entry.ready ? "Visa moment" : "Kommer senare · inga övningar ännu";
+    results.append(sectionButton(entry.title, entry.description, statusText, () => {
+      selectedCategory = entry.category;
+      topicsOrigin = origin;
+      if (entry.topicId) openTopic(entry.topicId, origin);
+      else openSubcategory(entry.group.id, origin);
+    }));
+  });
+}
+
+["home", "library"].forEach((origin) => {
+  const input = $(`#${origin}-search`);
+  input.addEventListener("input", () => renderSearch(origin));
+  $(`#${origin}-search-clear`).addEventListener("click", () => {
+    input.value = "";
+    renderSearch(origin);
+    input.focus();
+  });
+  $(`#${origin}-search-form`).addEventListener("submit", (event) => {
+    event.preventDefault();
+    renderSearch(origin);
+    $(`#${origin}-search-results button`)?.focus();
+  });
+});
 
 renderHome();
