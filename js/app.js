@@ -28,6 +28,192 @@ const q = (prompt, example, choices, correct, explanation, levels = ["high"]) =>
 });
 
 const topics = {
+  placeValueLanguage: {
+    title: "Positionssystemet",
+    description: "Skilj på siffra och tal och förstå platsvärde.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["Siffror bygger tal", "Siffra och tal", "En siffra är ett skrivtecken. Ett tal kan skrivas med en eller flera siffror.", "Även ett ensiffrigt tal är ett tal. Noll är både en siffra och ett tal."],
+      ["Platsen ger värdet", "Ental, tiotal, hundratal", "Samma siffra får olika värde beroende på vilken talsort den står i.", "Ett tiotal är tio ental. Ett hundratal är tio tiotal."],
+      ["Delar av en hel", "Tiondelar och hundradelar", "Till höger om decimaltecknet finns tiondelar, hundradelar och mindre delar.", "Tio hundradelar är en tiondel. Jämför samma talsort när du jämför tal."],
+    ],
+    modes: {
+      rules: [
+        q("Vilket ord passar?", "Ett skrivtecken i ett tal", ["Siffra", "Talsort", "Summa"], 0, "Siffror är skrivtecken som används för att skriva tal.", ["high"]),
+        q("Vad betyder positionssystem?", "Siffrans plats", ["Platsen saknar betydelse", "Platsen påverkar siffrans värde", "Alla siffror betyder ental"], 1, "Samma siffra representerar olika värden på olika positioner.", ["high"]),
+        q("Vilken talsort kommer först?", "Direkt till höger om decimaltecknet", ["Tiotal", "Hundradelar", "Tiondelar"], 2, "Tiondelarna står närmast decimaltecknet på höger sida.", ["high"]),
+        q("Vad skiljer begreppen?", "Siffra och tal", ["Tal kan skrivas med siffror", "Tal måste ha flera siffror", "Siffror är alltid större än tal"], 0, "Ett tal kan skrivas med en eller flera siffror. Siffra och tal beskriver olika saker.", ["high"]),
+      ],
+      methods: [
+        q("Hur jämför du positiva decimaltal?", "Börja med samma talsort", ["Räkna antalet decimaler", "Jämför största talsorten först", "Börja med sista decimalen"], 1, "Jämför från den största talsorten. Vid lika värden går du vidare åt höger.", ["high"]),
+        q("Vad gör du om heltalsdelarna är lika?", "Jämför två positiva decimaltal", ["Välj talet med flest siffror", "Sluta jämföra", "Jämför tiondelarna"], 2, "Jämför först tiondelarna, sedan hundradelarna om tiondelarna också är lika.", ["high"]),
+        q("Varför kan en nolla behövas?", "Ingen mängd av en viss talsort", ["För att bevara övriga siffrors plats", "För att alltid göra talet större", "För att visa att talet är negativt"], 0, "Nollan kan hålla en position så att andra siffror får rätt platsvärde.", ["high"]),
+        q("Hur växlar du mellan talsorter?", "Tio hundradelar", ["Blir ett hundratal", "Blir en tiondel", "Blir tio ental"], 1, "Tio delar av en talsort motsvarar en del av talsorten närmast till vänster.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "Ett tal kan skrivas med en enda siffra", ["Sant", "Falskt"], 0, "Ett ensiffrigt tal är också ett tal.", ["high"]),
+        q("Sant eller falskt?", "Hundradelar är större än tiondelar", ["Sant", "Falskt"], 1, "En hundradel är mindre än en tiondel. Tio hundradelar är en tiondel.", ["high"]),
+        q("Sant eller falskt?", "Fler decimaler betyder alltid ett större tal", ["Sant", "Falskt"], 1, "Det är siffrornas platsvärden som avgör storleken, inte antalet decimaler.", ["high"]),
+        q("Sant eller falskt?", "Decimaltecknet skiljer ental från tiondelar", ["Sant", "Falskt"], 0, "Entalen står direkt till vänster och tiondelarna direkt till höger om decimaltecknet.", ["high"]),
+      ],
+    },
+  },
+  roundingLanguage: {
+    title: "Avrundning och överslag",
+    description: "Förstå närmevärden och hur du väljer noggrannhet.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["Ungefärligt värde", "Närmevärde", "Ett närmevärde ligger nära det exakta värdet. Avrundning är ett sätt att få ett närmevärde.", "Tecknet ungefär lika med visar att värdena inte behöver vara exakt lika."],
+      ["Välj talsort", "Titta ett steg åt höger", "Vid vanlig avrundning av positiva tal tittar du på siffran direkt till höger om den valda positionen.", "Noll till fyra: behåll siffran. Fem till nio: höj den. En nia kan ge en övergång."],
+      ["Kontrollera storleken", "Överslagsräkning", "Byt till närliggande, lättare tal och gör en ungefärlig beräkning.", "Överslaget hjälper dig att bedöma om ditt svar är rimligt. Det ersätter inte alltid en exakt beräkning."],
+    ],
+    modes: {
+      rules: [
+        q("Vad betyder närmevärde?", "Ungefärligt värde", ["Ett värde nära det exakta", "Ett värde som alltid är större", "Ett helt annat värde"], 0, "Ett närmevärde är en approximation av det exakta värdet.", ["high"]),
+        q("Vilken talsort gäller?", "Avrunda till en decimal", ["Ental", "Tiondelar", "Hundradelar"], 1, "Den första decimalen står på tiondelsplatsen.", ["high"]),
+        q("Vad betyder tecknet?", "≈", ["Exakt lika med", "Större än", "Ungefär lika med"], 2, "Tecknet läses ungefär lika med och används bland annat vid avrundning.", ["high"]),
+        q("Vad menas med överslagsräkning?", "En snabb uppskattning", ["Räkna ungefär med enklare tal", "Räkna utan någon metod", "Skriva fler decimaler"], 0, "Du använder närliggande tal som är enklare att räkna med.", ["high"]),
+      ],
+      methods: [
+        q("Vad gör du först?", "En uppgift ber dig avrunda", ["Tar bort alla nollor", "Bestämmer vilken position som gäller", "Höjer alltid sista siffran"], 1, "Börja med att se vilken talsort eller hur många decimaler uppgiften anger.", ["high"]),
+        q("Vilken siffra avgör?", "Avrunda ett positivt tal", ["Den första siffran i talet", "Siffran direkt till vänster", "Siffran direkt till höger"], 2, "Titta direkt till höger om positionen du avrundar till.", ["high"]),
+        q("Vad gör du när nästa siffra är noll?", "Vanlig avrundning av positiva tal", ["Behåller siffran på vald position", "Höjer siffran på vald position", "Tar bort hela heltalsdelen"], 0, "Noll ingår i gruppen noll till fyra: siffran på vald position behålls.", ["high"]),
+        q("Vad hjälper ett överslag dig med?", "Kontroll av ett svar", ["Att bevisa varje decimal", "Att bedöma svarets storlek", "Att slippa läsa frågan"], 1, "Om ditt svar ligger långt från överslaget bör du kontrollera beräkningen.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "Ett avrundat värde är alltid större än originalet", ["Sant", "Falskt"], 1, "Avrundning kan ge ett lägre eller högre värde, eller lämna värdet oförändrat.", ["high"]),
+        q("Sant eller falskt?", "Avrundning till heltal lämnar inga decimaler", ["Sant", "Falskt"], 0, "Avrundning till heltal innebär att du avrundar till entalsplatsen.", ["high"]),
+        q("Sant eller falskt?", "Ett överslag ger alltid det exakta svaret", ["Sant", "Falskt"], 1, "Ett överslag är en uppskattning. Det behöver inte sammanfalla med det exakta svaret.", ["high"]),
+        q("Sant eller falskt?", "Vald noggrannhet påverkar avrundningen", ["Sant", "Falskt"], 0, "Att avrunda till tiondelar och till tiotal innebär olika noggrannhet.", ["high"]),
+      ],
+    },
+  },
+  angleLanguage: {
+    title: "Vinklarnas språk",
+    description: "Känn igen vinkeltyper och beskriv en vridning.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["Vinkelns delar", "Vinkelspets och vinkelben", "Två strålar med samma startpunkt bildar en vinkel. Startpunkten är vinkelspetsen.", "Strålarna kallas vinkelben. Vinkelns storlek beror på öppningen mellan dem."],
+      ["Jämför med ett hörn", "Spetsig, rät och trubbig", "En rät vinkel motsvarar ett kvarts varv. En spetsig är mindre; en trubbig är större men mindre än ett halvt varv.", "En spetsig vinkel är större än noll. En liten fyrkant vid spetsen markerar en rät vinkel."],
+      ["Mät öppningen", "Grader och gradskiva", "Lägg gradskivans centrum på vinkelspetsen och dess nolllinje längs ett vinkelben.", "Läs den skala som börjar på noll vid det vinkelbenet. Följ den till det andra vinkelbenet."],
+    ],
+    modes: {
+      rules: [
+        q("Vad kallas mötespunkten?", "Vinkelbenens gemensamma start", ["Vinkelspets", "Vinkelsumma", "Omkrets"], 0, "Den gemensamma startpunkten kallas vinkelspets.", ["high"]),
+        q("Vilken vinkel beskrivs?", "Större än noll men mindre än en rät", ["Trubbig", "Spetsig", "Rak"], 1, "En spetsig vinkel är mindre än en rät vinkel och större än noll.", ["high"]),
+        q("Vilken vinkel beskrivs?", "Större än rät, mindre än rak", ["Spetsig", "Rät", "Trubbig"], 2, "En trubbig vinkel ligger mellan en rät vinkel och ett halvt varv.", ["high"]),
+        q("Vad visar den lilla fyrkanten?", "En markering vid vinkelspetsen", ["Att vinkeln är rät", "Att benen är lika långa", "Att figuren är en kvadrat"], 0, "Den lilla fyrkanten markerar en rät vinkel, inte en viss längd på benen.", ["high"]),
+      ],
+      methods: [
+        q("Vad ska du jämföra?", "Vilken vinkel är störst?", ["Hur långa benen är ritade", "Hur stor öppningen är", "Vilken figur som är störst"], 1, "Vinkelstorleken avgörs av öppningen, inte av de ritade benens längd.", ["high"]),
+        q("Var lägger du gradskivans centrum?", "Börja mäta en vinkel", ["Vid slutet av ett ben", "Mitt mellan benen", "På vinkelspetsen"], 2, "Centrum ska ligga på spetsen och nolllinjen längs ett vinkelben.", ["high"]),
+        q("Vilken skala läser du?", "Gradskivan har två skalor", ["Den som börjar på noll vid benet", "Alltid den yttre skalan", "Den som ger störst värde"], 0, "Utgå från noll vid det vinkelben som ligger längs nolllinjen.", ["high"]),
+        q("Vad betyder vinkelsumma?", "En triangels vinkelsumma", ["Den största vinkeln", "Alla tre vinklarna tillsammans", "Summan av sidornas längder"], 1, "Vinkelsumma är summan av vinklarna. Sidornas sammanlagda längd är omkretsen.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "Längre ritade vinkelben ger alltid större vinkel", ["Sant", "Falskt"], 1, "Att förlänga benen utan att ändra deras riktning ändrar inte vinkeln.", ["high"]),
+        q("Sant eller falskt?", "En rät vinkel är ett kvarts varv", ["Sant", "Falskt"], 0, "Ett kvarts varv motsvarar en rät vinkel.", ["high"]),
+        q("Sant eller falskt?", "En rak vinkel och en rät vinkel är samma sak", ["Sant", "Falskt"], 1, "En rak vinkel är ett halvt varv. En rät vinkel är ett kvarts varv.", ["high"]),
+        q("Sant eller falskt?", "En spetsig vinkel är mindre än en rät vinkel", ["Sant", "Falskt"], 0, "En spetsig vinkel ligger mellan noll och en rät vinkel.", ["high"]),
+      ],
+    },
+  },
+  fractionLanguage: {
+    title: "Förstå bråk",
+    description: "Beskriv delar av en helhet och bråk med samma värde.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["Börja med helheten", "Lika stora delar", "När ett bråk beskriver en del av en figur behöver du veta vad som är hela figuren. Dela helheten i lika stora delar.", "Att bara räkna bitar fungerar inte om bitarna har olika storlek."],
+      ["Läs delarnas namn", "Täljare och nämnare", "Nämnaren anger hur många lika stora delar helheten delas i. Täljaren anger hur många sådana delar bråket avser.", "Bråkstrecket betyder division. Bråk kan också beskriva mer än en hel."],
+      ["Samma värde, ny form", "Förkorta och förlänga", "Dividera eller multiplicera täljare och nämnare med samma positiva heltal. Värdet bevaras.", "Vid förkortning väljer du en gemensam delare så att täljare och nämnare fortfarande är heltal."],
+    ],
+    modes: {
+      rules: [
+        q("Vad berättar nämnaren?", "Ett bråk av en helhet", ["Hur många lika delar helheten delas i", "Hur många delar som är markerade", "Hur stor hela figuren är i centimeter"], 0, "Nämnaren anger indelningen av helheten i lika stora delar.", ["high"]),
+        q("Vad berättar täljaren?", "Ett bråk av en helhet", ["Antalet delar i varje helhet", "Hur många delar bråket avser", "Att delarna alltid är olika stora"], 1, "Täljaren anger antalet delar av den storlek som nämnaren beskriver.", ["high"]),
+        q("Vad betyder bråkstrecket?", "Täljare över nämnare", ["Addition", "Multiplikation", "Division"], 2, "Ett bråk kan läsas som täljaren dividerad med nämnaren.", ["high"]),
+        q("Vilket begrepp passar?", "Samma bråkvärde med större heltal", ["Förlängning", "Avrundning", "Subtraktion"], 0, "Vid förlängning multipliceras både täljare och nämnare med samma positiva heltal större än ett.", ["high"]),
+      ],
+      methods: [
+        q("Vad måste du kontrollera först?", "Läs ett bråk genom att räkna bitar", ["Att alla bitar har samma färg", "Att delarna är lika stora", "Att täljaren är större"], 1, "När du räknar bitar måste varje bit representera lika stor del av helheten.", ["high"]),
+        q("Hur förkortar du ett bråk?", "Bevara värdet", ["Subtraherar samma tal från båda", "Dividerar bara täljaren", "Dividerar båda med en gemensam delare"], 2, "Dividera både täljare och nämnare med samma gemensamma delare.", ["high"]),
+        q("Hur jämför du positiva bråk med samma nämnare?", "Delarna är lika stora", ["Jämför täljarna", "Välj alltid det första bråket", "Jämför antalet siffror"], 0, "Samma nämnare betyder lika stora delar. Större täljare betyder fler sådana delar.", ["high"]),
+        q("Varför söker du en gemensam nämnare?", "Addera bråk med olika nämnare", ["För att göra båda bråken större", "För att räkna delar av samma storlek", "För att ta bort alla täljare"], 1, "En gemensam nämnare gör delarna lika stora. Då kan du addera antalet delar.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "Förlängning gör alltid bråkets värde större", ["Sant", "Falskt"], 1, "Båda talen ändras med samma faktor, så bråkets värde bevaras.", ["high"]),
+        q("Sant eller falskt?", "Ett bråk kan vara större än en hel", ["Sant", "Falskt"], 0, "Om täljaren är större än den positiva nämnaren är bråket större än en hel.", ["high"]),
+        q("Sant eller falskt?", "Olika stora bitar kan alltid räknas som lika delar", ["Sant", "Falskt"], 1, "Du behöver först en indelning i lika stora delar för att skriva bråket genom att räkna bitar.", ["high"]),
+        q("Sant eller falskt?", "Samma nämnare innebär samma sorts bråkdelar", ["Sant", "Falskt"], 0, "Nämnaren namnger delarnas storlek i förhållande till en hel.", ["high"]),
+      ],
+    },
+  },
+  dataLanguage: {
+    title: "Tabeller och diagram",
+    description: "Förstå frekvens, diagramval och hur du läser en skala.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["Samla och ordna", "Rader och kolumner", "En tabell ordnar information i rader och kolumner. Rubrikerna berättar vad uppgifterna betyder.", "En frekvenstabell visar hur många gånger ett värde eller en kategori förekommer."],
+      ["Välj en bild av informationen", "Staplar, linjer och cirklar", "Staplar kan jämföra kategorier. Linjer kan visa förändring över tid. En cirkel kan visa delar av en helhet.", "Diagramtypen ska hjälpa läsaren att se det du vill undersöka."],
+      ["Läs innan du jämför", "Rubrik, enhet och skala", "Kontrollera vad diagrammet visar, vilka enheter som används och vad markeringarna på axlarna betyder.", "Olika skalor kan få samma skillnad att se olika stor ut. Läs värdena, inte bara bilden."],
+    ],
+    modes: {
+      rules: [
+        q("Vad betyder frekvens?", "I en frekvenstabell", ["Antal gånger något förekommer", "Det största värdet", "Alla värdens medelvärde"], 0, "Frekvens är antalet förekomster av ett visst värde eller en kategori.", ["high"]),
+        q("Vad visar kolumnrubriken?", "Läs en tabell", ["Att värdena måste vara störst", "Vad uppgifterna i kolumnen betyder", "Att alla rader har samma värde"], 1, "Rubriken talar om vad som står i kolumnen och kan även ange enheten.", ["high"]),
+        q("Vilket diagram passar ofta?", "Förändring under en tidsperiod", ["Cirkeldiagram", "En lista utan ordning", "Linjediagram"], 2, "Ett linjediagram kan göra en förändring över tid tydlig.", ["high"]),
+        q("Vilket diagram passar ofta?", "Hur en helhet är fördelad", ["Cirkeldiagram", "Tallinje", "Enbart en medelvärdesruta"], 0, "Cirkeln representerar helheten och sektorerna visar delarnas andelar.", ["high"]),
+      ],
+      methods: [
+        q("Vad läser du först?", "Ett obekant diagram", ["Bara den högsta punkten", "Rubrik, axlar och enheter", "Bara färgerna"], 1, "Först behöver du veta vad diagrammet visar och hur värdena ska läsas.", ["high"]),
+        q("Hur tar du reda på markeringarnas värde?", "Läs en axel", ["Antar att varje steg är ett", "Räknar bara strecken", "Undersöker de utskrivna skalvärdena"], 2, "De utskrivna värdena visar vad stegen betyder. Ett steg är inte alltid en enhet.", ["high"]),
+        q("Vad kontrollerar du vid jämförelsen?", "Två diagram ser olika branta ut", ["Om skalorna är desamma", "Om rubrikerna har samma färg", "Om det finns lika många bokstäver"], 0, "Olika axelskalor kan ändra intrycket. Jämför värden och enheter.", ["high"]),
+        q("Vad ska du summera?", "Antalet svar i en frekvenstabell", ["De olika kategoriernas namn", "Frekvenserna", "Bara den högsta frekvensen"], 1, "Varje frekvens anger hur många svar en kategori eller ett värde har. Summan ger totalantalet.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "Frekvens betyder alltid det uppmätta värdet", ["Sant", "Falskt"], 1, "Det uppmätta värdet och hur ofta det förekommer är olika uppgifter.", ["high"]),
+        q("Sant eller falskt?", "En cirkel kan visa delar av en helhet", ["Sant", "Falskt"], 0, "Sektorerna i ett cirkeldiagram visar hur helheten är fördelad.", ["high"]),
+        q("Sant eller falskt?", "Axelns markeringar måste alltid öka med ett", ["Sant", "Falskt"], 1, "Skalan kan ha andra steg. Kontrollera de angivna värdena.", ["high"]),
+        q("Sant eller falskt?", "Samma data kan visas i både tabell och diagram", ["Sant", "Falskt"], 0, "En tabell och ett diagram kan presentera samma information på olika sätt.", ["high"]),
+      ],
+    },
+  },
+  problemLanguage: {
+    title: "Läs och lös problem",
+    description: "Välj information, planera steg och förklara din lösning.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["Förstå frågan", "Vad söker jag?", "Läs vad uppgiften ber om. Skilj mellan det som är känt och det du behöver ta reda på.", "All information i texten behöver inte användas. Välj det som hjälper dig besvara frågan."],
+      ["Gör en plan", "Bild, tabell eller ekvation", "Välj ett sätt att visa sambandet. En skiss, tabell eller ekvation kan hjälpa dig att dela upp problemet.", "Om problemet känns svårt kan du prova ett enklare fall eller arbeta baklänges."],
+      ["Visa och kontrollera", "Förklara varje steg", "Skriv vad du tar reda på i varje steg. Avsluta med ett svar som passar frågan och rätt enhet.", "Kontrollera både att beräkningen stämmer och att resultatet är rimligt i situationen."],
+    ],
+    modes: {
+      rules: [
+        q("Vad menas med relevant information?", "Läs en textuppgift", ["Information som behövs för lösningen", "Alla ord som är längst", "Enbart den första meningen"], 0, "Relevant information hjälper dig att besvara frågan.", ["high"]),
+        q("Vad är ett delproblem?", "En lösning i flera steg", ["En annan uppgift utan samband", "En mindre del av det stora problemet", "Ett svar som inte ska användas"], 1, "Ett delproblem är ett steg som hjälper dig vidare mot huvudfrågans svar.", ["high"]),
+        q("Vad menas med att redovisa?", "Visa din lösning", ["Skriva bara svaret", "Skriva av frågan", "Visa beräkningar och förklara stegen"], 2, "En redovisning visar hur du tänkte och hur stegen leder fram till svaret.", ["high"]),
+        q("Vad är en rimlighetskontroll?", "Kan svaret stämma?", ["Bedöma svaret i sitt sammanhang", "Kontrollera enbart stavningen", "Välja det största möjliga svaret"], 0, "Jämför resultatet med situationen, en uppskattning och det som efterfrågas.", ["high"]),
+      ],
+      methods: [
+        q("Vilken information behövs?", "Köp frukt till ett kilopris", ["Fruktens färg och namn", "Vikten och priset per kilo", "Butikens öppettider"], 1, "För att bestämma kostnaden utifrån ett kilopris behöver du vikten och priset per kilo.", ["high"]),
+        q("Vad kan hjälpa dig se sambandet?", "Texten beskriver delar och en helhet", ["Välja ett räknesätt på måfå", "Använda alla tal direkt", "Rita en enkel skiss"], 2, "En skiss kan visa vilka delar som hör ihop och vad du söker.", ["high"]),
+        q("Vad innebär att arbeta baklänges?", "Slutvärdet är känt", ["Utgå från slutet och ångra stegen", "Läsa varje ord bakifrån", "Byta plats på alla siffror"], 0, "Du utgår från slutet och använder motsatta steg för att hitta utgångsläget.", ["high"]),
+        q("Vad bör ditt slutliga svar innehålla?", "En fråga om hur långt någon färdas", ["Bara en siffra utan förklaring", "Sträckan med en passande enhet", "En tid i minuter"], 1, "Svaret ska besvara frågan. En sträcka behöver en längdenhet.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "Alla tal i en textuppgift måste användas", ["Sant", "Falskt"], 1, "Vissa uppgifter innehåller information som inte behövs för att svara på frågan.", ["high"]),
+        q("Sant eller falskt?", "En tabell kan hjälpa dig hitta ett mönster", ["Sant", "Falskt"], 0, "När du ordnar information systematiskt kan samband bli lättare att upptäcka.", ["high"]),
+        q("Sant eller falskt?", "En korrekt beräkning garanterar att frågan är besvarad", ["Sant", "Falskt"], 1, "Du kan ha räknat rätt på fel sak. Kontrollera vad frågan faktiskt efterfrågar.", ["high"]),
+        q("Sant eller falskt?", "Ett enklare exempel kan hjälpa med ett svårt problem", ["Sant", "Falskt"], 0, "Ett enklare fall kan visa en metod eller ett samband som du sedan använder i huvudproblemet.", ["high"]),
+      ],
+    },
+  },
   operationLanguage: {
     title: "Räknesättens språk",
     description: "Förstå orden term, summa, faktor och kvot.",
@@ -199,7 +385,7 @@ const highCategories = [
     "id": "number-sense",
     "title": "Taluppfattning",
     "description": "Tiosystemet, tallinjen och decimaltal.",
-    "topicIds": [],
+    "topicIds": ["placeValueLanguage"],
     "keywords": "positionssystem ental tiotal hundratal tiondelar hundradelar storleksordna"
   },
   {
@@ -216,7 +402,7 @@ const highCategories = [
     "id": "rounding",
     "title": "Avrundning och överslag",
     "description": "Närmevärden och rimliga uppskattningar.",
-    "topicIds": [],
+    "topicIds": ["roundingLanguage"],
     "keywords": "avrunda avrundningssiffra överslagsräkning"
   },
   {
@@ -255,7 +441,7 @@ const highCategories = [
     "id": "angles-shapes",
     "title": "Vinklar och former",
     "description": "Vinklar, trianglar, fyrhörningar och cirklar.",
-    "topicIds": [],
+    "topicIds": ["angleLanguage"],
     "keywords": "vinkelsumma spetsig rät trubbig diameter radie"
   },
   {
@@ -301,7 +487,7 @@ const highCategories = [
     "id": "fractions",
     "title": "Bråk",
     "description": "Andelar, bråkformer och att räkna med bråk.",
-    "topicIds": [],
+    "topicIds": ["fractionLanguage"],
     "keywords": "täljare nämnare förkorta förlänga blandad form"
   },
   {
@@ -326,7 +512,7 @@ const highCategories = [
     "id": "tables-charts",
     "title": "Tabeller och diagram",
     "description": "Samla, läsa och granska statistiskt material.",
-    "topicIds": [],
+    "topicIds": ["dataLanguage"],
     "keywords": "frekvens frekvenstabell stapeldiagram stolpdiagram cirkeldiagram linjediagram vilseledande"
   },
   {
@@ -385,7 +571,7 @@ const highCategories = [
     "id": "formulas",
     "title": "Formler och problemlösning",
     "description": "Beskriv samband och lös problem i flera steg.",
-    "topicIds": [],
+    "topicIds": ["problemLanguage"],
     "keywords": "hastighet sträcka tid kilopris literpris per redovisa rimlighet"
   },
   {
