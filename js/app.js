@@ -1,1066 +1,381 @@
-const $ = (selector) => document.querySelector(selector);
-const screens = [...document.querySelectorAll(".screen")];
-const navButtons = [...document.querySelectorAll("[data-nav]")];
+import { store } from "./storage.js?v=2.5.0";
+import { initFileTest } from "./file-test.js?v=2.5.0";
+import { APP_VERSION, initVersionInfo } from "./version.js?v=2.5.0";
 
-function dismissSplash() {
-  const splash = $("#splash-screen");
-  if (!splash || splash.classList.contains("is-leaving")) return;
-  splash.classList.add("is-leaving");
-  splash.addEventListener("animationend", () => splash.classList.add("is-hidden"), { once: true });
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+const keys = { plans:"plans", people:"people", activities:"activities", circles:"circles", agenda:"agenda", events:"events", bundles:"bundles", places:"places", goals:"goals", projects:"projects", trips:"trips" };
+const viewNames = { today:"Today", people:"People", calendar:"Calendar", activities:"Activities", settings:"Settings", changelog:"What’s new", "people-settings":"People settings", "calendar-settings":"Calendar settings", "activities-settings":"Activities settings" };
+const activityIcons = { Fika:"☕", Mat:"🍽", Utomhus:"🌿", Kultur:"🎭", Träning:"⚡", Annat:"✦" };
+const uid = () => crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+const dateKey = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const todayKey = dateKey(new Date());
+const read = (key, fallback=[]) => store.get(key, fallback);
+const write = (key, value) => store.set(key, value);
+const prettyDate = (key, options={weekday:"long",day:"numeric",month:"long"}) => { const [y,m,d]=key.split("-").map(Number); return new Intl.DateTimeFormat("sv-SE",options).format(new Date(y,m-1,d)); };
+const initials = (name) => name.split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const interestList = (value) => Array.isArray(value) ? value : typeof value === "string" ? value.split(",").map(item=>item.trim()).filter(Boolean) : [];
+const tagList = item => interestList(item?.tags?.length ? item.tags : item?.category);
+const parseTags = value => [...new Set(interestList(value).map(tag=>tag.trim()).filter(Boolean))];
+const primaryTag = (item, fallback="Annat") => tagList(item)[0] || fallback;
+const searchableTags = item => tagList(item).join(" ");
+const escapeHtml = value => String(value).replace(/[&<>"']/g, char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
+
+let shownMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let selectedDate = todayKey, peopleFilter = "Alla", peopleSearch = "", relationshipMode = "people";
+let activityFilter = "all", activityCategory = "all", activityMaxCost = "all", activityEnvironment = "all", activityPhysical = "all", activitySocial = "all", activitySort = "newest", activityView = "grid", activityContentMode = "activities", calendarMode = "month";
+let contentSearch = "", placeMaxDistance = "all", placeEnvironment = "all";
+let calendarAgendaMode = "day";
+let showCalendarRoutines = true;
+let showCalendarBirthdays = true;
+let currentEntity = null;
+let planPersonSelection = new Set(), planCircleSelection = new Set(), planActivitySelection = "", planPlaceSelection = "";
+let bundleActivitySelection = new Set(), bundlePlaceSelection = "";
+
+function namesFor(ids, collection, labelKey="name") {
+  return ids.map(id=>collection.find(item=>item.id===id)?.[labelKey]).filter(Boolean);
 }
 
-window.addEventListener("load", () => window.setTimeout(dismissSplash, 850));
-window.setTimeout(dismissSplash, 2500);
-
-const modeCatalog = {
-  walkthrough: { name: "Genomgång", description: "Lär dig steg för steg", icon: "▶" },
-  rules: { name: "Regler och begrepp", description: "Välj rätt regel eller begrepp", icon: "?" },
-  calculate: { name: "Räkna ut", description: "Välj rätt svar", icon: "=" },
-  missing: { name: "Saknat tal", description: "Fyll i det som saknas", icon: "□" },
-  truefalse: { name: "Sant eller falskt", description: "Bedöm matematiska påståenden", icon: "✓" },
-  quick: { name: "Snabbträning", description: "Flera frågor i följd", icon: "⏱" },
-  order: { name: "Ordna", description: "Hitta rätt ordning", icon: "↕" },
-  methods: { name: "Förstå metoden", description: "Välj och förklara ett arbetssätt", icon: "→" },
-};
-
-const q = (prompt, example, choices, correct, explanation, levels = ["high"]) => ({
-  prompt, example, choices, correct, explanation, levels,
-});
-
-const topics = {
-  placeValueLanguage: {
-    title: "Positionssystemet",
-    description: "Skilj på siffra och tal och förstå platsvärde.",
-    levels: ["high"],
-    languageFocused: true,
-    walkthrough: [
-      ["Siffror bygger tal", "Siffra och tal", "En siffra är ett skrivtecken. Ett tal kan skrivas med en eller flera siffror.", "Även ett ensiffrigt tal är ett tal. Noll är både en siffra och ett tal."],
-      ["Platsen ger värdet", "Ental, tiotal, hundratal", "Samma siffra får olika värde beroende på vilken talsort den står i.", "Ett tiotal är tio ental. Ett hundratal är tio tiotal."],
-      ["Delar av en hel", "Tiondelar och hundradelar", "Till höger om decimaltecknet finns tiondelar, hundradelar och mindre delar.", "Tio hundradelar är en tiondel. Jämför samma talsort när du jämför tal."],
-    ],
-    modes: {
-      rules: [
-        q("Vilket ord passar?", "Ett skrivtecken i ett tal", ["Siffra", "Talsort", "Summa"], 0, "Siffror är skrivtecken som används för att skriva tal.", ["high"]),
-        q("Vad betyder positionssystem?", "Siffrans plats", ["Platsen saknar betydelse", "Platsen påverkar siffrans värde", "Alla siffror betyder ental"], 1, "Samma siffra representerar olika värden på olika positioner.", ["high"]),
-        q("Vilken talsort kommer först?", "Direkt till höger om decimaltecknet", ["Tiotal", "Hundradelar", "Tiondelar"], 2, "Tiondelarna står närmast decimaltecknet på höger sida.", ["high"]),
-        q("Vad skiljer begreppen?", "Siffra och tal", ["Tal kan skrivas med siffror", "Tal måste ha flera siffror", "Siffror är alltid större än tal"], 0, "Ett tal kan skrivas med en eller flera siffror. Siffra och tal beskriver olika saker.", ["high"]),
-      ],
-      methods: [
-        q("Hur jämför du positiva decimaltal?", "Börja med samma talsort", ["Räkna antalet decimaler", "Jämför största talsorten först", "Börja med sista decimalen"], 1, "Jämför från den största talsorten. Vid lika värden går du vidare åt höger.", ["high"]),
-        q("Vad gör du om heltalsdelarna är lika?", "Jämför två positiva decimaltal", ["Välj talet med flest siffror", "Sluta jämföra", "Jämför tiondelarna"], 2, "Jämför först tiondelarna, sedan hundradelarna om tiondelarna också är lika.", ["high"]),
-        q("Varför kan en nolla behövas?", "Ingen mängd av en viss talsort", ["För att bevara övriga siffrors plats", "För att alltid göra talet större", "För att visa att talet är negativt"], 0, "Nollan kan hålla en position så att andra siffror får rätt platsvärde.", ["high"]),
-        q("Hur växlar du mellan talsorter?", "Tio hundradelar", ["Blir ett hundratal", "Blir en tiondel", "Blir tio ental"], 1, "Tio delar av en talsort motsvarar en del av talsorten närmast till vänster.", ["high"]),
-      ],
-      truefalse: [
-        q("Sant eller falskt?", "Ett tal kan skrivas med en enda siffra", ["Sant", "Falskt"], 0, "Ett ensiffrigt tal är också ett tal.", ["high"]),
-        q("Sant eller falskt?", "Hundradelar är större än tiondelar", ["Sant", "Falskt"], 1, "En hundradel är mindre än en tiondel. Tio hundradelar är en tiondel.", ["high"]),
-        q("Sant eller falskt?", "Fler decimaler betyder alltid ett större tal", ["Sant", "Falskt"], 1, "Det är siffrornas platsvärden som avgör storleken, inte antalet decimaler.", ["high"]),
-        q("Sant eller falskt?", "Decimaltecknet skiljer ental från tiondelar", ["Sant", "Falskt"], 0, "Entalen står direkt till vänster och tiondelarna direkt till höger om decimaltecknet.", ["high"]),
-      ],
-    },
-  },
-  roundingLanguage: {
-    title: "Avrundning och överslag",
-    description: "Förstå närmevärden och hur du väljer noggrannhet.",
-    levels: ["high"],
-    languageFocused: true,
-    walkthrough: [
-      ["Ungefärligt värde", "Närmevärde", "Ett närmevärde ligger nära det exakta värdet. Avrundning är ett sätt att få ett närmevärde.", "Tecknet ungefär lika med visar att värdena inte behöver vara exakt lika."],
-      ["Välj talsort", "Titta ett steg åt höger", "Vid vanlig avrundning av positiva tal tittar du på siffran direkt till höger om den valda positionen.", "Noll till fyra: behåll siffran. Fem till nio: höj den. En nia kan ge en övergång."],
-      ["Kontrollera storleken", "Överslagsräkning", "Byt till närliggande, lättare tal och gör en ungefärlig beräkning.", "Överslaget hjälper dig att bedöma om ditt svar är rimligt. Det ersätter inte alltid en exakt beräkning."],
-    ],
-    modes: {
-      rules: [
-        q("Vad betyder närmevärde?", "Ungefärligt värde", ["Ett värde nära det exakta", "Ett värde som alltid är större", "Ett helt annat värde"], 0, "Ett närmevärde är en approximation av det exakta värdet.", ["high"]),
-        q("Vilken talsort gäller?", "Avrunda till en decimal", ["Ental", "Tiondelar", "Hundradelar"], 1, "Den första decimalen står på tiondelsplatsen.", ["high"]),
-        q("Vad betyder tecknet?", "≈", ["Exakt lika med", "Större än", "Ungefär lika med"], 2, "Tecknet läses ungefär lika med och används bland annat vid avrundning.", ["high"]),
-        q("Vad menas med överslagsräkning?", "En snabb uppskattning", ["Räkna ungefär med enklare tal", "Räkna utan någon metod", "Skriva fler decimaler"], 0, "Du använder närliggande tal som är enklare att räkna med.", ["high"]),
-      ],
-      methods: [
-        q("Vad gör du först?", "En uppgift ber dig avrunda", ["Tar bort alla nollor", "Bestämmer vilken position som gäller", "Höjer alltid sista siffran"], 1, "Börja med att se vilken talsort eller hur många decimaler uppgiften anger.", ["high"]),
-        q("Vilken siffra avgör?", "Avrunda ett positivt tal", ["Den första siffran i talet", "Siffran direkt till vänster", "Siffran direkt till höger"], 2, "Titta direkt till höger om positionen du avrundar till.", ["high"]),
-        q("Vad gör du när nästa siffra är noll?", "Vanlig avrundning av positiva tal", ["Behåller siffran på vald position", "Höjer siffran på vald position", "Tar bort hela heltalsdelen"], 0, "Noll ingår i gruppen noll till fyra: siffran på vald position behålls.", ["high"]),
-        q("Vad hjälper ett överslag dig med?", "Kontroll av ett svar", ["Att bevisa varje decimal", "Att bedöma svarets storlek", "Att slippa läsa frågan"], 1, "Om ditt svar ligger långt från överslaget bör du kontrollera beräkningen.", ["high"]),
-      ],
-      truefalse: [
-        q("Sant eller falskt?", "Ett avrundat värde är alltid större än originalet", ["Sant", "Falskt"], 1, "Avrundning kan ge ett lägre eller högre värde, eller lämna värdet oförändrat.", ["high"]),
-        q("Sant eller falskt?", "Avrundning till heltal lämnar inga decimaler", ["Sant", "Falskt"], 0, "Avrundning till heltal innebär att du avrundar till entalsplatsen.", ["high"]),
-        q("Sant eller falskt?", "Ett överslag ger alltid det exakta svaret", ["Sant", "Falskt"], 1, "Ett överslag är en uppskattning. Det behöver inte sammanfalla med det exakta svaret.", ["high"]),
-        q("Sant eller falskt?", "Vald noggrannhet påverkar avrundningen", ["Sant", "Falskt"], 0, "Att avrunda till tiondelar och till tiotal innebär olika noggrannhet.", ["high"]),
-      ],
-    },
-  },
-  angleLanguage: {
-    title: "Vinklarnas språk",
-    description: "Känn igen vinkeltyper och beskriv en vridning.",
-    levels: ["high"],
-    languageFocused: true,
-    walkthrough: [
-      ["Vinkelns delar", "Vinkelspets och vinkelben", "Två strålar med samma startpunkt bildar en vinkel. Startpunkten är vinkelspetsen.", "Strålarna kallas vinkelben. Vinkelns storlek beror på öppningen mellan dem."],
-      ["Jämför med ett hörn", "Spetsig, rät och trubbig", "En rät vinkel motsvarar ett kvarts varv. En spetsig är mindre; en trubbig är större men mindre än ett halvt varv.", "En spetsig vinkel är större än noll. En liten fyrkant vid spetsen markerar en rät vinkel."],
-      ["Mät öppningen", "Grader och gradskiva", "Lägg gradskivans centrum på vinkelspetsen och dess nolllinje längs ett vinkelben.", "Läs den skala som börjar på noll vid det vinkelbenet. Följ den till det andra vinkelbenet."],
-    ],
-    modes: {
-      rules: [
-        q("Vad kallas mötespunkten?", "Vinkelbenens gemensamma start", ["Vinkelspets", "Vinkelsumma", "Omkrets"], 0, "Den gemensamma startpunkten kallas vinkelspets.", ["high"]),
-        q("Vilken vinkel beskrivs?", "Större än noll men mindre än en rät", ["Trubbig", "Spetsig", "Rak"], 1, "En spetsig vinkel är mindre än en rät vinkel och större än noll.", ["high"]),
-        q("Vilken vinkel beskrivs?", "Större än rät, mindre än rak", ["Spetsig", "Rät", "Trubbig"], 2, "En trubbig vinkel ligger mellan en rät vinkel och ett halvt varv.", ["high"]),
-        q("Vad visar den lilla fyrkanten?", "En markering vid vinkelspetsen", ["Att vinkeln är rät", "Att benen är lika långa", "Att figuren är en kvadrat"], 0, "Den lilla fyrkanten markerar en rät vinkel, inte en viss längd på benen.", ["high"]),
-      ],
-      methods: [
-        q("Vad ska du jämföra?", "Vilken vinkel är störst?", ["Hur långa benen är ritade", "Hur stor öppningen är", "Vilken figur som är störst"], 1, "Vinkelstorleken avgörs av öppningen, inte av de ritade benens längd.", ["high"]),
-        q("Var lägger du gradskivans centrum?", "Börja mäta en vinkel", ["Vid slutet av ett ben", "Mitt mellan benen", "På vinkelspetsen"], 2, "Centrum ska ligga på spetsen och nolllinjen längs ett vinkelben.", ["high"]),
-        q("Vilken skala läser du?", "Gradskivan har två skalor", ["Den som börjar på noll vid benet", "Alltid den yttre skalan", "Den som ger störst värde"], 0, "Utgå från noll vid det vinkelben som ligger längs nolllinjen.", ["high"]),
-        q("Vad betyder vinkelsumma?", "En triangels vinkelsumma", ["Den största vinkeln", "Alla tre vinklarna tillsammans", "Summan av sidornas längder"], 1, "Vinkelsumma är summan av vinklarna. Sidornas sammanlagda längd är omkretsen.", ["high"]),
-      ],
-      truefalse: [
-        q("Sant eller falskt?", "Längre ritade vinkelben ger alltid större vinkel", ["Sant", "Falskt"], 1, "Att förlänga benen utan att ändra deras riktning ändrar inte vinkeln.", ["high"]),
-        q("Sant eller falskt?", "En rät vinkel är ett kvarts varv", ["Sant", "Falskt"], 0, "Ett kvarts varv motsvarar en rät vinkel.", ["high"]),
-        q("Sant eller falskt?", "En rak vinkel och en rät vinkel är samma sak", ["Sant", "Falskt"], 1, "En rak vinkel är ett halvt varv. En rät vinkel är ett kvarts varv.", ["high"]),
-        q("Sant eller falskt?", "En spetsig vinkel är mindre än en rät vinkel", ["Sant", "Falskt"], 0, "En spetsig vinkel ligger mellan noll och en rät vinkel.", ["high"]),
-      ],
-    },
-  },
-  fractionLanguage: {
-    title: "Förstå bråk",
-    description: "Beskriv delar av en helhet och bråk med samma värde.",
-    levels: ["high"],
-    languageFocused: true,
-    walkthrough: [
-      ["Börja med helheten", "Lika stora delar", "När ett bråk beskriver en del av en figur behöver du veta vad som är hela figuren. Dela helheten i lika stora delar.", "Att bara räkna bitar fungerar inte om bitarna har olika storlek."],
-      ["Läs delarnas namn", "Täljare och nämnare", "Nämnaren anger hur många lika stora delar helheten delas i. Täljaren anger hur många sådana delar bråket avser.", "Bråkstrecket betyder division. Bråk kan också beskriva mer än en hel."],
-      ["Samma värde, ny form", "Förkorta och förlänga", "Dividera eller multiplicera täljare och nämnare med samma positiva heltal. Värdet bevaras.", "Vid förkortning väljer du en gemensam delare så att täljare och nämnare fortfarande är heltal."],
-    ],
-    modes: {
-      rules: [
-        q("Vad berättar nämnaren?", "Ett bråk av en helhet", ["Hur många lika delar helheten delas i", "Hur många delar som är markerade", "Hur stor hela figuren är i centimeter"], 0, "Nämnaren anger indelningen av helheten i lika stora delar.", ["high"]),
-        q("Vad berättar täljaren?", "Ett bråk av en helhet", ["Antalet delar i varje helhet", "Hur många delar bråket avser", "Att delarna alltid är olika stora"], 1, "Täljaren anger antalet delar av den storlek som nämnaren beskriver.", ["high"]),
-        q("Vad betyder bråkstrecket?", "Täljare över nämnare", ["Addition", "Multiplikation", "Division"], 2, "Ett bråk kan läsas som täljaren dividerad med nämnaren.", ["high"]),
-        q("Vilket begrepp passar?", "Samma bråkvärde med större heltal", ["Förlängning", "Avrundning", "Subtraktion"], 0, "Vid förlängning multipliceras både täljare och nämnare med samma positiva heltal större än ett.", ["high"]),
-      ],
-      methods: [
-        q("Vad måste du kontrollera först?", "Läs ett bråk genom att räkna bitar", ["Att alla bitar har samma färg", "Att delarna är lika stora", "Att täljaren är större"], 1, "När du räknar bitar måste varje bit representera lika stor del av helheten.", ["high"]),
-        q("Hur förkortar du ett bråk?", "Bevara värdet", ["Subtraherar samma tal från båda", "Dividerar bara täljaren", "Dividerar båda med en gemensam delare"], 2, "Dividera både täljare och nämnare med samma gemensamma delare.", ["high"]),
-        q("Hur jämför du positiva bråk med samma nämnare?", "Delarna är lika stora", ["Jämför täljarna", "Välj alltid det första bråket", "Jämför antalet siffror"], 0, "Samma nämnare betyder lika stora delar. Större täljare betyder fler sådana delar.", ["high"]),
-        q("Varför söker du en gemensam nämnare?", "Addera bråk med olika nämnare", ["För att göra båda bråken större", "För att räkna delar av samma storlek", "För att ta bort alla täljare"], 1, "En gemensam nämnare gör delarna lika stora. Då kan du addera antalet delar.", ["high"]),
-      ],
-      truefalse: [
-        q("Sant eller falskt?", "Förlängning gör alltid bråkets värde större", ["Sant", "Falskt"], 1, "Båda talen ändras med samma faktor, så bråkets värde bevaras.", ["high"]),
-        q("Sant eller falskt?", "Ett bråk kan vara större än en hel", ["Sant", "Falskt"], 0, "Om täljaren är större än den positiva nämnaren är bråket större än en hel.", ["high"]),
-        q("Sant eller falskt?", "Olika stora bitar kan alltid räknas som lika delar", ["Sant", "Falskt"], 1, "Du behöver först en indelning i lika stora delar för att skriva bråket genom att räkna bitar.", ["high"]),
-        q("Sant eller falskt?", "Samma nämnare innebär samma sorts bråkdelar", ["Sant", "Falskt"], 0, "Nämnaren namnger delarnas storlek i förhållande till en hel.", ["high"]),
-      ],
-    },
-  },
-  dataLanguage: {
-    title: "Tabeller och diagram",
-    description: "Förstå frekvens, diagramval och hur du läser en skala.",
-    levels: ["high"],
-    languageFocused: true,
-    walkthrough: [
-      ["Samla och ordna", "Rader och kolumner", "En tabell ordnar information i rader och kolumner. Rubrikerna berättar vad uppgifterna betyder.", "En frekvenstabell visar hur många gånger ett värde eller en kategori förekommer."],
-      ["Välj en bild av informationen", "Staplar, linjer och cirklar", "Staplar kan jämföra kategorier. Linjer kan visa förändring över tid. En cirkel kan visa delar av en helhet.", "Diagramtypen ska hjälpa läsaren att se det du vill undersöka."],
-      ["Läs innan du jämför", "Rubrik, enhet och skala", "Kontrollera vad diagrammet visar, vilka enheter som används och vad markeringarna på axlarna betyder.", "Olika skalor kan få samma skillnad att se olika stor ut. Läs värdena, inte bara bilden."],
-    ],
-    modes: {
-      rules: [
-        q("Vad betyder frekvens?", "I en frekvenstabell", ["Antal gånger något förekommer", "Det största värdet", "Alla värdens medelvärde"], 0, "Frekvens är antalet förekomster av ett visst värde eller en kategori.", ["high"]),
-        q("Vad visar kolumnrubriken?", "Läs en tabell", ["Att värdena måste vara störst", "Vad uppgifterna i kolumnen betyder", "Att alla rader har samma värde"], 1, "Rubriken talar om vad som står i kolumnen och kan även ange enheten.", ["high"]),
-        q("Vilket diagram passar ofta?", "Förändring under en tidsperiod", ["Cirkeldiagram", "En lista utan ordning", "Linjediagram"], 2, "Ett linjediagram kan göra en förändring över tid tydlig.", ["high"]),
-        q("Vilket diagram passar ofta?", "Hur en helhet är fördelad", ["Cirkeldiagram", "Tallinje", "Enbart en medelvärdesruta"], 0, "Cirkeln representerar helheten och sektorerna visar delarnas andelar.", ["high"]),
-      ],
-      methods: [
-        q("Vad läser du först?", "Ett obekant diagram", ["Bara den högsta punkten", "Rubrik, axlar och enheter", "Bara färgerna"], 1, "Först behöver du veta vad diagrammet visar och hur värdena ska läsas.", ["high"]),
-        q("Hur tar du reda på markeringarnas värde?", "Läs en axel", ["Antar att varje steg är ett", "Räknar bara strecken", "Undersöker de utskrivna skalvärdena"], 2, "De utskrivna värdena visar vad stegen betyder. Ett steg är inte alltid en enhet.", ["high"]),
-        q("Vad kontrollerar du vid jämförelsen?", "Två diagram ser olika branta ut", ["Om skalorna är desamma", "Om rubrikerna har samma färg", "Om det finns lika många bokstäver"], 0, "Olika axelskalor kan ändra intrycket. Jämför värden och enheter.", ["high"]),
-        q("Vad ska du summera?", "Antalet svar i en frekvenstabell", ["De olika kategoriernas namn", "Frekvenserna", "Bara den högsta frekvensen"], 1, "Varje frekvens anger hur många svar en kategori eller ett värde har. Summan ger totalantalet.", ["high"]),
-      ],
-      truefalse: [
-        q("Sant eller falskt?", "Frekvens betyder alltid det uppmätta värdet", ["Sant", "Falskt"], 1, "Det uppmätta värdet och hur ofta det förekommer är olika uppgifter.", ["high"]),
-        q("Sant eller falskt?", "En cirkel kan visa delar av en helhet", ["Sant", "Falskt"], 0, "Sektorerna i ett cirkeldiagram visar hur helheten är fördelad.", ["high"]),
-        q("Sant eller falskt?", "Axelns markeringar måste alltid öka med ett", ["Sant", "Falskt"], 1, "Skalan kan ha andra steg. Kontrollera de angivna värdena.", ["high"]),
-        q("Sant eller falskt?", "Samma data kan visas i både tabell och diagram", ["Sant", "Falskt"], 0, "En tabell och ett diagram kan presentera samma information på olika sätt.", ["high"]),
-      ],
-    },
-  },
-  problemLanguage: {
-    title: "Läs och lös problem",
-    description: "Välj information, planera steg och förklara din lösning.",
-    levels: ["high"],
-    languageFocused: true,
-    walkthrough: [
-      ["Förstå frågan", "Vad söker jag?", "Läs vad uppgiften ber om. Skilj mellan det som är känt och det du behöver ta reda på.", "All information i texten behöver inte användas. Välj det som hjälper dig besvara frågan."],
-      ["Gör en plan", "Bild, tabell eller ekvation", "Välj ett sätt att visa sambandet. En skiss, tabell eller ekvation kan hjälpa dig att dela upp problemet.", "Om problemet känns svårt kan du prova ett enklare fall eller arbeta baklänges."],
-      ["Visa och kontrollera", "Förklara varje steg", "Skriv vad du tar reda på i varje steg. Avsluta med ett svar som passar frågan och rätt enhet.", "Kontrollera både att beräkningen stämmer och att resultatet är rimligt i situationen."],
-    ],
-    modes: {
-      rules: [
-        q("Vad menas med relevant information?", "Läs en textuppgift", ["Information som behövs för lösningen", "Alla ord som är längst", "Enbart den första meningen"], 0, "Relevant information hjälper dig att besvara frågan.", ["high"]),
-        q("Vad är ett delproblem?", "En lösning i flera steg", ["En annan uppgift utan samband", "En mindre del av det stora problemet", "Ett svar som inte ska användas"], 1, "Ett delproblem är ett steg som hjälper dig vidare mot huvudfrågans svar.", ["high"]),
-        q("Vad menas med att redovisa?", "Visa din lösning", ["Skriva bara svaret", "Skriva av frågan", "Visa beräkningar och förklara stegen"], 2, "En redovisning visar hur du tänkte och hur stegen leder fram till svaret.", ["high"]),
-        q("Vad är en rimlighetskontroll?", "Kan svaret stämma?", ["Bedöma svaret i sitt sammanhang", "Kontrollera enbart stavningen", "Välja det största möjliga svaret"], 0, "Jämför resultatet med situationen, en uppskattning och det som efterfrågas.", ["high"]),
-      ],
-      methods: [
-        q("Vilken information behövs?", "Köp frukt till ett kilopris", ["Fruktens färg och namn", "Vikten och priset per kilo", "Butikens öppettider"], 1, "För att bestämma kostnaden utifrån ett kilopris behöver du vikten och priset per kilo.", ["high"]),
-        q("Vad kan hjälpa dig se sambandet?", "Texten beskriver delar och en helhet", ["Välja ett räknesätt på måfå", "Använda alla tal direkt", "Rita en enkel skiss"], 2, "En skiss kan visa vilka delar som hör ihop och vad du söker.", ["high"]),
-        q("Vad innebär att arbeta baklänges?", "Slutvärdet är känt", ["Utgå från slutet och ångra stegen", "Läsa varje ord bakifrån", "Byta plats på alla siffror"], 0, "Du utgår från slutet och använder motsatta steg för att hitta utgångsläget.", ["high"]),
-        q("Vad bör ditt slutliga svar innehålla?", "En fråga om hur långt någon färdas", ["Bara en siffra utan förklaring", "Sträckan med en passande enhet", "En tid i minuter"], 1, "Svaret ska besvara frågan. En sträcka behöver en längdenhet.", ["high"]),
-      ],
-      truefalse: [
-        q("Sant eller falskt?", "Alla tal i en textuppgift måste användas", ["Sant", "Falskt"], 1, "Vissa uppgifter innehåller information som inte behövs för att svara på frågan.", ["high"]),
-        q("Sant eller falskt?", "En tabell kan hjälpa dig hitta ett mönster", ["Sant", "Falskt"], 0, "När du ordnar information systematiskt kan samband bli lättare att upptäcka.", ["high"]),
-        q("Sant eller falskt?", "En korrekt beräkning garanterar att frågan är besvarad", ["Sant", "Falskt"], 1, "Du kan ha räknat rätt på fel sak. Kontrollera vad frågan faktiskt efterfrågar.", ["high"]),
-        q("Sant eller falskt?", "Ett enklare exempel kan hjälpa med ett svårt problem", ["Sant", "Falskt"], 0, "Ett enklare fall kan visa en metod eller ett samband som du sedan använder i huvudproblemet.", ["high"]),
-      ],
-    },
-  },
-  operationLanguage: {
-    title: "Räknesättens språk",
-    description: "Förstå orden term, summa, faktor och kvot.",
-    levels: ["high"],
-    languageFocused: true,
-    walkthrough: [
-      ["Ord för olika roller", "Talens roller", "Matematikord berättar vad talen gör och vad resultatet kallas.", "Skilj på talen du arbetar med och resultatet du får."],
-      ["Lägga ihop och ta skillnaden", "Term → summa eller differens", "Tal som adderas eller subtraheras kallas termer. Resultatet heter summa vid addition och differens vid subtraktion.", "Ordet term hör alltså till två räknesätt. Resultatets namn visar vilket du använder."],
-      ["Multiplicera", "Faktorer → produkt", "Talen som multipliceras kallas faktorer. Resultatet kallas produkt.", "En faktor är en del av beräkningen. Produkten är det du får fram."],
-      ["Dividera", "Täljare, nämnare och kvot", "I en division skriven som ett bråk står täljaren över bråkstrecket och nämnaren under. Resultatet kallas kvot.", "Täljaren är talet som delas. Nämnaren är talet du delar med och får inte vara noll."],
-    ],
-    modes: {
-      rules: [
-        q("Vad heter resultatet?", "Addition", ["Summa", "Produkt", "Term"], 0, "Vid addition lägger du ihop termer. Resultatet kallas summa.", ["high"]),
-        q("Vad heter resultatet?", "Subtraktion", ["Kvot", "Differens", "Faktor"], 1, "Resultatet av en subtraktion kallas differens.", ["high"]),
-        q("Vad heter talen som multipliceras?", "Multiplikation", ["Termer", "Kvoter", "Faktorer"], 2, "Talen som multipliceras är faktorer. Resultatet är en produkt.", ["high"]),
-        q("Vad heter resultatet?", "Division", ["Kvot", "Nämnare", "Differens"], 0, "Kvoten är resultatet av divisionen.", ["high"]),
-        q("Vilket ord passar?", "Tal som adderas", ["Produkter", "Termer", "Faktorer"], 1, "Talen som adderas kallas termer. Även tal i en subtraktion kallas termer.", ["high"]),
-        q("Vilket ord passar?", "Ovanför bråkstrecket", ["Kvot", "Nämnare", "Täljare"], 2, "Täljaren står ovanför bråkstrecket. Nämnaren står under.", ["high"]),
-        q("Vilket ord passar?", "Under bråkstrecket", ["Nämnare", "Produkt", "Täljare"], 0, "Nämnaren står under bråkstrecket och är talet du delar med.", ["high"]),
-        q("Vilket räknesätt menas?", "Bestäm produkten", ["Addition", "Multiplikation", "Division"], 1, "Att bestämma produkten betyder att multiplicera faktorerna.", ["high"]),
-        q("Vilket räknesätt menas?", "Bestäm differensen", ["Multiplikation", "Addition", "Subtraktion"], 2, "Differensen är skillnaden som du får genom subtraktion.", ["high"]),
-        q("Vilken beskrivning stämmer?", "Faktor och produkt", ["Faktorer multipliceras till en produkt", "Produkter adderas till en faktor", "En faktor är alltid resultatet"], 0, "Faktor beskriver talets roll före resultatet. Produkt är resultatets namn.", ["high"]),
-      ],
-      truefalse: [
-        q("Sant eller falskt?", "En summa är ett resultat", ["Sant", "Falskt"], 0, "Summan är resultatet när termer adderas.", ["high"]),
-        q("Sant eller falskt?", "Termer finns bara i addition", ["Sant", "Falskt"], 1, "Tal som subtraheras kallas också termer.", ["high"]),
-        q("Sant eller falskt?", "Produkt och kvot betyder samma sak", ["Sant", "Falskt"], 1, "Produkt hör till multiplikation. Kvot hör till division.", ["high"]),
-        q("Sant eller falskt?", "Nämnaren är talet du delar med", ["Sant", "Falskt"], 0, "När division skrivs som ett bråk är nämnaren talet du delar med.", ["high"]),
-      ],
-    },
-  },
-  calculationMethods: {
-    title: "Förstå räknemetoder",
-    description: "Välj en metod och förklara varför den fungerar.",
-    levels: ["high"],
-    languageFocused: true,
-    walkthrough: [
-      ["En metod har en anledning", "Gör beräkningen enklare", "En räknemetod ändrar hur du räknar. Den ska bevara resultatet.", "Fråga både vad som ändras och varför svaret blir detsamma."],
-      ["Bevara summan", "Öka en term, minska den andra", "Vid addition kan du öka den ena termen och minska den andra lika mycket.", "Det du lägger till på ett ställe tar du bort på det andra. Summan bevaras."],
-      ["Bevara differensen", "Ändra båda lika mycket", "Vid subtraktion kan du öka båda termerna lika mycket eller minska båda lika mycket.", "Tänk på avståndet mellan två punkter på en tallinje. Om båda flyttas lika långt åt samma håll är avståndet kvar."],
-      ["Bevara produkten", "Dubbla och halvera", "Dubbla den ena faktorn och halvera den andra. Produkten blir densamma.", "Dubbelt så många grupper med hälften så mycket i varje ger samma mängd totalt."],
-      ["Bevara kvoten", "Ändra båda på samma sätt", "Multiplicera täljare och nämnare med samma tal, som inte är noll. Kvoten bevaras.", "Du kan också dividera båda med samma tal, som inte är noll. Att dubbla båda är ett exempel."],
-    ],
-    modes: {
-      methods: [
-        q("Vilken metod beskrivs?", "Lägg ihop ental för sig och tiotal för sig", ["Addera talsort för talsort", "Dubbla och halvera", "Räkna upp med addition"], 0, "Du delar upp termerna efter talsort och lägger sedan ihop delresultaten.", ["high"]),
-        q("Vad bevarar summan?", "Öka den ena termen", ["Öka den andra lika mycket", "Minska den andra lika mycket", "Låt den andra vara oförändrad"], 1, "För att summan ska vara kvar måste du ta bort lika mycket som du lägger till.", ["high"]),
-        q("Vad bevarar differensen?", "Öka den första termen", ["Halvera den andra", "Minska den andra lika mycket", "Öka den andra lika mycket"], 2, "När båda termerna ökar lika mycket är skillnaden mellan dem oförändrad.", ["high"]),
-        q("Vilken metod beskrivs?", "Räkna från det mindre talet till det större", ["Räkna upp med addition", "Multiplicera delarna", "Dubbla båda talen"], 0, "För att hitta skillnaden kan du lägga ihop stegen från det mindre talet till det större.", ["high"]),
-        q("Vad är nästa steg?", "Dela upp en faktor i en summa", ["Multiplicera bara den första delen", "Multiplicera varje del med den andra faktorn", "Addera den andra faktorn till varje del"], 1, "Varje del måste multipliceras med den andra faktorn. Sedan adderar du delprodukterna.", ["high"]),
-        q("Vad bevarar produkten?", "Dubbla den ena faktorn", ["Dubbla den andra", "Låt den andra vara kvar", "Halvera den andra"], 2, "Dubbleringen och halveringen tar ut varandra, så produkten bevaras.", ["high"]),
-        q("Vad bevarar kvoten?", "Dubbla nämnaren", ["Dubbla även täljaren", "Halvera täljaren", "Låt täljaren vara kvar"], 0, "Täljare och nämnare måste ändras med samma faktor för att kvoten ska bevaras.", ["high"]),
-        q("Varför används metoden?", "Skaffa heltal i nämnaren", ["För att alltid göra svaret större", "För att göra divisionen enklare", "För att ta bort täljaren"], 1, "Du kan göra divisionen enklare genom att multiplicera båda talen med samma tiopotens tills nämnaren är ett heltal.", ["high"]),
-      ],
-      truefalse: [
-        q("Sant eller falskt?", "Dubbla båda faktorerna för att bevara produkten", ["Sant", "Falskt"], 1, "Dubbla och halvera är metoden som bevarar produkten. Att dubbla båda gör inte det.", ["high"]),
-        q("Sant eller falskt?", "Lika stor ökning av båda termerna bevarar differensen", ["Sant", "Falskt"], 0, "Skillnaden är kvar när båda termerna flyttas lika mycket åt samma håll.", ["high"]),
-        q("Sant eller falskt?", "Vid uppdelning räcker det att multiplicera en del", ["Sant", "Falskt"], 1, "Alla delar måste multipliceras med den andra faktorn. Annars saknas en del av produkten.", ["high"]),
-        q("Sant eller falskt?", "En användbar metod kan ge samma svar med enklare steg", ["Sant", "Falskt"], 0, "Metoden hjälper dig att räkna enklare samtidigt som resultatet bevaras.", ["high"]),
-      ],
-    },
-  },
-  powers10: {
-    title: "Multiplicera med 10, 100 och 1000",
-    description: "Förstå nollregeln och räkna med tiopotenser.",
-    walkthrough: [
-      ["Räkna nollorna", "10 · 100 · 1000", "10 har en nolla, 100 har två och 1000 har tre.", "För heltal visar antalet nollor hur många platser siffrorna flyttas åt vänster."],
-      ["Multiplicera med 10", "7 × 10 = 70", "Lägg till en nolla efter heltalet.", "Sjuan går från entalsplatsen till tiotalsplatsen."],
-      ["Multiplicera med 100", "7 × 100 = 700", "Lägg till två nollor efter heltalet.", "Sjuan får ett hundra gånger större platsvärde."],
-      ["Multiplicera med 1000", "7 × 1000 = 7000", "Lägg till tre nollor efter heltalet.", "Sjuan hamnar på tusentalsplatsen."],
-    ],
-    modes: {
-      rules: [q("Vilken regel gäller?", "7 × 100", ["Lägg till 1 nolla", "Lägg till 2 nollor", "Lägg till 3 nollor"], 1, "100 har två nollor, så 7 × 100 = 700."), q("Vilken regel gäller?", "9 × 1000", ["Lägg till 3 nollor", "Lägg till 2 nollor", "Lägg till 1 nolla"], 0, "1000 har tre nollor, så 9 × 1000 = 9000.")],
-      calculate: [q("Vad blir svaret?", "8 × 10", ["80", "800", "18"], 0, "Multiplicera med 10 genom att lägga till en nolla."), q("Vad blir svaret?", "12 × 100", ["120", "1200", "12000"], 1, "100 har två nollor: 12 × 100 = 1200."), q("Vad blir svaret?", "6 × 1000", ["600", "6000", "60000"], 1, "1000 har tre nollor: 6 × 1000 = 6000.")],
-      missing: [q("Vilket tal saknas?", "7 × □ = 700", ["10", "100", "1000"], 1, "700 är hundra gånger större än 7."), q("Vilket tal saknas?", "4 × □ = 4000", ["1000", "100", "10"], 0, "4 × 1000 = 4000.")],
-      truefalse: [q("Sant eller falskt?", "15 × 100 = 1500", ["Sant", "Falskt"], 0, "Två nollor läggs efter 15."), q("Sant eller falskt?", "3 × 1000 = 300", ["Sant", "Falskt"], 1, "3 × 1000 är 3000, inte 300.")],
-    },
-  },
-  area: {
-    title: "Area och omkrets",
-    description: "Räkna på rektanglar och skilj mellan yta och sträcka.",
-    walkthrough: [
-      ["Två olika mått", "Omkrets ≠ area", "Omkrets är sträckan runt en figur. Area är ytan inuti.", "Tänk staket för omkrets och gräs för area."],
-      ["Rektangelns omkrets", "O = 2 × längd + 2 × bredd", "Lägg ihop figurens fyra sidor.", "Motstående sidor är lika långa."],
-      ["Rektangelns area", "A = längd × bredd", "Multiplicera längden med bredden.", "Enheten blir kvadratisk, till exempel cm²."],
-    ],
-    modes: {
-      rules: [q("Vilket begrepp beskriver ytan inuti?", "Ytan inuti figuren", ["Area", "Omkrets", "Diameter"], 0, "Area beskriver hur stor ytan är."), q("Vilken enhet passar för area?", "Area av ett rum", ["m", "m²", "m³"], 1, "Area mäts i kvadratenheter, exempelvis m².")],
-      calculate: [q("Vad är rektangelns area?", "6 cm × 4 cm", ["10 cm²", "20 cm²", "24 cm²"], 2, "6 × 4 = 24 cm²."), q("Vad är omkretsen?", "Längd 5 m · bredd 3 m", ["8 m", "15 m", "16 m"], 2, "5 + 3 + 5 + 3 = 16 m.")],
-      missing: [q("Vilken längd saknas?", "Area 24 cm² · bredd 4 cm", ["5 cm", "6 cm", "8 cm"], 1, "24 ÷ 4 = 6 cm.")],
-      truefalse: [q("Sant eller falskt?", "Area mäts i cm²", ["Sant", "Falskt"], 0, "Area mäts i kvadratenheter."), q("Sant eller falskt?", "3 cm × 5 cm ger arean 8 cm²", ["Sant", "Falskt"], 1, "Arean är 3 × 5 = 15 cm².")],
-    },
-  },
-  percent: {
-    title: "Procent av ett tal",
-    description: "Beräkna 10 %, 25 %, 50 % och andra vanliga andelar.",
-    walkthrough: [
-      ["Procent betyder hundradel", "1 % = 1/100", "Procent visar hur många hundradelar vi menar.", "25 % betyder 25 av 100, alltså en fjärdedel."],
-      ["Hitta 10 procent", "10 % av 300 = 30", "Dela talet med 10.", "300 ÷ 10 = 30."],
-      ["Hitta 50 procent", "50 % av 80 = 40", "50 procent är samma sak som hälften.", "Dela talet med 2."],
-      ["Bygg fler procent", "20 % = 10 % + 10 %", "Använd enkla andelar för att bygga svaret.", "10 % av 150 är 15, alltså är 20 % 30."],
-    ],
-    modes: {
-      rules: [q("Vad betyder 50 %?", "50 %", ["Hälften", "En fjärdedel", "Dubbelt"], 0, "50 av 100 är hälften."), q("Hur hittar du 10 %?", "10 % av ett tal", ["Dela med 10", "Multiplicera med 10", "Dela med 2"], 0, "En tiondel är 10 procent.")],
-      calculate: [q("Hur mycket är 25 %?", "25 % av 200", ["25", "50", "75"], 1, "25 % är en fjärdedel och 200 ÷ 4 = 50."), q("Hur mycket är 10 %?", "10 % av 450", ["45", "4,5", "90"], 0, "450 ÷ 10 = 45."), q("Hur mycket är 50 %?", "50 % av 70", ["20", "35", "50"], 1, "Hälften av 70 är 35.")],
-      missing: [q("Vilken procentsats saknas?", "□ av 80 = 40", ["10 %", "25 %", "50 %"], 2, "40 är hälften av 80, alltså 50 %.")],
-      truefalse: [q("Sant eller falskt?", "20 % av 100 är 20", ["Sant", "Falskt"], 0, "20 hundradelar av 100 är 20."), q("Sant eller falskt?", "10 % av 60 är 10", ["Sant", "Falskt"], 1, "10 % av 60 är 6.")],
-    },
-  },
-  statistics: {
-    title: "Medelvärde, median och typvärde",
-    description: "Sammanfatta och jämför tal i en datamängd.",
-    walkthrough: [
-      ["Tre lägesmått", "Medelvärde · median · typvärde", "De beskriver en datamängd på olika sätt.", "Vilket mått som passar bäst beror på talen och frågan."],
-      ["Medelvärde", "(2 + 4 + 6) ÷ 3 = 4", "Addera talen och dela med hur många de är.", "Summan är 12 och det finns tre tal."],
-      ["Median", "2, 5, 9 → 5", "Ordna talen och välj det mittersta.", "Vid jämnt antal tal tar du medelvärdet av de två mittersta."],
-      ["Typvärde", "2, 3, 3, 7 → 3", "Typvärdet är talet som förekommer flest gånger.", "En datamängd kan ha flera typvärden eller inget alls."],
-    ],
-    modes: {
-      rules: [q("Vilket mått är det mittersta talet?", "Tal i storleksordning", ["Median", "Medelvärde", "Typvärde"], 0, "Medianen är det mittersta talet."), q("Vilket mått förekommer flest gånger?", "Det vanligaste värdet", ["Medelvärde", "Typvärde", "Median"], 1, "Typvärdet är vanligast.")],
-      calculate: [q("Vad är medelvärdet?", "2, 4, 6", ["3", "4", "6"], 1, "(2 + 4 + 6) ÷ 3 = 4."), q("Vad är medianen?", "1, 3, 8, 10, 12", ["3", "8", "10"], 1, "8 står i mitten.")],
-      truefalse: [q("Sant eller falskt?", "Typvärdet i 2, 2, 5 är 2", ["Sant", "Falskt"], 0, "2 förekommer flest gånger."), q("Sant eller falskt?", "Medianen i 1, 4, 9 är 4", ["Sant", "Falskt"], 0, "4 är talet i mitten.")],
-      order: [q("Vilken ordning är stigande?", "5 · 1 · 3", ["1, 3, 5", "5, 3, 1", "3, 1, 5"], 0, "Stigande ordning går från minst till störst."), q("Ordna inför medianen", "8 · 2 · 6", ["8, 6, 2", "2, 6, 8", "6, 2, 8"], 1, "2, 6, 8 är rätt ordning och medianen är 6.")],
-    },
-  },
-  probability: {
-    title: "Enkel sannolikhet",
-    description: "Räkna möjliga och gynnsamma utfall.",
-    walkthrough: [
-      ["Möjliga utfall", "En tärning: 1, 2, 3, 4, 5, 6", "Börja med att hitta alla möjliga resultat.", "En vanlig tärning har sex lika sannolika utfall."],
-      ["Gynnsamma utfall", "Jämnt tal: 2, 4, 6", "Gynnsamma utfall är de resultat vi vill få.", "Tre av tärningens sex utfall är jämna."],
-      ["Skriv sannolikheten", "3 av 6 = 1/2 = 50 %", "Dela gynnsamma utfall med möjliga utfall.", "Bråket 3/6 kan förkortas till 1/2."],
-    ],
-    modes: {
-      rules: [q("Vad är ett gynnsamt utfall?", "Vi vill slå en sexa", ["Att få 6", "Alla sex tal", "Att kasta tärningen"], 0, "Det gynnsamma utfallet är resultatet vi vill ha."), q("Vad betyder omöjlig händelse?", "Sannolikhet 0", ["Kan inte inträffa", "Inträffar alltid", "Inträffar hälften av gångerna"], 0, "Sannolikheten för en omöjlig händelse är 0.")],
-      calculate: [q("Vad är sannolikheten?", "Få krona med ett rättvist mynt", ["1/2", "1/3", "1"], 0, "Ett av två möjliga utfall är krona."), q("Vad är sannolikheten?", "Slå en sexa med en tärning", ["1/2", "1/6", "6"], 1, "Ett av sex möjliga utfall är en sexa.")],
-      missing: [q("Hur många gynnsamma utfall finns?", "Slå ett jämnt tal med en tärning", ["2", "3", "6"], 1, "De jämna utfallen är 2, 4 och 6.")],
-      truefalse: [q("Sant eller falskt?", "Sannolikheten för krona är 50 %", ["Sant", "Falskt"], 0, "Ett rättvist mynt har två lika sannolika sidor."), q("Sant eller falskt?", "Man kan slå 7 med en vanlig tärning", ["Sant", "Falskt"], 1, "En vanlig tärning visar 1 till 6.")],
-    },
-  },
-  algebra: {
-    title: "Lösa enkla ekvationer",
-    description: "Hitta det okända talet och kontrollera lösningen.",
-    walkthrough: [
-      ["En ekvation är en balans", "x + 3 = 8", "Båda sidor om likhetstecknet har samma värde.", "Gör du något på ena sidan måste du göra samma på den andra."],
-      ["Använd motsatt räknesätt", "x + 3 − 3 = 8 − 3", "Ta bort 3 genom att subtrahera 3 på båda sidor.", "Plus och minus är motsatta räknesätt."],
-      ["Lös och kontrollera", "x = 5 → 5 + 3 = 8", "Sätt in svaret för att se att likheten stämmer.", "Kontrollen visar att 5 är rätt lösning."],
-    ],
-    modes: {
-      rules: [q("Vilket räknesätt löser ekvationen?", "x + 7 = 12", ["Subtrahera 7", "Addera 7", "Multiplicera med 7"], 0, "Använd motsatt räknesätt: subtrahera 7."), q("Vad måste bevaras?", "En ekvation", ["Balansen", "Talens ordning", "Det största talet"], 0, "Gör samma sak på båda sidor så bevaras balansen.")],
-      calculate: [q("Vad är x?", "x + 4 = 11", ["5", "7", "15"], 1, "11 − 4 = 7."), q("Vad är x?", "3x = 18", ["6", "15", "54"], 0, "18 ÷ 3 = 6."), q("Vad är x?", "x − 5 = 9", ["4", "14", "45"], 1, "9 + 5 = 14.")],
-      missing: [q("Vilket tal saknas?", "□ + 6 = 10", ["4", "6", "16"], 0, "10 − 6 = 4."), q("Vilket tal saknas?", "5 × □ = 20", ["2", "4", "15"], 1, "20 ÷ 5 = 4.")],
-      truefalse: [q("Sant eller falskt?", "x + 2 = 7 ger x = 5", ["Sant", "Falskt"], 0, "5 + 2 = 7."), q("Sant eller falskt?", "2x = 10 ger x = 8", ["Sant", "Falskt"], 1, "10 ÷ 2 = 5, alltså är x = 5.")],
-    },
-  },
-};
-
-Object.values(topics).forEach((topic) => {
-  topic.levels ??= ["high"];
-  topic.modes.quick = topic.languageFocused
-    ? [...(topic.modes.rules || []), ...(topic.modes.methods || []), ...(topic.modes.truefalse || [])]
-    : [...(topic.modes.calculate || []), ...(topic.modes.truefalse || [])];
-});
-
-const highCategories = [
-  { id: "numbers", title: "Tal", description: "Taluppfattning och räknesätt", subcategories: [
-  {
-    "id": "number-sense",
-    "title": "Taluppfattning",
-    "description": "Tiosystemet, tallinjen och decimaltal.",
-    "topicIds": ["placeValueLanguage"],
-    "keywords": "positionssystem ental tiotal hundratal tiondelar hundradelar storleksordna"
-  },
-  {
-    "id": "operations",
-    "title": "De fyra räknesätten",
-    "description": "Begrepp, räknemetoder och prioriteringsregler.",
-    "topicIds": [
-      "operationLanguage",
-      "calculationMethods"
-    ],
-    "keywords": "addition subtraktion multiplikation division parenteser"
-  },
-  {
-    "id": "rounding",
-    "title": "Avrundning och överslag",
-    "description": "Närmevärden och rimliga uppskattningar.",
-    "topicIds": ["roundingLanguage"],
-    "keywords": "avrunda avrundningssiffra överslagsräkning"
-  },
-  {
-    "id": "decimal-operations",
-    "title": "Tiopotenser och decimalräkning",
-    "description": "Multiplicera och dividera med tio, hundra, tusen och decimaltal.",
-    "topicIds": [
-      "powers10"
-    ],
-    "keywords": "10 100 1000 decimaltecken"
-  },
-  {
-    "id": "negative",
-    "title": "Negativa tal",
-    "description": "Tallinjen, motsatta tal och teckenregler.",
-    "topicIds": [],
-    "keywords": "positiva tal minus"
-  },
-  {
-    "id": "powers-roots",
-    "title": "Potenser och rötter",
-    "description": "Bas, exponent, grundpotensform och kvadratrot.",
-    "topicIds": [],
-    "keywords": "upphöjt kvadrattal roten ur"
-  },
-  {
-    "id": "prefixes",
-    "title": "Prefix",
-    "description": "Namn och beteckningar för stora och små tal.",
-    "topicIds": [],
-    "keywords": "kilo mega giga deci centi milli mikro"
-  }
-] },
-  { id: "geometry", title: "Geometri", description: "Former, mått och samband", subcategories: [
-  {
-    "id": "angles-shapes",
-    "title": "Vinklar och former",
-    "description": "Vinklar, trianglar, fyrhörningar och cirklar.",
-    "topicIds": ["angleLanguage"],
-    "keywords": "vinkelsumma spetsig rät trubbig diameter radie"
-  },
-  {
-    "id": "perimeter-area",
-    "title": "Omkrets och area",
-    "description": "Sträckan runt en figur och ytan inuti.",
-    "topicIds": [
-      "area"
-    ],
-    "keywords": "rektangel cirkel triangel bas höjd"
-  },
-  {
-    "id": "units",
-    "title": "Längd och enheter",
-    "description": "Mätning och omvandling av längdenheter.",
-    "topicIds": [],
-    "keywords": "meter centimeter millimeter kilometer mil"
-  },
-  {
-    "id": "scale-symmetry",
-    "title": "Skala och symmetri",
-    "description": "Avbildningar, förstoring, förminskning och symmetri.",
-    "topicIds": [],
-    "keywords": "spegling rotation verklighet bild"
-  },
-  {
-    "id": "pythagoras",
-    "title": "Pythagoras sats",
-    "description": "Sambandet mellan sidorna i en rätvinklig triangel.",
-    "topicIds": [],
-    "keywords": "hypotenusa kateter"
-  },
-  {
-    "id": "volume",
-    "title": "Volym och rymdgeometri",
-    "description": "Kroppar, volym och volymenheter.",
-    "topicIds": [],
-    "keywords": "rätblock kub cylinder liter deciliter centiliter milliliter"
-  }
-] },
-  { id: "percent", title: "Procent", description: "Andelar och förändringar", subcategories: [
-  {
-    "id": "fractions",
-    "title": "Bråk",
-    "description": "Andelar, bråkformer och att räkna med bråk.",
-    "topicIds": ["fractionLanguage"],
-    "keywords": "täljare nämnare förkorta förlänga blandad form"
-  },
-  {
-    "id": "percent-basics",
-    "title": "Förstå procent",
-    "description": "Hundradelar och sambandet mellan andel, del och helhet.",
-    "topicIds": [
-      "percent"
-    ],
-    "keywords": "procentform decimalform hälften fjärdedel"
-  },
-  {
-    "id": "percent-change",
-    "title": "Förändring och ränta",
-    "description": "Procentuell förändring, förändringsfaktor och ränta.",
-    "topicIds": [],
-    "keywords": "rabatt ökning minskning lån årsränta"
-  }
-] },
-  { id: "statistics", title: "Statistik", description: "Data och lägesmått", subcategories: [
-  {
-    "id": "tables-charts",
-    "title": "Tabeller och diagram",
-    "description": "Samla, läsa och granska statistiskt material.",
-    "topicIds": ["dataLanguage"],
-    "keywords": "frekvens frekvenstabell stapeldiagram stolpdiagram cirkeldiagram linjediagram vilseledande"
-  },
-  {
-    "id": "averages",
-    "title": "Lägesmått",
-    "description": "Beskriv och jämför en datamängd.",
-    "topicIds": [
-      "statistics"
-    ],
-    "keywords": "medelvärde median typvärde"
-  }
-] },
-  { id: "probability", title: "Sannolikhet", description: "Slump och möjliga utfall", subcategories: [
-  {
-    "id": "outcomes",
-    "title": "Händelser och utfall",
-    "description": "Chans, risk och enkel sannolikhet.",
-    "topicIds": [
-      "probability"
-    ],
-    "keywords": "gynnsamma möjliga säkert omöjligt tärning mynt"
-  },
-  {
-    "id": "multiple-events",
-    "title": "Flera händelser",
-    "description": "Räkna med sannolikhet i flera steg.",
-    "topicIds": [],
-    "keywords": "återläggning träddiagram"
-  },
-  {
-    "id": "combinations",
-    "title": "Kombinatorik",
-    "description": "Räkna möjliga kombinationer och placeringar.",
-    "topicIds": [],
-    "keywords": "ordning urval handskakning"
-  }
-] },
-  { id: "algebra", title: "Algebra", description: "Uttryck och ekvationer", subcategories: [
-  {
-    "id": "expressions",
-    "title": "Variabler och uttryck",
-    "description": "Bokstäver, mönster, förenkling och parenteser.",
-    "topicIds": [],
-    "keywords": "sifferterm bokstavsterm talföljd"
-  },
-  {
-    "id": "equations",
-    "title": "Likheter och ekvationer",
-    "description": "Balans, okända tal och ekvationslösning.",
-    "topicIds": [
-      "algebra"
-    ],
-    "keywords": "balansmetoden motsatt räknesätt"
-  },
-  {
-    "id": "formulas",
-    "title": "Formler och problemlösning",
-    "description": "Beskriv samband och lös problem i flera steg.",
-    "topicIds": ["problemLanguage"],
-    "keywords": "hastighet sträcka tid kilopris literpris per redovisa rimlighet"
-  },
-  {
-    "id": "functions",
-    "title": "Koordinater och funktioner",
-    "description": "Koordinatsystem, linjära samband och proportionalitet.",
-    "topicIds": [],
-    "keywords": "origo x-axel y-axel graf lutning startvärde räta linjens ekvation"
-  }
-] },
-];
-
-const curriculum = {
-  high: { name: "Högstadiet", categories: highCategories },
-  middle: { name: "Mellanstadiet", categories: highCategories },
-};
-
-const wisdoms = [
-  "Förklara lösningen högt för dig själv – då märker du snabbt vad du verkligen förstår.",
-  "Ett fel är inte ett misslyckande. Det visar exakt vad du kan träna på härnäst.",
-  "Rita en bild när talen känns abstrakta. En enkel skiss kan göra sambandet tydligt.",
-  "Träna kort och ofta. Tio fokuserade minuter kan ge mer än ett långt pass ibland.",
-  "Kontrollera svaret med en annan metod när du kan. Då tränar du både säkerhet och förståelse.",
-  "Fråga inte bara vad svaret är – fråga varför metoden fungerar.",
-];
-
-let level = localStorage.getItem("mathclass-level") || "high";
-let activeScreen = "home";
-let selectedCategory = null;
-let selectedTopic = null;
-let selectedSubcategory = null;
-let modeOrigin = "topics";
-let subcategoryOrigin = "subcategories";
-let currentMode = null;
-let questionIndex = 0;
-let walkthroughIndex = 0;
-let quickScore = 0;
-let topicsOrigin = "home";
-let settingsOrigin = "home";
-let touchStartY = null;
-let touchCurrentY = null;
-let touchStartedAt = 0;
-let swipeAnimating = false;
-let wheelLocked = false;
-
-function showScreen(name) {
-  screens.forEach((screen) => {
-    const active = screen.id === `${name}-screen`;
-    screen.hidden = !active;
-    screen.classList.toggle("is-active", active);
-  });
-  activeScreen = name;
-  navButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.nav === name));
-  const heading = $(`#${name}-screen h1`);
-  if (heading) setTimeout(() => heading.focus({ preventScroll: true }), 0);
+function expandCircleMembers(personIds, circleIds) {
+  const circles=read(keys.circles);
+  return [...new Set([...personIds, ...circleIds.flatMap(id=>circles.find(c=>c.id===id)?.personIds||[])])];
 }
 
-function renderHome() {
-  renderSearch("home");
-  const data = progressData()[level] || {};
-  const available = availableTopics();
-  const latest = data.latestTopicId ? topics[data.latestTopicId] : null;
-  const latestCategory = data.latestCategoryId ? categoryById(data.latestCategoryId) : null;
-  const recommendation = available.find((item) => item.topicId !== data.latestTopicId) || available[0];
-  configureFeaturedButton($("#continue-button"), latestCategory, data.latestTopicId, latest ? latest.title : "Börja träna", latest ? latest.description : `Öppna Bibliotek för material i ${curriculum[level].name.toLowerCase()}.`);
-  configureFeaturedButton($("#recommendation-button"), recommendation?.category, recommendation?.topicId, recommendation ? topics[recommendation.topicId].title : "Nytt material kommer", recommendation ? topics[recommendation.topicId].description : "Det finns ännu inget material för den valda nivån.");
-  $("#math-wisdom").textContent = wisdoms[Math.floor(Math.random() * wisdoms.length)];
+function checkboxList(target, items, name, selected=[]) {
+  target.replaceChildren();
+  if (!items.length) { const p=document.createElement("p"); p.className="field-empty"; p.textContent="Inga att välja ännu"; target.append(p); return; }
+  items.forEach(item=>{const label=document.createElement("label");label.className="check-option";const input=document.createElement("input");input.type="checkbox";input.name=name;input.value=item.id;input.checked=selected.includes(item.id);const span=document.createElement("span");span.textContent=item.name||item.title;label.append(input,span);target.append(label);});
+}
+function setNamedChecks(form,name,selected=[]){[...form.querySelectorAll(`[name="${name}"]`)].forEach(input=>{input.checked=selected.includes(input.value);});}
+const legacyCost = [0,100,300,600];
+const costOf = activity => Number(activity.estimatedCost ?? legacyCost[Number(activity.cost)] ?? 0);
+
+function fillActivitySelect(select, selected="") {
+  const first=select.querySelector("option[value='']"); select.replaceChildren(first||new Option("Ingen vald aktivitet",""));
+  read(keys.activities).forEach(activity=>select.add(new Option(activity.title,activity.id)));
+  select.value=selected||"";
+}
+function renderPlanActivityPicker(){const query=$("#plan-activity-search").value.trim().toLocaleLowerCase("sv"),activities=read(keys.activities).filter(activity=>!query||[activity.title,searchableTags(activity),activity.place].join(" ").toLocaleLowerCase("sv").includes(query)),target=$("#plan-activity-results");target.replaceChildren();activities.slice(0,8).forEach(activity=>{const button=document.createElement("button");button.type="button";button.className=activity.id===planActivitySelection?"is-selected":"";button.textContent=activity.title;button.onclick=()=>{planActivitySelection=activity.id;$("#plan-form").elements.activityId.value=activity.id;$("#plan-activity-search").value=activity.title;renderPlanActivityPicker();};target.append(button);});if(!activities.length){const small=document.createElement("small");small.textContent="Ingen aktivitet hittades.";target.append(small);}}
+function renderPlanPlacePicker(){const query=$("#plan-place-search").value.trim().toLocaleLowerCase("sv"),places=read(keys.places).filter(place=>!query||[place.name,place.address,searchableTags(place)].join(" ").toLocaleLowerCase("sv").includes(query)),target=$("#plan-place-results");target.replaceChildren();places.slice(0,8).forEach(place=>{const button=document.createElement("button");button.type="button";button.className=place.id===planPlaceSelection?"is-selected":"";button.textContent=place.name;button.onmousedown=e=>e.preventDefault();button.onclick=()=>{planPlaceSelection=place.id;$("#plan-form").elements.placeId.value=place.id;$("#plan-place-search").value=place.name;target.hidden=true;};target.append(button);});if(!places.length){const small=document.createElement("small");small.textContent="Ingen plats hittades.";target.append(small);}}
+function renderPlanRelationPicker(type){const isPeople=type==="people",items=read(isPeople?keys.people:keys.circles),search=$(isPeople?"#plan-people-search":"#plan-circles-search").value.trim().toLocaleLowerCase("sv"),selected=isPeople?planPersonSelection:planCircleSelection,target=$(isPeople?"#plan-people":"#plan-circles");target.replaceChildren();items.filter(item=>!search||[item.name,item.group,...interestList(item.interests)].join(" ").toLocaleLowerCase("sv").includes(search)).slice(0,10).forEach(item=>{const label=document.createElement("label");label.className="check-option";const input=document.createElement("input");input.type="checkbox";input.checked=selected.has(item.id);input.onchange=()=>input.checked?selected.add(item.id):selected.delete(item.id);const span=document.createElement("span");span.textContent=item.name;label.append(input,span);target.append(label);});if(!target.children.length){const small=document.createElement("small");small.className="field-empty";small.textContent="Inga träffar.";target.append(small);}}
+function renderBundleActivityPicker(){const query=$("#bundle-activity-search").value.trim().toLocaleLowerCase("sv"),target=$("#bundle-activities");target.replaceChildren();read(keys.activities).filter(activity=>!query||[activity.title,searchableTags(activity),activity.place].join(" ").toLocaleLowerCase("sv").includes(query)).slice(0,12).forEach(activity=>{const label=document.createElement("label");label.className="check-option";const input=document.createElement("input");input.type="checkbox";input.checked=bundleActivitySelection.has(activity.id);input.onchange=()=>input.checked?bundleActivitySelection.add(activity.id):bundleActivitySelection.delete(activity.id);const span=document.createElement("span");span.textContent=activity.title;label.append(input,span);target.append(label);});if(!target.children.length){const small=document.createElement("small");small.className="field-empty";small.textContent="Inga aktiviteter hittades.";target.append(small);}}
+function renderBundlePlacePicker(){const query=$("#bundle-place-search").value.trim().toLocaleLowerCase("sv"),target=$("#bundle-place-results");target.replaceChildren();read(keys.places).filter(place=>!query||[place.name,searchableTags(place),place.address].join(" ").toLocaleLowerCase("sv").includes(query)).slice(0,8).forEach(place=>{const button=document.createElement("button");button.type="button";button.className=place.id===bundlePlaceSelection?"is-selected":"";button.textContent=place.name;button.onclick=()=>{bundlePlaceSelection=place.id;$("#bundle-form").elements.placeId.value=place.id;$("#bundle-place-search").value=place.name;renderBundlePlacePicker();};target.append(button);});if(!target.children.length){const small=document.createElement("small");small.textContent="Ingen plats hittades.";target.append(small);}}
+
+function showView() {
+  const wanted=location.hash.slice(1), active=viewNames[wanted]?wanted:"today";
+  $$('[data-view]').forEach(v=>v.classList.toggle("is-active",v.dataset.view===active));
+  $$('[data-nav]').forEach(item=>{const on=item.dataset.nav===active;item.classList.toggle("is-active",on);on?item.setAttribute("aria-current","page"):item.removeAttribute("aria-current");});
+  $(".bottom-nav").hidden = active === "settings" || active === "changelog" || active.endsWith("-settings");
+  $("#open-settings").hidden = active !== "today";
+  $("#open-page-settings").hidden = !["people","calendar","activities"].includes(active);
+  $("#open-page-settings").onclick = () => { location.hash = `${active}-settings`; };
+  document.title=`${viewNames[active]} · Social Circle`;
 }
 
-function categoryById(id) {
-  return curriculum[level].categories.find((category) => category.id === id);
+function completePlan(plan) {
+  const plans=read(keys.plans), index=plans.findIndex(p=>p.id===plan.id); if(index<0)return;
+  plans[index]={...plans[index],status:"completed",completedAt:new Date().toISOString()};
+  const events=read(keys.events);
+  if(!events.some(event=>event.sourcePlanId===plan.id)) events.push({id:uid(),sourcePlanId:plan.id,title:plan.title,date:plan.date,time:plan.time||"",activityId:plan.activityId||"",bundleId:plan.bundleId||"",personIds:expandCircleMembers(plan.personIds||[],plan.circleIds||[]),circleIds:plan.circleIds||[],notes:plan.notes||"",createdAt:new Date().toISOString()});
+  store.set(keys.events,events); store.set(keys.plans,plans);
 }
 
-function topicIdsFor(category) {
-  const ids = category.subcategories ? category.subcategories.flatMap((group) => group.topicIds) : category.topicIds;
-  return ids.filter((topicId) => topics[topicId]?.levels.includes(level));
+function archivePastPlans(){const plans=read(keys.plans),events=read(keys.events);let changed=false;plans.forEach(plan=>{if(plan.date&&plan.date<todayKey&&plan.status!=="completed"){plan.status="completed";plan.completedAt=new Date().toISOString();if(!events.some(event=>event.sourcePlanId===plan.id))events.push({id:uid(),sourcePlanId:plan.id,title:plan.title,date:plan.date,time:plan.time||"",activityId:plan.activityId||"",bundleId:plan.bundleId||"",placeId:plan.placeId||"",personIds:expandCircleMembers(plan.personIds||[],plan.circleIds||[]),circleIds:plan.circleIds||[],notes:plan.notes||"",createdAt:new Date().toISOString()});changed=true;}});if(changed){store.set(keys.events,events);store.set(keys.plans,plans);}return changed;}
+
+function makePlanCard(plan, allPlans, target) {
+  const card=document.createElement("article");card.className=`plan-card clickable-card${plan.status==="completed"?" is-completed":""}`;card.tabIndex=0;card.setAttribute("role","button");card.onclick=()=>openPlanDialog("",plan);card.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openPlanDialog("",plan);}};
+  const time=document.createElement("span");time.className="plan-time";time.textContent=plan.time;
+  const details=document.createElement("div"),title=document.createElement("h3"),sub=document.createElement("p");title.textContent=plan.title;
+  const people=namesFor(plan.personIds||[],read(keys.people)); const circles=namesFor(plan.circleIds||[],read(keys.circles)),statusLabels={planned:"Schemalagt",planning:"Planering",scheduled:"Schemalagt",completed:"Gjort"}; sub.textContent=[plan.isRoutine?"Rutin":null,statusLabels[plan.status||"planned"],plan.date===todayKey?"Idag":prettyDate(plan.date,{day:"numeric",month:"short"}),...people,...circles].filter(Boolean).join(" · ");details.append(title,sub);
+  const actions=document.createElement("div");actions.className="plan-actions";
+  if(plan.status!=="completed"){const done=document.createElement("button");done.type="button";done.className="complete-button";done.textContent="✓";done.title="Markera som genomförd";done.onclick=e=>{e.stopPropagation();completePlan(plan);};actions.append(done);}
+  const remove=document.createElement("button");remove.type="button";remove.textContent="×";remove.setAttribute("aria-label",`Ta bort ${plan.title}`);remove.onclick=e=>{e.stopPropagation();let removeFuture=false;if(plan.recurrenceId){removeFuture=confirm("Vill du ta bort detta och alla framtida tillfällen i serien?\n\nOK = alla framtida\nAvbryt = välj om bara detta tillfälle ska tas bort");if(!removeFuture&&!confirm("Vill du bara ta bort detta tillfälle?"))return;}else if(!confirm(`Ta bort ${plan.title}?`))return;const storedPlans=read(keys.plans);write(keys.plans,storedPlans.filter(item=>removeFuture?!(item.recurrenceId===plan.recurrenceId&&item.date>=plan.date):item.id!==plan.id));};actions.append(remove);card.append(time,details,actions);target.append(card);
 }
 
-function availableTopics() {
-  return curriculum[level].categories.flatMap((category) => topicIdsFor(category).map((topicId) => ({ category, topicId })));
+function makeEventCard(event, target) {
+  const card=document.createElement("article");card.className="history-card";
+  const activity=read(keys.activities).find(a=>a.id===event.activityId);const people=namesFor(event.personIds||[],read(keys.people));const circles=namesFor(event.circleIds||[],read(keys.circles));
+  const date=document.createElement("time");date.textContent=`${prettyDate(event.date,{day:"numeric",month:"short"})}${event.time?` · ${event.time}`:""}`;
+  const title=document.createElement("h3");title.textContent=event.title;
+  const meta=document.createElement("p");meta.textContent=[activity?.title,...people,...circles].filter(Boolean).join(" · ")||"Social händelse";
+  card.append(date,title,meta);if(event.notes){const notes=document.createElement("p");notes.className="history-notes";notes.textContent=event.notes;card.append(notes);}target.append(card);
 }
 
-function configureFeaturedButton(button, category, topicId, title, description) {
-  button.innerHTML = `<strong>${title}</strong><small>${description}</small>`;
-  button.disabled = false;
-  button.onclick = category && topicId ? () => { selectedCategory = category; topicsOrigin = "home"; openTopic(topicId, "home"); } : () => { renderLibrary(); showScreen("library"); };
+function renderToday() {
+  const all=read(keys.plans).map(p=>({...p,date:p.date||todayKey,status:p.status||"planned"})),plans=all.filter(p=>p.date===todayKey).sort((a,b)=>a.time.localeCompare(b.time));
+  $("#plan-list").replaceChildren();$("#empty-state").hidden=plans.length>0;$("#plan-count").textContent=`${plans.length} ${plans.length===1?"plan":"planer"}`;plans.forEach(p=>makePlanCard(p,all,$("#plan-list")));renderContactReminders();const manualEvents=read(keys.events).filter(event=>event.date===todayKey&&!event.sourcePlanId);renderTodayBalance([...plans,...manualEvents]);
 }
 
-function sectionButton(title, description, status, onClick) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "list-button";
-  const text = document.createElement("span");
-  const heading = document.createElement("strong");
-  heading.textContent = title;
-  const detail = document.createElement("small");
-  detail.textContent = description;
-  text.append(heading, detail);
-  if (status) {
-    const badge = document.createElement("small");
-    badge.className = "section-status";
-    badge.textContent = status;
-    text.append(badge);
-  }
-  const arrow = document.createElement("b");
-  arrow.textContent = "›";
-  arrow.setAttribute("aria-hidden", "true");
-  button.append(text, arrow);
-  button.addEventListener("click", onClick);
-  return button;
+function lastInteractionDate(type,id){const dates=read(keys.events).filter(event=>type==="person"?(event.personIds||[]).includes(id):(event.circleIds||[]).includes(id)).map(event=>event.date).filter(Boolean).sort();return dates.at(-1)||"";}
+function renderContactReminders(){const target=$("#contact-reminders");if(!target)return;const today=keyToDate(todayKey),items=[...read(keys.people).map(item=>({...item,type:"person"})),...read(keys.circles).map(item=>({...item,type:"circle"}))].filter(item=>item.reminderEnabled&&Number(item.frequency)>0).map(item=>{const last=lastInteractionDate(item.type,item.id)||item.reminderStartedAt?.slice(0,10)||todayKey,days=Math.floor((today-keyToDate(last))/86400000);return {...item,daysLeft:Number(item.frequency)-days};}).filter(item=>item.daysLeft<=0).sort((a,b)=>a.daysLeft-b.daysLeft);target.replaceChildren();$("#contact-reminders-section").hidden=!items.length;items.forEach(item=>{const button=document.createElement("button");button.type="button";button.className="reminder-row";button.innerHTML=`<span>♡</span><span><b>${escapeHtml(item.name)}</b><small>${item.reminderType==="plan"?"Dags att göra en plan":"Dags att ta kontakt"}</small></span><i>›</i>`;button.onclick=()=>openEntity(item.type,item.id);target.append(button);});}
+
+function renderPeople() {
+  const people=read(keys.people),query=peopleSearch.trim().toLocaleLowerCase("sv"),visible=people.filter(person=>(peopleFilter==="Alla"||person.group===peopleFilter)&&(!query||[person.name,person.group,...interestList(person.interests),person.notes].join(" ").toLocaleLowerCase("sv").includes(query)));$("#people-list").replaceChildren();$("#people-empty").hidden=visible.length>0;
+  visible.forEach(person=>{const card=document.createElement("article");card.className="person-card clickable-card";card.tabIndex=0;card.setAttribute("role","button");card.onclick=()=>openEntity("person",person.id);card.onkeydown=e=>{if(e.key==="Enter"||e.key===" ")openEntity("person",person.id);};const avatar=document.createElement("span");avatar.className="person-avatar";avatar.textContent=initials(person.name);const info=document.createElement("div"),name=document.createElement("h2"),meta=document.createElement("p");name.textContent=person.name;const agendaCount=read(keys.agenda).filter(a=>a.ownerType==="person"&&a.ownerId===person.id&&!a.completedAt).length,interestText=interestList(person.interests).slice(0,2).join(", "),relation=relationLabels[person.isSelf?"self":person.relationType];meta.textContent=[relation,person.group,interestText,`${agendaCount} på agendan`].filter(Boolean).join(" · ");info.append(name,meta);const arrow=document.createElement("span");arrow.className="card-arrow";arrow.textContent="›";card.append(avatar,info,arrow);$("#people-list").append(card);});
+  renderCircles();
 }
 
-function openCategory(categoryId, origin = "library") {
-  selectedCategory = categoryById(categoryId);
-  topicsOrigin = origin;
-  $("#subcategories-eyebrow").textContent = curriculum[level].name;
-  $("#subcategories-heading").textContent = selectedCategory.title;
-  $("#subcategories-introduction").textContent = "Välj en underkategori. Här samlas momenten steg för steg.";
-  const list = $("#subcategory-list");
-  list.replaceChildren();
-  selectedCategory.subcategories.forEach((group) => {
-    const count = topicIdsFor(group).length;
-    list.append(sectionButton(group.title, group.description, count ? `${count} moment att träna` : "Kommer senare", () => openSubcategory(group.id)));
-  });
-  $("#back-from-subcategories").setAttribute("aria-label", origin === "home" ? "Tillbaka till Hem" : "Tillbaka till Bibliotek");
-  showScreen("subcategories");
+function renderCircles() {
+  const circles=read(keys.circles),people=read(keys.people);$("#circles-list").replaceChildren();$("#circles-empty").hidden=circles.length>0;
+  circles.forEach(circle=>{const card=document.createElement("article");card.className="person-card circle-card clickable-card";card.tabIndex=0;card.setAttribute("role","button");card.onclick=()=>openEntity("circle",circle.id);const avatar=document.createElement("span");avatar.className="person-avatar circle-avatar";avatar.textContent="◯";const info=document.createElement("div"),name=document.createElement("h2"),meta=document.createElement("p");name.textContent=circle.name;const members=namesFor(circle.personIds||[],people);meta.textContent=members.length?members.join(", "):"Inga personer ännu";info.append(name,meta);const arrow=document.createElement("span");arrow.className="card-arrow";arrow.textContent="›";card.append(avatar,info,arrow);$("#circles-list").append(card);});
 }
 
-function openSubcategory(groupId, origin = "subcategories") {
-  selectedSubcategory = selectedCategory.subcategories.find((group) => group.id === groupId);
-  subcategoryOrigin = origin;
-  $("#topics-eyebrow").textContent = `${curriculum[level].name} · ${selectedCategory.title}`;
-  $("#topics-heading").textContent = selectedSubcategory.title;
-  $("#topics-introduction").textContent = selectedSubcategory.description;
-  $("#back-from-topics").setAttribute("aria-label", origin === "subcategories" ? `Tillbaka till ${selectedCategory.title}` : "Tillbaka till sökresultaten");
-  const list = $("#topic-list");
-  list.replaceChildren();
-  const availableIds = topicIdsFor(selectedSubcategory);
-  $("#topics-empty").hidden = availableIds.length > 0;
-  availableIds.forEach((topicId) => {
-    const topic = topics[topicId];
-    list.append(sectionButton(topic.title, topic.description, "", () => openTopic(topicId)));
-  });
-  showScreen("topics");
-}
-
-function openTopic(topicId, origin = "topics") {
-  selectedTopic = topics[topicId];
-  selectedSubcategory = selectedCategory.subcategories.find((group) => group.topicIds.includes(topicId));
-  modeOrigin = origin;
-  $("#back-from-modes").setAttribute("aria-label", origin === "topics" ? "Tillbaka till momenten" : `Tillbaka till ${origin === "home" ? "Hem" : "Bibliotek"}`);
-  $("#mode-eyebrow").textContent = `${selectedCategory.title} · ${selectedSubcategory.title}`;
-  $("#mode-introduction").textContent = selectedTopic.title;
-  const grid = $("#mode-grid");
-  grid.replaceChildren();
-  const available = [...(selectedTopic.walkthrough?.length ? ["walkthrough"] : []), ...Object.keys(selectedTopic.modes).filter((mode) => modeQuestions(mode).length)];
-  available.forEach((mode) => {
-    const info = modeCatalog[mode];
-    const button = document.createElement("button");
-    button.className = "mode-button";
-    button.innerHTML = `<span class="mode-icon">${info.icon}</span><span><strong>${info.name}</strong><small>${info.description}</small></span><b>›</b>`;
-    button.addEventListener("click", () => startMode(mode));
-    grid.append(button);
-  });
-  showScreen("mode");
-}
-
-function modeQuestions(mode) {
-  return selectedTopic.modes[mode].filter((question) => question.levels.includes(level));
-}
-
-function startMode(mode) {
-  currentMode = mode;
-  questionIndex = 0;
-  quickScore = 0;
-  saveLastVisited();
-  if (mode === "walkthrough") {
-    walkthroughIndex = 0;
-    renderWalkthrough();
-    showScreen("walkthrough");
+const addDays=(date,days)=>new Date(date.getFullYear(),date.getMonth(),date.getDate()+days);
+const mondayOf=(date)=>addDays(date,-((date.getDay()+6)%7));
+function birthdayEventsBetween(start,end){const people=read(keys.people).filter(person=>person.birthday),events=[];for(let day=new Date(start);day<=end;day=addDays(day,1)){const monthDay=dateKey(day).slice(5);people.filter(person=>person.birthday.slice(5)===monthDay).forEach(person=>events.push({id:`birthday-${person.id}-${dateKey(day)}`,title:`🎂 ${person.name}`,date:dateKey(day),time:"",personIds:[person.id],circleIds:[],notes:"Födelsedag",isBirthday:true}));}return events;}
+function renderCalendar() {
+  const allPlans=read(keys.plans).map(p=>({...p,date:p.date||todayKey})),routinePlanIds=new Set(allPlans.filter(plan=>plan.isRoutine).map(plan=>plan.id)),plans=showCalendarRoutines?allPlans:allPlans.filter(plan=>!plan.isRoutine),allEvents=read(keys.events),events=showCalendarRoutines?allEvents:allEvents.filter(event=>!routinePlanIds.has(event.sourcePlanId)),rangeStart=calendarMode==="month"?new Date(shownMonth.getFullYear(),shownMonth.getMonth(),1):calendarMode==="3"?new Date(shownMonth):mondayOf(shownMonth),rangeEnd=calendarMode==="month"?new Date(shownMonth.getFullYear(),shownMonth.getMonth()+1,0):addDays(rangeStart,Number(calendarMode)-1),displayEvents=showCalendarBirthdays?[...events,...birthdayEventsBetween(rangeStart,rangeEnd)]:events,grid=$("#calendar-grid"),weekdays=$(".calendar-weekdays");grid.replaceChildren();grid.className="calendar-grid";
+  if(calendarMode==="month"){
+    const y=shownMonth.getFullYear(),m=shownMonth.getMonth();$("#month-label").textContent=new Intl.DateTimeFormat("sv-SE",{month:"long",year:"numeric"}).format(shownMonth);weekdays.hidden=false;
+    const offset=(new Date(y,m,1).getDay()+6)%7,total=new Date(y,m+1,0).getDate();for(let i=0;i<offset;i++){const blank=document.createElement("span");blank.className="calendar-blank";grid.append(blank);}for(let day=1;day<=total;day++)makeCalendarDay(new Date(y,m,day),grid,plans,displayEvents,false);
   } else {
-    renderQuestion();
-    showScreen("quiz");
+    const count=Number(calendarMode),start=count===3?new Date(shownMonth):mondayOf(shownMonth),end=addDays(start,count-1);weekdays.hidden=true;grid.classList.add("range-calendar",`range-${count}`);$("#month-label").textContent=`${prettyDate(dateKey(start),{day:"numeric",month:"short"})} – ${prettyDate(dateKey(end),{day:"numeric",month:"short"})}`;for(let i=0;i<count;i++)makeCalendarDay(addDays(start,i),grid,plans,displayEvents,true);
   }
+  renderCalendarAgenda(plans,displayEvents);renderWeekBalance(plans,events);
+}
+function renderCalendarAgenda(plans,events){const selected=keyToDate(selectedDate),start=calendarAgendaMode==="week"?mondayOf(selected):selected,end=calendarAgendaMode==="week"?addDays(start,6):start,startKey=dateKey(start),endKey=dateKey(end),inRange=item=>item.date>=startKey&&item.date<=endKey,selectedPlans=plans.filter(inRange),selectedEvents=events.filter(e=>inRange(e)&&(!e.sourcePlanId||!plans.some(p=>p.id===e.sourcePlanId))),target=$("#calendar-plans"),total=selectedPlans.length+selectedEvents.length;const label=calendarAgendaMode==="week"?`${prettyDate(startKey,{day:"numeric",month:"short"})} – ${prettyDate(endKey,{day:"numeric",month:"short"})}`:selectedDate===todayKey?"Idag":prettyDate(selectedDate);$("#selected-date-label").textContent=label;$("#calendar-agenda-summary").textContent=calendarAgendaMode==="week"?`Veckan för ${prettyDate(selectedDate,{day:"numeric",month:"short"})}`:label;target.replaceChildren();$("#calendar-empty").hidden=total>0;if(calendarAgendaMode==="week"){for(let offset=0;offset<7;offset++){const day=addDays(start,offset),key=dateKey(day),dayPlans=selectedPlans.filter(item=>item.date===key),dayEvents=selectedEvents.filter(item=>item.date===key),group=document.createElement("section"),heading=document.createElement("h3"),list=document.createElement("div");group.className="calendar-day-group";heading.className="calendar-day-heading";heading.textContent=prettyDate(key,{weekday:"long",day:"numeric",month:"long"});list.className="calendar-day-bookings";[...dayPlans.map(item=>({kind:"plan",item})),...dayEvents.map(item=>({kind:"event",item}))].sort((a,b)=>(a.item.time||"").localeCompare(b.item.time||"")).forEach(entry=>entry.kind==="plan"?makePlanCard(entry.item,plans,list):makeEventCard(entry.item,list));if(!list.children.length){const empty=document.createElement("p");empty.className="calendar-day-empty";empty.textContent="Inga bokningar";list.append(empty);}group.append(heading,list);target.append(group);}}else{selectedPlans.sort((a,b)=>(a.time||"").localeCompare(b.time||"")).forEach(p=>makePlanCard(p,plans,target));selectedEvents.sort((a,b)=>(a.time||"").localeCompare(b.time||"")).forEach(e=>makeEventCard(e,target));}}
+function keyToDate(key){const [year,month,day]=key.split("-").map(Number);return new Date(year,month-1,day);}
+function scoreForBooking(item,kind){const activities=read(keys.activities),bundle=read(keys.bundles).find(entry=>entry.id===item.bundleId),ids=bundle?.activityIds?.length?bundle.activityIds:item.activityId?[item.activityId]:[],values=ids.map(id=>activities.find(activity=>activity.id===id)?.[kind]).filter(value=>Number.isFinite(Number(value))).map(Number);if(values.length)return values.reduce((sum,value)=>sum+value,0)/values.length;if(kind==="socialLevel"&&((item.personIds||[]).length||(item.circleIds||[]).length))return 2;return null;}
+function environmentsForBooking(item){const activities=read(keys.activities),bundles=read(keys.bundles),places=read(keys.places),bundle=bundles.find(entry=>entry.id===item.bundleId),ids=bundle?.activityIds?.length?bundle.activityIds:item.activityId?[item.activityId]:[];let values=ids.flatMap(id=>activities.find(activity=>activity.id===id)?.environments||[]);if(!values.length&&bundle?.placeId)values=places.find(place=>place.id===bundle.placeId)?.environments||[];return [...new Set(values)];}
+function environmentSummary(items){let indoor=0,outdoor=0;items.forEach(item=>{const values=environmentsForBooking(item);if(values.includes("indoor"))indoor++;if(values.includes("outdoor"))outdoor++;});const total=indoor+outdoor;return {indoor,outdoor,total,label:!total?"Ingen data":indoor&&outdoor?Math.abs(indoor-outdoor)<=1?"Bra blandning":indoor>outdoor?"Mest inomhus":"Mest utomhus":indoor?"Bara inomhus":"Bara utomhus"};}
+function renderTodayBalance(plans){const socialValues=plans.map(item=>scoreForBooking(item,"socialLevel")),activityValues=plans.map(item=>scoreForBooking(item,"activityLevel")),socialCount=socialValues.filter(value=>value!==null&&value>=1).length,activeCount=activityValues.filter(value=>value!==null&&value>=2).length,calmCount=activityValues.filter(value=>value!==null&&value<2).length,environment=environmentSummary(plans);$("#today-booking-count").textContent=`${plans.length} ${plans.length===1?"bokning":"bokningar"}`;$("#today-activity-label").textContent=activeCount+calmCount?`${activeCount} aktiva · ${calmCount} lugna`:"Inte bedömt";$("#today-social-label").textContent=plans.length?`${socialCount} av ${plans.length} sociala`:"Inga bokningar";$("#today-environment-label").textContent=environment.total?`${environment.indoor} inne · ${environment.outdoor} ute`:"Inte bedömt";const tips=[];if(!activeCount)tips.push("en mer aktiv bokning");if(!socialCount)tips.push("något socialt");if(environment.total&&environment.outdoor===0)tips.push("något utomhus");$("#today-balance-advice").textContent=!plans.length?"Inget är bokat idag. Du kan börja med något litet.":tips.length?`För mer variation kan du lägga till ${tips.join(", ")}.`:"Dagens bokningar innehåller aktivitet, social tid och utomhustid.";}
+function renderWeekBalance(plans,events){const start=mondayOf(keyToDate(selectedDate)),end=addDays(start,6),startKey=dateKey(start),endKey=dateKey(end),inWeek=item=>item.date>=startKey&&item.date<=endKey;let items,period;if(endKey<todayKey){items=events.filter(inWeek);period="Genomfört";}else if(startKey>todayKey){items=plans.filter(item=>inWeek(item)&&item.status!=="completed");period="Planerat";}else{const completedPlanIds=new Set(events.map(event=>event.sourcePlanId).filter(Boolean));items=[...events.filter(inWeek),...plans.filter(item=>inWeek(item)&&item.status!=="completed"&&!completedPlanIds.has(item.id))];period="Den här veckan";}const socialValues=items.map(item=>scoreForBooking(item,"socialLevel")),activityValues=items.map(item=>scoreForBooking(item,"activityLevel")),socialCount=socialValues.filter(value=>value!==null&&value>=1).length,activeCount=activityValues.filter(value=>value!==null&&value>=2).length,calmCount=activityValues.filter(value=>value!==null&&value<2).length,environment=environmentSummary(items),total=Math.max(items.length,1);$("#week-balance-period").textContent=`${period} · ${prettyDate(startKey,{day:"numeric",month:"short"})}–${prettyDate(endKey,{day:"numeric",month:"short"})}`;$("#week-booking-count").textContent=`${items.length} ${items.length===1?"bokning":"bokningar"}`;$("#social-score-label").textContent=items.length?`${socialCount} av ${items.length} sociala`:"Inga bokningar";$("#social-score-bar").style.width=`${socialCount/total*100}%`;$("#activity-score-label").textContent=activeCount+calmCount?`${activeCount} aktiva · ${calmCount} lugna`:"Inte bedömt";$("#activity-score-bar").style.width=`${activeCount/total*100}%`;$("#environment-score-label").textContent=environment.total?`${environment.indoor} inne · ${environment.outdoor} ute`:"Inte bedömt";$("#indoor-share").style.width=environment.total?`${environment.indoor/environment.total*100}%`:"0%";$("#outdoor-share").style.width=environment.total?`${environment.outdoor/environment.total*100}%`:"0%";const tips=[];if(!activeCount)tips.push("ingen aktiv bokning");if(!socialCount)tips.push("inget socialt");if(environment.total&&environment.outdoor===0)tips.push("inget utomhus");$("#week-balance-advice").textContent=!items.length?"Inga bokningar finns den här veckan.":tips.length?`Veckan innehåller ${tips.join(", ")}. Du kan lägga till något för mer variation.`:`Veckan innehåller både aktivitet, social tid och utomhustid.`;}
+function makeCalendarDay(date,grid,plans,events,range){const key=dateKey(date),items=[...plans.filter(p=>p.date===key),...events.filter(e=>e.date===key&&!e.sourcePlanId)],button=document.createElement("button");button.type="button";button.className=range?"range-day":"calendar-day";if(key===todayKey)button.classList.add("is-today");if(key===selectedDate)button.classList.add("is-selected");if(items.length)button.classList.add("has-plan");if(range){const weekday=document.createElement("small"),number=document.createElement("strong"),list=document.createElement("span");weekday.textContent=new Intl.DateTimeFormat("sv-SE",{weekday:"short"}).format(date);number.textContent=date.getDate();items.slice(0,2).forEach(item=>{const line=document.createElement("i");line.textContent=`${item.time||""} ${item.title}`.trim();list.append(line);});if(items.length>2){const more=document.createElement("i");more.textContent=`+${items.length-2} till`;list.append(more);}button.append(weekday,number,list);}else button.textContent=date.getDate();button.setAttribute("aria-label",prettyDate(key));button.onclick=()=>{selectedDate=key;renderCalendar();};grid.append(button);}
+function shiftCalendar(direction){if(calendarMode==="month")shownMonth=new Date(shownMonth.getFullYear(),shownMonth.getMonth()+direction,1);else shownMonth=addDays(shownMonth,direction*Number(calendarMode));selectedDate=dateKey(shownMonth);renderCalendar();}
+
+function renderActivities() {
+  let activities=read(keys.activities);activities=activities.map(a=>({...a,duration:Number(a.duration??60),place:a.place||"Ej angivet",environments:Array.isArray(a.environments)?a.environments:[]}));const query=contentSearch.trim().toLocaleLowerCase("sv"),categorySelect=$("#activity-category-filter"),categories=[...new Set(activities.flatMap(tagList))].sort((a,b)=>a.localeCompare(b,"sv"));categorySelect.replaceChildren(new Option("Alla kategorier","all"),...categories.map(category=>new Option(category,category)));if(!categories.includes(activityCategory))activityCategory="all";categorySelect.value=activityCategory;let visible=activities.filter(a=>(!query||[a.title,searchableTags(a),a.place].join(" ").toLocaleLowerCase("sv").includes(query))&&(activityFilter!=="favorite"||a.favorite)&&(activityCategory==="all"||tagList(a).includes(activityCategory))&&(activityMaxCost==="all"||costOf(a)<=Number(activityMaxCost))&&(activityEnvironment==="all"||a.environments.includes(activityEnvironment))&&(activityPhysical==="all"||Number(a.activityLevel)>=Number(activityPhysical))&&(activitySocial==="all"||Number(a.socialLevel)>=Number(activitySocial)));const sorters={newest:(a,b)=>activities.indexOf(b)-activities.indexOf(a),title:(a,b)=>a.title.localeCompare(b.title,"sv"),cost:(a,b)=>costOf(a)-costOf(b),duration:(a,b)=>a.duration-b.duration,place:(a,b)=>a.place.localeCompare(b.place,"sv")};visible=visible.slice().sort(sorters[activitySort]);$("#activity-grid").replaceChildren();$("#activity-grid").classList.toggle("is-list-view",activityView==="list");$("#activity-grid").classList.toggle("is-compact-view",activityView==="compact");
+  visible.forEach(activity=>{const card=document.createElement("article");card.className="activity-card clickable-card";card.tabIndex=0;card.setAttribute("role","button");card.onclick=()=>openEntity("activity",activity.id);card.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openEntity("activity",activity.id);}};const top=document.createElement("div");top.className="activity-top";const icon=document.createElement("span");icon.textContent=activityIcons[primaryTag(activity)]||"✦";const favorite=document.createElement("button");favorite.className=`favorite-button${activity.favorite?" is-favorite":""}`;favorite.textContent=activity.favorite?"♥":"♡";favorite.setAttribute("aria-label",activity.favorite?"Ta bort favorit":"Lägg till favorit");favorite.onclick=e=>{e.stopPropagation();activity.favorite=!activity.favorite;write(keys.activities,activities);};top.append(icon,favorite);const title=document.createElement("h2");title.textContent=activity.title;const meta=document.createElement("p");meta.className="activity-meta";const activityLevels=["Mycket lugn","Lugn","Måttlig","Ansträngande"],socialLevels=["Ensam","Lite social","Social","Mycket social"],environmentNames={indoor:"Inne",outdoor:"Ute"},environmentText=activity.environments.map(value=>environmentNames[value]).filter(Boolean).join(" + ");meta.textContent=`${tagList(activity).join(" · ")} · ${costOf(activity)===0?"Gratis":costOf(activity).toLocaleString("sv-SE")+" kr"} · ${activity.duration<60?activity.duration+" min":activity.duration/60+" tim"} · ${activity.place}`;const traits=document.createElement("p");traits.className="activity-traits";traits.textContent=[activity.activityLevel==null?null:activityLevels[Number(activity.activityLevel)],activity.socialLevel==null?null:socialLevels[Number(activity.socialLevel)],environmentText||null].filter(Boolean).join(" · ")||"Nivåer ej bedömda";card.append(top,title,meta,traits);$("#activity-grid").append(card);});
+  if(!visible.length){const empty=document.createElement("div");empty.className="mini-empty activity-empty";empty.innerHTML="<span>♡</span><h2>Inga träffar</h2><p>Prova ett annat filter.</p>";$("#activity-grid").append(empty);}
 }
 
-function renderQuestion() {
-  const questions = modeQuestions(currentMode);
-  const question = questions[questionIndex];
-  $("#quiz-screen").classList.toggle("language-practice", Boolean(selectedTopic.languageFocused));
-  $("#mode-label").textContent = currentMode === "quick" ? `Snabbträning · ${quickScore} rätt` : modeCatalog[currentMode].name;
-  $("#question-progress").textContent = `Fråga ${questionIndex + 1} av ${questions.length}`;
-  $("#question-heading").textContent = question.prompt;
-  $("#question-example").textContent = question.example;
-  $("#answer-instruction").textContent = "Välj ett svar.";
-  $("#feedback").hidden = true;
-  $("#explanation").hidden = true;
-  $("#explanation-button").hidden = true;
-  $("#next-question-button").hidden = true;
-  const answers = $("#answers");
-  answers.hidden = false;
-  answers.replaceChildren();
-  question.choices.forEach((choice, index) => {
-    const button = document.createElement("button");
-    button.className = "answer-button";
-    button.textContent = choice;
-    button.addEventListener("click", () => handleAnswer(index === question.correct));
-    answers.append(button);
-  });
+function renderBundles() {
+  const bundles=read(keys.bundles),activities=read(keys.activities),places=read(keys.places),query=contentSearch.trim().toLocaleLowerCase("sv"),visible=bundles.filter(bundle=>{const activityNames=namesFor(bundle.activityIds||[],activities,"title"),place=places.find(p=>p.id===bundle.placeId);return !query||[bundle.name,bundle.organizer,searchableTags(bundle),bundle.notes,place?.name,...activityNames].join(" ").toLocaleLowerCase("sv").includes(query);});$("#bundle-list").replaceChildren();$("#bundle-empty").hidden=visible.length>0;
+  visible.forEach(bundle=>{const card=document.createElement("article");card.className="collection-card";const icon=document.createElement("span");icon.className="collection-icon";icon.textContent=bundle.eventType==="own"?"✦":"◉";const body=document.createElement("div"),title=document.createElement("h2"),meta=document.createElement("p");title.textContent=bundle.name;const activityNames=namesFor(bundle.activityIds||[],activities,"title"),place=places.find(p=>p.id===bundle.placeId),dateRange=bundle.startDate?(bundle.endDate&&bundle.endDate!==bundle.startDate?`${prettyDate(bundle.startDate,{day:"numeric",month:"short"})}–${prettyDate(bundle.endDate,{day:"numeric",month:"short"})}`:prettyDate(bundle.startDate,{day:"numeric",month:"short"})):"";meta.textContent=[bundle.eventType==="own"?"Eget":"Publikt",dateRange,tagList(bundle).join(" · "),activityNames.join(" + "),place?.name].filter(Boolean).join(" · ")||"Evenemang";body.append(title,meta);const actions=document.createElement("div");actions.className="collection-actions";const plan=document.createElement("button");plan.className="small-button";plan.textContent="Planera besök";plan.onclick=()=>openPlanDialog(bundle.name,null,bundle.activityIds?.[0]||"",bundle.id);const future=document.createElement("button");future.className="text-button";future.textContent="Inbokat";future.onclick=()=>openFuturePlans("bundle",bundle.id,bundle.name);const edit=document.createElement("button");edit.className="text-button";edit.textContent="Redigera";edit.onclick=()=>openBundleDialog(bundle);actions.append(plan,future,edit);card.append(icon,body,actions);$("#bundle-list").append(card);});
+  [...$("#bundle-list").children].forEach((card,index)=>{card.classList.add("clickable-card");card.tabIndex=0;card.setAttribute("role","button");card.onclick=e=>{if(!e.target.closest("button"))openContentDetails("bundle",visible[index].id);};card.onkeydown=e=>{if((e.key==="Enter"||e.key===" ")&&!e.target.closest("button")){e.preventDefault();openContentDetails("bundle",visible[index].id);}};});
 }
 
-function handleAnswer(correct) {
-  const question = modeQuestions(currentMode)[questionIndex];
-  $("#answers").hidden = true;
-  $("#feedback").hidden = false;
-  $("#feedback-heading").textContent = correct ? "Rätt!" : "Inte riktigt";
-  $("#feedback-message").textContent = correct ? "Bra jobbat – du valde rätt svar." : "Öppna förklaringen för att se hur du kan tänka.";
-  $("#explanation-message").textContent = question.explanation;
-  $("#explanation-button").hidden = correct;
-  $("#next-question-button").hidden = !correct;
-  if (currentMode === "quick" && correct) quickScore += 1;
-  saveAttempt(correct);
+function renderPlaces() {
+  const places=read(keys.places),query=contentSearch.trim().toLocaleLowerCase("sv"),visible=places.filter(place=>{const haystack=[place.name,searchableTags(place),place.address,place.notes].join(" ").toLocaleLowerCase("sv"),environments=Array.isArray(place.environments)?place.environments:[];return (!query||haystack.includes(query))&&(placeMaxDistance==="all"||Number(place.distanceKm)<=Number(placeMaxDistance))&&(placeEnvironment==="all"||environments.includes(placeEnvironment));}).sort((a,b)=>(a.distanceKm==null?Infinity:Number(a.distanceKm))-(b.distanceKm==null?Infinity:Number(b.distanceKm)));$("#place-list").replaceChildren();$("#place-empty").hidden=visible.length>0;
+  visible.forEach(place=>{const card=document.createElement("article");card.className="collection-card";const icon=document.createElement("span");icon.className="collection-icon place-icon";icon.textContent="⌖";const body=document.createElement("div"),title=document.createElement("h2"),meta=document.createElement("p"),environmentNames={indoor:"Inne",outdoor:"Ute"},environmentText=(place.environments||[]).map(value=>environmentNames[value]).filter(Boolean).join(" + ");title.textContent=place.name;meta.textContent=[tagList(place).join(" · "),place.address,place.distanceKm!==null&&place.distanceKm!==undefined&&place.distanceKm!==""?`${Number(place.distanceKm).toLocaleString("sv-SE")} km`:null,place.travelMinutes!==null&&place.travelMinutes!==undefined&&place.travelMinutes!==""?`${place.travelMinutes} min resa`:null,environmentText].filter(Boolean).join(" · ");body.append(title,meta);const actions=document.createElement("div");actions.className="collection-actions";const plan=document.createElement("button");plan.className="small-button";plan.textContent="Planera";plan.onclick=()=>openPlanDialog(`Besök ${place.name}`);const future=document.createElement("button");future.className="text-button";future.textContent="Inbokat";future.onclick=()=>openFuturePlans("place",place.id,place.name);const edit=document.createElement("button");edit.className="text-button";edit.textContent="Redigera";edit.onclick=()=>openPlaceDialog(place);actions.append(plan,future,edit);card.append(icon,body,actions);$("#place-list").append(card);});
+  [...$("#place-list").children].forEach((card,index)=>{card.classList.add("clickable-card");card.tabIndex=0;card.setAttribute("role","button");card.onclick=e=>{if(!e.target.closest("button"))openContentDetails("place",visible[index].id);};card.onkeydown=e=>{if((e.key==="Enter"||e.key===" ")&&!e.target.closest("button")){e.preventDefault();openContentDetails("place",visible[index].id);}};});
 }
 
-function nextQuestion() {
-  const questions = modeQuestions(currentMode);
-  questionIndex = (questionIndex + 1) % questions.length;
-  if (questionIndex === 0 && currentMode === "quick") quickScore = 0;
-  renderQuestion();
+const libraryConfig={goals:{singular:"Mål",icon:"◎",empty:"goal-empty"},projects:{singular:"Projekt",icon:"◇",empty:"project-empty"},trips:{singular:"Resa",icon:"→",empty:"trip-empty"}};
+function libraryMeta(kind,item){const people=namesFor(item.personIds||[],read(keys.people)),circles=namesFor(item.circleIds||[],read(keys.circles));if(kind==="goals")return [item.goalType==="outcome"?"Konkret mål":"Strävansmål",item.completedAt?"Uppnått":item.checkIns?`${item.checkIns} avstämningar`:"Pågående",...people,...circles].filter(Boolean).join(" · ");if(kind==="projects")return [{idea:"Idé",active:"Pågår",paused:"Pausat",completed:"Klart"}[item.status],item.deadline?`Deadline ${prettyDate(item.deadline,{day:"numeric",month:"short"})}`:"",...people,...circles].filter(Boolean).join(" · ");return [item.origin&&item.destination?`${item.origin} → ${item.destination}`:item.destination,item.transport,item.departure?prettyDate(item.departure.slice(0,10),{day:"numeric",month:"short"}):"",item.cost!=null?`${Number(item.cost).toLocaleString("sv-SE")} kr`:"",...people,...circles].filter(Boolean).join(" · ");}
+function renderLibraryCollection(kind){const config=libraryConfig[kind],query=contentSearch.trim().toLocaleLowerCase("sv"),items=read(keys[kind]).filter(item=>!query||[item.name,searchableTags(item),item.notes,item.why,item.nextStep,item.destination,item.origin].join(" ").toLocaleLowerCase("sv").includes(query)),target=$(kind==="goals"?"#goal-list":kind==="projects"?"#project-list":"#trip-list");if(!target)return;target.replaceChildren();$("#"+config.empty).hidden=items.length>0;items.forEach(item=>{const card=document.createElement("article");card.className="collection-card clickable-card";card.tabIndex=0;card.setAttribute("role","button");card.innerHTML=`<span class="collection-icon library-icon">${config.icon}</span><div><h2>${escapeHtml(item.name)}</h2><p>${escapeHtml([tagList(item).join(" · "),libraryMeta(kind,item)].filter(Boolean).join(" · "))}</p></div><span class="card-chevron">›</span>`;card.onclick=()=>openLibraryDetails(kind,item.id);card.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openLibraryDetails(kind,item.id);}};target.append(card);});}
+function openLibraryDialog(kind,item=null,prefill={}){const f=$("#library-form"),config=libraryConfig[kind];f.reset();f.elements.kind.value=kind;f.elements.id.value=item?.id||"";f.elements.name.value=item?.name||"";f.elements.tags.value=tagList(item).join(", ");f.elements.notes.value=item?.notes||"";f.elements.goalType.value=item?.goalType||"aspiration";f.elements.why.value=item?.why||"";f.elements.nextStep.value=item?.nextStep||"";f.elements.projectStatus.value=item?.status||"idea";f.elements.deadline.value=item?.deadline||"";f.elements.projectNextStep.value=item?.nextStep||"";f.elements.origin.value=item?.origin||"";f.elements.destination.value=item?.destination||"";f.elements.departure.value=item?.departure||"";f.elements.arrival.value=item?.arrival||"";f.elements.transport.value=item?.transport||"Tåg";f.elements.tripCost.value=item?.cost??"";f.elements.distance.value=item?.distance??"";f.elements.bookingReference.value=item?.bookingReference||"";checkboxList($("#library-people"),read(keys.people),"personIds",item?.personIds||prefill.personIds||[]);checkboxList($("#library-circles"),read(keys.circles),"circleIds",item?.circleIds||prefill.circleIds||[]);$("#goal-fields").hidden=kind!=="goals";$("#project-fields").hidden=kind!=="projects";$("#trip-fields").hidden=kind!=="trips";$("#library-eyebrow").textContent=config.singular;$("#library-dialog-title").textContent=item?`Redigera ${config.singular.toLocaleLowerCase("sv")}`:`Nytt ${config.singular.toLocaleLowerCase("sv")}`;$("#library-dialog").showModal();}
+function openLibraryDetails(kind,id){const item=read(keys[kind]).find(entry=>entry.id===id),config=libraryConfig[kind];if(!item)return;const rows=kind==="goals"?[["Typ",item.goalType==="outcome"?"Konkret mål":"Strävansmål"],["Varför",item.why],["Nästa steg",item.nextStep],["Avstämningar",String(item.checkIns||0)],["Status",item.completedAt?"Uppnått":"Pågående"]]:kind==="projects"?[["Status",{idea:"Idé",active:"Pågår",paused:"Pausat",completed:"Klart"}[item.status]],["Deadline",item.deadline],["Nästa steg",item.nextStep]]:[["Sträcka",[item.origin,item.destination].filter(Boolean).join(" → ")],["Transport",item.transport],["Avresa",item.departure?.replace("T"," ")],["Ankomst",item.arrival?.replace("T"," ")],["Kostnad",item.cost!=null?`${item.cost} kr`:""],["Avstånd",item.distance!=null?`${item.distance} km`:""],["Bokningsreferens",item.bookingReference]];const people=namesFor(item.personIds||[],read(keys.people)),circles=namesFor(item.circleIds||[],read(keys.circles));rows.push(["Taggar",tagList(item).join(", ")],["Personer",people.join(", ")],["Cirklar",circles.join(", ")],["Anteckning",item.notes]);$("#library-detail-type").textContent=config.singular;$("#library-detail-title").textContent=item.name;$("#library-detail-info").innerHTML=`<dl>${rows.filter(([,value])=>value).map(([label,value])=>`<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>`;const action=$("#library-detail-action");action.textContent=kind==="goals"?(item.goalType==="outcome"?item.completedAt?"Öppna igen":"Markera uppnått":"Gör avstämning"):kind==="projects"?"Skapa plan":"Skapa plan";action.onclick=()=>{if(kind==="goals"){const all=read(keys.goals),found=all.find(entry=>entry.id===id);if(found.goalType==="outcome")found.completedAt=found.completedAt?null:new Date().toISOString();else found.checkIns=(found.checkIns||0)+1;write(keys.goals,all);openLibraryDetails(kind,id);}else{$("#library-detail-dialog").close();openPlanDialog(item.name);}};$("#library-detail-edit").onclick=()=>{$("#library-detail-dialog").close();openLibraryDialog(kind,item);};if(!$("#library-detail-dialog").open)$("#library-detail-dialog").showModal();}
+
+function interactionAgeLabel(person){const last=lastInteractionDate("person",person.id)||person.lastContact;if(!last)return "Ingen loggad interaktion";const days=Math.max(0,Math.floor((keyToDate(todayKey)-keyToDate(String(last).slice(0,10)))/86400000));return days===0?"Kontakt idag":days===1?"1 dag sedan":`${days} dagar sedan`;}
+
+function renderEntity() {
+  if(!currentEntity)return;const collection=currentEntity.type==="person"?read(keys.people):currentEntity.type==="circle"?read(keys.circles):read(keys.activities);const item=collection.find(i=>i.id===currentEntity.id);if(!item){$("#entity-dialog").close();return;}
+  const isActivity=currentEntity.type==="activity";$("#entity-type").textContent=currentEntity.type==="person"?"Person":currentEntity.type==="circle"?"Cirkel":"Aktivitet";$("#entity-title").textContent=item.name||item.title;$("#entity-subtitle").textContent=currentEntity.type==="person"?[item.group,interestList(item.interests).join(", "),interactionAgeLabel(item),`kontakt var ${item.frequency} dag`].filter(Boolean).join(" · "):currentEntity.type==="circle"?`${(item.personIds||[]).length} personer`:tagList(item).join(" · ");
+  $("#plan-entity").hidden=false;$("#show-entity-history").hidden=!isActivity;$("#show-entity-plans").hidden=!isActivity;$("#log-for-entity").hidden=isActivity;$("#activity-detail").hidden=!isActivity;$("#entity-tabs").hidden=isActivity;$("#agenda-panel").hidden=isActivity;$("#entity-plans-panel").hidden=true;$("#history-panel").hidden=true;
+  if(isActivity){const levels=["Mycket lugn","Lugn","Måttlig","Ansträngande"],social=["Ensam aktivitet","Lite social","Social","Mycket social"],environment={indoor:"Inomhus",outdoor:"Utomhus"},upcoming=read(keys.plans).filter(plan=>plan.activityId===item.id&&plan.status!=="completed").length;$("#activity-detail").innerHTML=`<div class="detail-tags">${tagList(item).map(tag=>`<span>${escapeHtml(tag)}</span>`).join("")}</div><dl><div><dt>Kostnad</dt><dd>${costOf(item)===0?"Gratis":costOf(item).toLocaleString("sv-SE")+" kr"}</dd></div><div><dt>Tid</dt><dd>${Number(item.duration||60)} min</dd></div><div><dt>Aktivitetsnivå</dt><dd>${levels[Number(item.activityLevel)]||"Ej bedömd"}</dd></div><div><dt>Social nivå</dt><dd>${social[Number(item.socialLevel)]||"Ej bedömd"}</dd></div><div><dt>Miljö</dt><dd>${(item.environments||[]).map(value=>environment[value]).filter(Boolean).join(" + ")||"Ej angiven"}</dd></div><div><dt>Plats</dt><dd>${escapeHtml(item.place||"Ej angiven")}</dd></div><div><dt>Inbokat</dt><dd>${upcoming} ${upcoming===1?"gång":"gånger"}</dd></div></dl>`;}
+  else{$$('#entity-tabs button').forEach(b=>b.classList.toggle("is-active",b.dataset.entityTab==="agenda"));renderAgenda();renderEntityPlans();}
+  renderEntityHistory();
 }
 
-function changeQuestion(direction) {
-  const questions = modeQuestions(currentMode);
-  const step = direction < 0 ? 1 : -1;
-  questionIndex = (questionIndex + step + questions.length) % questions.length;
-  if (questionIndex === 0 && currentMode === "quick") quickScore = 0;
-  renderQuestion();
+function openEntity(type,id){currentEntity={type,id};renderEntity();$("#entity-dialog").showModal();}
+
+function renderAgenda(){const items=read(keys.agenda).filter(a=>a.ownerType===currentEntity.type&&a.ownerId===currentEntity.id);const active=$("#agenda-active"),history=$("#agenda-history");active.replaceChildren();history.replaceChildren();items.filter(a=>!a.completedAt).forEach(item=>makeAgendaItem(item,active,false));items.filter(a=>a.completedAt).sort((a,b)=>b.completedAt.localeCompare(a.completedAt)).forEach(item=>makeAgendaItem(item,history,true));if(!active.children.length)active.innerHTML='<p class="field-empty">Agendan är tom.</p>';if(!history.children.length)history.innerHTML='<p class="field-empty">Inget avbockat ännu.</p>';renderPersonDetails();renderRelationshipDevelopment();}
+function renderPersonDetails(){const old=$("#person-details");old?.remove();if(currentEntity?.type!=="person")return;const person=read(keys.people).find(item=>item.id===currentEntity.id);if(!person)return;const circles=read(keys.circles).filter(circle=>(circle.personIds||[]).includes(person.id)).map(circle=>circle.name),rows=[["Adress",person.address],["Telefon",person.phone],["E-post",person.email],["Jobb eller sysselsättning",person.job],["Födelsedag",person.birthday?prettyDate(person.birthday,{day:"numeric",month:"long",year:"numeric"}):""],["Intressen",interestList(person.interests).join(", ")],["Cirklar",circles.join(", ")],["Facebook",person.facebook],["Instagram",person.instagram],["LinkedIn",person.linkedin],["Annan profil",person.socialOther],["Anteckning",person.notes]].filter(([,value])=>value);const details=document.createElement("details");details.id="person-details";details.className="person-details";details.open=person.showProfileDetails!==false;const summary=document.createElement("summary");summary.innerHTML='<span><b>Personuppgifter</b><small>Kontakt, sociala medier, intressen, jobb och cirklar</small></span><span class="disclosure" aria-hidden="true">⌄</span>';const body=document.createElement("dl");if(rows.length)rows.forEach(([label,value])=>{const row=document.createElement("div"),term=document.createElement("dt"),description=document.createElement("dd");term.textContent=label;description.textContent=value;if(/^https?:\/\//i.test(value)){const link=document.createElement("a");link.href=value;link.target="_blank";link.rel="noopener noreferrer";link.textContent=value;description.append(link);}else description.textContent=value;row.append(term,description);body.append(row);});else{const empty=document.createElement("p");empty.className="field-empty";empty.textContent="Inga extra personuppgifter sparade ännu.";body.append(empty);}details.append(summary,body);$("#agenda-panel").append(details);}
+function renderRelationshipDevelopment(){const old=$("#relationship-development");old?.remove();if(!currentEntity||currentEntity.type==="activity")return;const item=read(currentEntity.type==="person"?keys.people:keys.circles).find(entry=>entry.id===currentEntity.id);if(!item)return;const goals=read(keys.goals).filter(goal=>currentEntity.type==="person"?(goal.personIds||[]).includes(item.id):(goal.circleIds||[]).includes(item.id));const fields=[["Det som fungerar bra",item.strengths],["Utmaningar eller konflikter",item.challenges],["Behov och önskemål",item.needs],["Gränser",item.boundaries],["Pågående frågor",item.relationshipQuestions],["Uppskattning",item.appreciation]].filter(([,value])=>value),details=document.createElement("details");details.id="relationship-development";details.className="person-details relationship-development";details.open=true;details.innerHTML=`<summary><span><b>Utveckling</b><small>Relationsbild och mål</small></span><span class="disclosure" aria-hidden="true">⌄</span></summary><div class="relationship-picture">${fields.length?`<dl>${fields.map(([label,value])=>`<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>`:'<p class="field-empty">Ingen relationsbild ifylld ännu.</p>'}<div class="relationship-goal-heading"><h3>Relationsmål</h3><button type="button" class="text-button">+ Nytt mål</button></div><div class="relationship-goals">${goals.length?goals.map(goal=>`<button type="button" data-goal-id="${goal.id}"><b>${escapeHtml(goal.name)}</b><small>${goal.goalType==="outcome"?(goal.completedAt?"Uppnått":"Konkret mål"):`Strävansmål · ${goal.checkIns||0} avstämningar`}</small></button>`).join(""):'<p class="field-empty">Inga mål knutna till relationen.</p>'}</div></div>`;details.querySelector(".relationship-goal-heading button").onclick=()=>openLibraryDialog("goals",null,currentEntity.type==="person"?{personIds:[item.id]}:{circleIds:[item.id]});details.querySelectorAll("[data-goal-id]").forEach(button=>button.onclick=()=>openLibraryDetails("goals",button.dataset.goalId));$("#agenda-panel").append(details);}
+function makeAgendaItem(item,target,done){const row=document.createElement("div");row.className=`agenda-item${done?" is-done":""}`;const button=document.createElement("button");button.className="agenda-check";button.textContent=done?"✓":"";button.setAttribute("aria-label",done?"Flytta tillbaka till agendan":"Bocka av");button.onclick=()=>{const all=read(keys.agenda),found=all.find(a=>a.id===item.id);found.completedAt=done?null:new Date().toISOString();write(keys.agenda,all);renderEntity();};const text=document.createElement("span");text.textContent=item.text;row.append(button,text);target.append(row);}
+
+function renderEntityHistory(){const events=read(keys.events).filter(event=>currentEntity.type==="person"?(event.personIds||[]).includes(currentEntity.id):currentEntity.type==="circle"?(event.circleIds||[]).includes(currentEntity.id):event.activityId===currentEntity.id).sort((a,b)=>`${b.date} ${b.time||""}`.localeCompare(`${a.date} ${a.time||""}`));$("#entity-history").replaceChildren();$("#entity-history-empty").hidden=events.length>0;events.forEach(event=>makeEventCard(event,$("#entity-history")));renderRelationshipBalance(events);}
+function renderRelationshipBalance(events){const target=$("#relationship-balance");target.hidden=currentEntity?.type!=="person";if(target.hidden)return;const activities=read(keys.activities),dated=events.filter(event=>event.date).sort((a,b)=>a.date.localeCompare(b.date)),last=dated.at(-1),recentStart=dateKey(addDays(new Date(),-89)),recent=dated.filter(event=>event.date>=recentStart),gaps=dated.slice(1).map((event,index)=>Math.round((keyToDate(event.date)-keyToDate(dated[index].date))/86400000)).filter(days=>days>=0),averageGap=gaps.length?Math.round(gaps.reduce((sum,value)=>sum+value,0)/gaps.length):null,counts={};events.forEach(event=>{const activity=activities.find(item=>item.id===event.activityId),label=primaryTag(activity,event.activityId?"Annan aktivitet":"Utan aktivitet");counts[label]=(counts[label]||0)+1;});const types=Object.entries(counts).sort((a,b)=>b[1]-a[1]),linked=events.map(event=>activities.find(item=>item.id===event.activityId)).filter(Boolean),physical=linked.length?Math.round(linked.reduce((sum,item)=>sum+Number(item.activityLevel||0),0)/linked.length):null,social=linked.length?Math.round(linked.reduce((sum,item)=>sum+Number(item.socialLevel||0),0)/linked.length):null,inside=linked.filter(item=>(item.environments||[]).includes("indoor")).length,outside=linked.filter(item=>(item.environments||[]).includes("outdoor")).length;target.innerHTML=`<div class="balance-heading"><div><p class="eyebrow">Gemensam historik</p><h3>Balans i relationen</h3></div><span>${events.length} tillfällen</span></div><div class="relation-balance-grid"><div><small>Senast</small><b>${last?prettyDate(last.date,{day:"numeric",month:"short",year:"numeric"}):"Ingen historik"}</b></div><div><small>Senaste 90 dagarna</small><b>${recent.length} tillfällen</b></div><div><small>Genomsnittligt mellanrum</small><b>${averageGap!==null?`${averageGap} dagar`:"Mer data behövs"}</b></div></div><h4>Typ av aktivitet</h4>${types.length?`<div class="balance-type-list">${types.map(([label,count])=>`<div><span>${escapeHtml(label)}</span><b>${count}</b><i style="width:${Math.round(count/events.length*100)}%"></i></div>`).join("")}</div>`:'<p class="field-empty">Logga aktiviteter för att se fördelningen.</p>'}<div class="relation-aspects"><span>Fysisk nivå <b>${physical===null?"–":["Mycket lugn","Lugn","Måttlig","Ansträngande"][physical]}</b></span><span>Social nivå <b>${social===null?"–":["Ensam","Lite social","Social","Mycket social"][social]}</b></span><span>Miljö <b>${inside||outside?`${inside} inne · ${outside} ute`:"–"}</b></span></div>`;}
+function renderEntityPlans(){const all=read(keys.plans),circles=read(keys.circles),matches=all.filter(plan=>{if(plan.status==="completed")return false;if(currentEntity.type==="activity")return plan.activityId===currentEntity.id;if(currentEntity.type==="circle")return (plan.circleIds||[]).includes(currentEntity.id);return (plan.personIds||[]).includes(currentEntity.id)||(plan.circleIds||[]).some(id=>circles.find(circle=>circle.id===id)?.personIds?.includes(currentEntity.id));}).sort((a,b)=>`${a.date} ${a.time||""}`.localeCompare(`${b.date} ${b.time||""}`));const target=$("#entity-plans");target.replaceChildren();$("#entity-plans-empty").hidden=matches.length>0;matches.forEach(plan=>{const row=document.createElement("button");row.type="button";row.className="entity-plan-row";const text=document.createElement("span"),date=document.createElement("small");text.textContent=plan.title;date.textContent=`${prettyDate(plan.date,{day:"numeric",month:"short"})} · ${plan.time||""}`;row.append(text,date);row.onclick=()=>{$("#entity-dialog").close();openPlanDialog("",plan);};target.append(row);});}
+
+function openPlanDialog(title="",plan=null,activityId="",bundleId="") {const f=$("#plan-form");f.reset();planActivitySelection=plan?.activityId||activityId||"";planPlaceSelection=plan?.placeId||"";planPersonSelection=new Set(plan?.personIds||[]);planCircleSelection=new Set(plan?.circleIds||[]);f.elements.activityId.value=planActivitySelection;f.elements.placeId.value=planPlaceSelection;const selectedActivity=read(keys.activities).find(activity=>activity.id===planActivitySelection),selectedPlace=read(keys.places).find(place=>place.id===planPlaceSelection);$("#plan-activity-search").value=selectedActivity?.title||"";$("#plan-place-search").value=selectedPlace?.name||"";$("#plan-activity-results").hidden=true;$("#plan-place-results").hidden=true;$("#plan-people").hidden=true;$("#plan-circles").hidden=true;$("#plan-people-search").value="";$("#plan-circles-search").value="";renderPlanActivityPicker();renderPlanPlacePicker();renderPlanRelationPicker("people");renderPlanRelationPicker("circles");f.elements.id.value=plan?.id||"";f.elements.bundleId.value=plan?.bundleId||bundleId;f.elements.title.value=plan?.title||title;f.elements.date.value=plan?.date||selectedDate;f.elements.time.value=plan?.time||"18:00";f.elements.status.value=plan?.status==="completed"?"completed":plan?.status==="planning"?"planning":"scheduled";f.elements.isRoutine.checked=Boolean(plan?.isRoutine);f.elements.recurrence.value=plan?.recurrence||"none";f.elements.recurrenceEnd.value=plan?.recurrenceEnd||"";setNamedChecks(f,"weekdays",(plan?.recurrenceWeekdays||[]).map(String));$("#recurrence-end-label").hidden=f.elements.recurrence.value==="none";$("#custom-weekdays").hidden=f.elements.recurrence.value!=="custom";f.elements.notes.value=plan?.notes||"";$("#plan-dialog-title").textContent=plan?"Redigera plan":"Lägg till en plan";$("#plan-dialog").showModal();}
+function nextOccurrence(date,recurrence){if(recurrence==="weekly")return addDays(date,7);if(recurrence==="biweekly")return addDays(date,14);const targetMonth=date.getMonth()+1,lastDay=new Date(date.getFullYear(),targetMonth+1,0).getDate();return new Date(date.getFullYear(),targetMonth,Math.min(date.getDate(),lastDay));}
+function recurrenceDates(startKey,endKey,recurrence,weekdays=[]){const dates=[];let cursor=keyToDate(startKey),limit=0;if(recurrence==="custom"||recurrence==="daily"){while(dateKey(cursor)<=endKey&&limit<730){if(dateKey(cursor)!==startKey&&(recurrence==="daily"||weekdays.includes(cursor.getDay())))dates.push(dateKey(cursor));cursor=addDays(cursor,1);limit++;}return dates;}cursor=nextOccurrence(cursor,recurrence);while(dateKey(cursor)<=endKey&&limit<260){dates.push(dateKey(cursor));cursor=nextOccurrence(cursor,recurrence);limit++;}return dates;}
+function openPersonDialog(person=null){const f=$("#person-form");f.reset();f.elements.id.value=person?.id||"";f.elements.name.value=person?.name||"";f.elements.group.value=person?.group||"Vänner";f.elements.interests.value=interestList(person?.interests).join(", ");f.elements.job.value=person?.job||"";f.elements.address.value=person?.address||"";f.elements.phone.value=person?.phone||"";f.elements.email.value=person?.email||"";f.elements.birthday.value=person?.birthday||"";f.elements.facebook.value=person?.facebook||"";f.elements.instagram.value=person?.instagram||"";f.elements.linkedin.value=person?.linkedin||"";f.elements.socialOther.value=person?.socialOther||"";f.elements.frequency.value=person?.frequency||7;f.elements.reminderEnabled.checked=Boolean(person?.reminderEnabled);f.elements.reminderType.value=person?.reminderType||"contact";f.elements.showProfileDetails.checked=person?.showProfileDetails!==false;f.elements.notes.value=person?.notes||"";const memberships=read(keys.circles).filter(circle=>(circle.personIds||[]).includes(person?.id)).map(circle=>circle.id);checkboxList($("#person-circles"),read(keys.circles),"circleIds",memberships);$("#person-dialog-title").textContent=person?person.name:"Ny person";$("#person-dialog").showModal();}
+function openCircleDialog(circle=null){const f=$("#circle-form");f.reset();f.elements.id.value=circle?.id||"";f.elements.name.value=circle?.name||"";f.elements.frequency.value=circle?.frequency||14;f.elements.reminderEnabled.checked=Boolean(circle?.reminderEnabled);f.elements.reminderType.value=circle?.reminderType||"contact";f.elements.notes.value=circle?.notes||"";checkboxList($("#circle-people"),read(keys.people),"personIds",circle?.personIds||[]);$("#circle-dialog-title").textContent=circle?circle.name:"Ny cirkel";$("#circle-dialog").showModal();}
+function openActivityDialog(activity=null){const f=$("#activity-form");f.reset();f.elements.id.value=activity?.id||"";f.elements.title.value=activity?.title||"";f.elements.tags.value=tagList(activity).join(", ")||"Fika";f.elements.estimatedCost.value=activity?costOf(activity):0;f.elements.duration.value=activity?.duration??60;f.elements.activityLevel.value=activity?.activityLevel??0;f.elements.socialLevel.value=activity?.socialLevel??0;setNamedChecks(f,"environments",activity?.environments||[]);f.elements.place.value=activity?.place||"";$("#activity-dialog-title").textContent=activity?"Redigera aktivitet":"Ny idé";$("#activity-dialog").showModal();}
+function fillPlaceSelect(select,selected=""){const first=select.querySelector("option[value='']");select.replaceChildren(first||new Option("Ingen vald plats",""));read(keys.places).forEach(place=>select.add(new Option(place.name,place.id)));select.value=selected||"";}
+function openBundleDialog(bundle=null){const f=$("#bundle-form");f.reset();bundleActivitySelection=new Set(bundle?.activityIds||[]);bundlePlaceSelection=bundle?.placeId||"";f.elements.id.value=bundle?.id||"";f.elements.name.value=bundle?.name||"";f.elements.eventType.value=bundle?.eventType||"external";f.elements.startDate.value=bundle?.startDate||"";f.elements.endDate.value=bundle?.endDate||"";f.elements.organizer.value=bundle?.organizer||"";f.elements.website.value=bundle?.website||"";f.elements.estimatedCost.value=bundle?.estimatedCost??"";f.elements.status.value=bundle?.status||"idea";f.elements.tags.value=tagList(bundle).join(", ");f.elements.placeId.value=bundlePlaceSelection;f.elements.notes.value=bundle?.notes||"";$("#bundle-activity-search").value="";$("#bundle-place-search").value=read(keys.places).find(place=>place.id===bundlePlaceSelection)?.name||"";renderBundleActivityPicker();renderBundlePlacePicker();$("#bundle-dialog-title").textContent=bundle?"Redigera evenemang":"Nytt evenemang";$("#bundle-dialog").showModal();}
+function openPlaceDialog(place=null){const f=$("#place-form");f.reset();f.elements.id.value=place?.id||"";f.elements.name.value=place?.name||"";f.elements.address.value=place?.address||"";f.elements.tags.value=tagList(place).join(", ")||"Café";f.elements.distanceKm.value=place?.distanceKm??"";f.elements.travelMinutes.value=place?.travelMinutes??"";setNamedChecks(f,"environments",place?.environments||[]);f.elements.notes.value=place?.notes||"";$("#place-dialog-title").textContent=place?"Redigera plats":"Ny plats";$("#place-dialog").showModal();}
+function openEventDialog(prefill=currentEntity){const f=$("#event-form");f.reset();f.elements.date.value=todayKey;f.elements.time.value="18:00";fillActivitySelect(f.elements.activityId,prefill?.type==="activity"?prefill.id:"");checkboxList($("#event-people"),read(keys.people),"personIds",prefill?.type==="person"?[prefill.id]:[]);checkboxList($("#event-circles"),read(keys.circles),"circleIds",prefill?.type==="circle"?[prefill.id]:[]);$("#event-dialog").showModal();}
+
+function renderAll(){renderToday();renderPeople();renderCalendar();renderActivities();renderBundles();renderPlaces();renderLibraryCollection("goals");renderLibraryCollection("projects");renderLibraryCollection("trips");if($("#entity-dialog").open)renderEntity();}
+
+const ACTIVITY_PACK = [
+  ["Ta en promenad tillsammans","Utomhus",0,60,2,2,["outdoor"]],
+  ["Fika och prata","Fika",100,90,0,2,["indoor","outdoor"]],
+  ["Laga middag ihop","Mat",150,120,1,2,["indoor"]],
+  ["Besök ett museum","Kultur",150,120,1,2,["indoor"]],
+  ["Spela brädspel","Annat",0,120,0,3,["indoor"]],
+  ["Gör en dagsutflykt","Utomhus",250,240,2,2,["outdoor"]],
+];
+const CHILDREN_PACK = [["Bygg en koja","Lek",0,90,2,3,["indoor","outdoor"]],["Gå på upptäcktsfärd","Natur",0,90,2,2,["outdoor"]],["Baka tillsammans","Mat",100,90,1,3,["indoor"]],["Pyssla och skapa","Kreativt",100,90,0,2,["indoor"]],["Besök en lekplats","Lek",0,90,3,3,["outdoor"]],["Ha filmkväll","Återhämtning",100,120,0,2,["indoor"]]];
+const WIFE_PACK = [["Planera en ostörd dejtkväll","Relation",300,180,0,3,["indoor","outdoor"]],["Ta en promenad och prata","Relation",0,60,2,3,["outdoor"]],["Laga en favoriträtt tillsammans","Mat",200,120,1,3,["indoor"]],["Återbesök en betydelsefull plats","Minnen",100,150,1,3,["indoor","outdoor"]],["Gör en gemensam framtidslista","Relation",0,60,0,3,["indoor"]],["Överraska med en liten utflykt","Utflykt",300,240,2,3,["outdoor"]]];
+const PLACE_PACK = [["Närmaste bibliotek","Bibliotek","Lokalt bibliotek",2,15,["indoor"]],["Favoritcafé","Café","Ett café att återvända till",3,20,["indoor"]],["Nära naturreservat","Natur","Naturreservat i närheten",15,30,["outdoor"]],["Lokal lekplats","Lekplats","Lekplats i närområdet",2,15,["outdoor"]],["Kulturhus","Kultur","Lokalt kulturhus",5,20,["indoor"]]];
+const SKANE_ACTIVITIES = [["Vandra längs Skåneleden","Natur",0,240,3,2,["outdoor"]],["Cykla på Ven","Utflykt",350,300,3,2,["outdoor"]],["Besök en skånsk gårdsbutik","Mat",200,120,1,2,["indoor","outdoor"]],["Upptäck ett skånskt slott","Kultur",180,180,1,2,["indoor","outdoor"]]];
+const SKANE_PLACES = [["Sofiero slott och slottsträdgård","Trädgård","Helsingborg",0,0,["outdoor"]],["Kullaberg","Natur","Mölle",0,0,["outdoor"]],["Lunds domkyrka","Kultur","Lund",0,0,["indoor"]],["Ales stenar","Utflyktsmål","Kåseberga",0,0,["outdoor"]],["Wanås Konst","Konst","Knislinge",0,0,["indoor","outdoor"]]];
+const relationLabels = {self:"Mig själv",son:"Son",dotter:"Dotter",barn:"Barn",fru:"Fru",man:"Man",pojkvän:"Pojkvän",flickvän:"Flickvän",partner:"Partner",foralder:"Förälder",mamma:"Mamma",pappa:"Pappa",syskon:"Syskon",bror:"Bror",syster:"Syster",van:"Vän",kollega:"Kollega",annan:"Annan relation"};
+const relationIdeas = {
+  son:["Fråga vad han ser fram emot just nu","Planera en stund tillsammans utifrån hans intressen"],
+  dotter:["Fråga vad hon ser fram emot just nu","Planera en stund tillsammans utifrån hennes intressen"],
+  barn:["Fråga vad barnet vill göra tillsammans","Skapa tid för ett ostört samtal"],
+  partner:["Planera kvalitetstid tillsammans","Fråga vad din partner behöver just nu"],
+  fru:["Planera en ostörd dejtkväll","Fråga vad hon vill ha mer av i er vardag","Gör något omtänksamt utan särskild anledning","Prata om något ni ser fram emot tillsammans","Återbesök ett gemensamt fint minne"],
+  man:["Planera en ostörd dejtkväll","Fråga vad han vill ha mer av i er vardag","Gör något omtänksamt utan särskild anledning","Prata om något ni ser fram emot tillsammans","Återbesök ett gemensamt fint minne"],
+  pojkvän:["Planera kvalitetstid utan telefoner","Prova något nytt tillsammans","Fråga vad som får honom att känna sig uppskattad","Planera nästa gemensamma utflykt"],
+  flickvän:["Planera kvalitetstid utan telefoner","Prova något nytt tillsammans","Fråga vad som får henne att känna sig uppskattad","Planera nästa gemensamma utflykt"],
+  foralder:["Hör av dig och fråga hur veckan varit","Planera ett gemensamt besök"],
+  syskon:["Föreslå något ni båda tycker om","Hör av dig utan särskild anledning"],
+  van:["Föreslå en fika eller promenad","Följ upp något ni pratade om senast"],
+  kollega:["Ta en gemensam lunch","Fråga hur ett viktigt projekt går"],
+  mamma:["Ring och fråga hur hon mår","Planera en gemensam måltid","Be henne berätta om ett minne"],
+  pappa:["Ring och fråga hur han mår","Planera något ni båda tycker om","Be honom berätta om ett minne"],
+  bror:["Föreslå något från er gemensamma uppväxt","Hör av dig utan särskild anledning","Planera en aktivitet kring ett gemensamt intresse"],
+  syster:["Föreslå något från er gemensamma uppväxt","Hör av dig utan särskild anledning","Planera en aktivitet kring ett gemensamt intresse"],
+  self:["Planera tid för återhämtning","Fundera över vad du själv behöver"],
+};
+const openPersonDialogBase=openPersonDialog;
+openPersonDialog=function(person=null){openPersonDialogBase(person);const form=$("#person-form");form.elements.isSelf.checked=Boolean(person?.isSelf);form.elements.relationType.value=person?.isSelf?"":person?.relationType||"";form.elements.relationType.disabled=form.elements.isSelf.checked;form.elements.isSelf.onchange=()=>{form.elements.relationType.disabled=form.elements.isSelf.checked;};};
+const renderRelationshipDevelopmentBase=renderRelationshipDevelopment;
+renderRelationshipDevelopment=function(){renderRelationshipDevelopmentBase();$("#relation-ideas")?.remove();if(currentEntity?.type!=="person"||!store.database.preferences?.relationshipIdeas)return;const person=read(keys.people).find(item=>item.id===currentEntity.id),ideas=[...(relationIdeas[person?.isSelf?"self":person?.relationType]||[]),...(person?.customRelationIdeas||[])];if(!ideas.length)return;const section=document.createElement("button");section.type="button";section.id="relation-ideas";section.className="person-details relationship-development relation-ideas-entry";section.innerHTML=`<span><b>Idéer för ${escapeHtml(relationLabels[person.isSelf?"self":person.relationType]||"relationen")}</b><small>${ideas.length} förslag · öppna, lägg till eller boka</small></span><span class="card-arrow">›</span>`;section.onclick=()=>openRelationIdeas(person.id);$("#agenda-panel").append(section);};
+function initPageFeatures(){
+  const preferences=store.database.preferences||{};
+  const setToggle=(id,key,defaultValue=false)=>{const input=$(id);input.checked=preferences[key]??defaultValue;input.onchange=()=>store.setPreference(key,input.checked);};
+  setToggle("#enable-relationship-ideas","relationshipIdeas");
+  setToggle("#calendar-settings-routines","calendarRoutines",true);
+  setToggle("#calendar-settings-birthdays","calendarBirthdays",true);
+  showCalendarRoutines=preferences.calendarRoutines??true;showCalendarBirthdays=preferences.calendarBirthdays??true;
+  $("#show-calendar-routines").checked=showCalendarRoutines;$("#show-calendar-birthdays").checked=showCalendarBirthdays;
+  $("#calendar-settings-routines").onchange=e=>{$("#show-calendar-routines").checked=showCalendarRoutines=e.target.checked;store.setPreference("calendarRoutines",showCalendarRoutines);renderCalendar();};
+  $("#calendar-settings-birthdays").onchange=e=>{$("#show-calendar-birthdays").checked=showCalendarBirthdays=e.target.checked;store.setPreference("calendarBirthdays",showCalendarBirthdays);renderCalendar();};
+  const addActivities=(items,sourcePack)=>{const activities=read(keys.activities),existing=new Set(activities.map(item=>item.title.toLocaleLowerCase("sv")));items.forEach(([title,category,estimatedCost,duration,activityLevel,socialLevel,environments])=>{if(!existing.has(title.toLocaleLowerCase("sv"))){activities.push({id:uid(),title,tags:[category],category,estimatedCost,duration,activityLevel,socialLevel,environments,place:"Ej angivet",favorite:false,sourcePack});existing.add(title.toLocaleLowerCase("sv"));}});write(keys.activities,activities);};
+  const addPlaces=(items,sourcePack)=>{const places=read(keys.places),existing=new Set(places.map(item=>item.name.toLocaleLowerCase("sv")));items.forEach(([name,category,address,distanceKm,travelMinutes,environments])=>{if(!existing.has(name.toLocaleLowerCase("sv"))){places.push({id:uid(),name,tags:[category],category,address,distanceKm,travelMinutes,environments,notes:"Tillagd från paket. Anpassa adress, avstånd och restid efter dig.",sourcePack});existing.add(name.toLocaleLowerCase("sv"));}});write(keys.places,places);};
+  const packageDefinitions=[
+    ["#enable-activity-pack","activityPack",()=>addActivities(ACTIVITY_PACK,"general")],
+    ["#enable-children-pack","childrenPack",()=>addActivities(CHILDREN_PACK,"children")],
+    ["#enable-wife-pack","wifePack",()=>addActivities(WIFE_PACK,"wife")],
+    ["#enable-place-pack","placePack",()=>addPlaces(PLACE_PACK,"places")],
+    ["#enable-skane-pack","skanePack",()=>{addActivities(SKANE_ACTIVITIES,"skane");addPlaces(SKANE_PLACES,"skane");}],
+  ];
+  const updatePackStatus=()=>{const active=packageDefinitions.filter(([selector])=>$(selector).checked).length;$("#activity-pack-status").textContent=active?`${active} paket är aktiva. Innehållet finns i biblioteken och kan redigeras som vanligt.`:"Inga paket är aktiva.";};
+  packageDefinitions.forEach(([selector,key,activate])=>{const input=$(selector);input.checked=Boolean(preferences[key]);input.onchange=()=>{store.setPreference(key,input.checked);if(input.checked)activate();updatePackStatus();};});updatePackStatus();
+  const form=$("#person-form");form.elements.group.closest("label").insertAdjacentHTML("afterend",'<label>Relation till dig<select name="relationType"><option value="">Välj relationstyp</option><option value="son">Son</option><option value="dotter">Dotter</option><option value="barn">Barn</option><option value="fru">Fru</option><option value="man">Man</option><option value="pojkvän">Pojkvän</option><option value="flickvän">Flickvän</option><option value="partner">Partner</option><option value="mamma">Mamma</option><option value="pappa">Pappa</option><option value="foralder">Förälder</option><option value="bror">Bror</option><option value="syster">Syster</option><option value="syskon">Syskon</option><option value="van">Vän</option><option value="kollega">Kollega</option><option value="annan">Annan relation</option></select></label><label class="toggle-row"><input name="isSelf" type="checkbox" /><span><b>Det här är jag</b><small>Markera din egen personliga profil. Det kan bara finnas en.</small></span></label>');
+  form.addEventListener("submit",e=>{if(e.submitter?.value==="cancel")return;const d=new FormData(form),id=d.get("id")||read(keys.people).at(-1)?.id,people=read(keys.people),person=people.find(item=>item.id===id);if(!person)return;person.isSelf=d.get("isSelf")==="on";person.relationType=person.isSelf?"self":d.get("relationType")||"";if(person.isSelf)people.forEach(item=>{if(item.id!==person.id){item.isSelf=false;if(item.relationType==="self")item.relationType="";}});write(keys.people,people);updateProfileInitials();});
+  updateProfileInitials();
+}
+function updateProfileInitials(){const self=read(keys.people).find(person=>person.isSelf);$("#open-settings").textContent=self?.name?initials(self.name):"RM";}
+function openRelationIdeas(personId){const person=read(keys.people).find(item=>item.id===personId);if(!person)return;currentEntity={type:"person",id:personId};const type=person.isSelf?"self":person.relationType,ideas=[...(relationIdeas[type]||[]).map(text=>({text,builtIn:true})),...(person.customRelationIdeas||[]).map(text=>({text,builtIn:false}))],target=$("#relation-ideas-list");$("#relation-ideas-title").textContent=`Idéer för ${person.name}`;target.replaceChildren();ideas.forEach(idea=>{const row=document.createElement("div");row.className="idea-row";const text=document.createElement("span");text.textContent=idea.text;const book=document.createElement("button");book.type="button";book.className="small-button";book.textContent="Boka";book.onclick=()=>{$("#relation-ideas-dialog").close();$("#entity-dialog").close();openPlanDialog(idea.text);planPersonSelection.add(person.id);renderPlanRelationPicker("people");};row.append(text,book);if(!idea.builtIn){const remove=document.createElement("button");remove.type="button";remove.className="text-button";remove.textContent="Ta bort";remove.onclick=()=>{const people=read(keys.people),found=people.find(item=>item.id===person.id);found.customRelationIdeas=(found.customRelationIdeas||[]).filter(text=>text!==idea.text);write(keys.people,people);openRelationIdeas(person.id);};row.append(remove);}target.append(row);});if(!ideas.length)target.innerHTML='<p class="field-empty">Lägg till den första idén för relationen.</p>';$("#relation-ideas-dialog").showModal();}
+
+function initExtendedUi(){
+  const activityControls=$(".activity-controls"),physicalSelect=document.createElement("select"),socialSelect=document.createElement("select");physicalSelect.id="activity-physical-filter";physicalSelect.setAttribute("aria-label","Fysisk nivå");physicalSelect.innerHTML='<option value="all">Alla fysiska nivåer</option><option value="0">Mycket lugn eller mer</option><option value="1">Lugn eller mer</option><option value="2">Måttlig eller mer</option><option value="3">Ansträngande</option>';socialSelect.id="activity-social-filter";socialSelect.setAttribute("aria-label","Social nivå");socialSelect.innerHTML='<option value="all">Alla sociala nivåer</option><option value="0">Ensam eller mer</option><option value="1">Lite social eller mer</option><option value="2">Social eller mer</option><option value="3">Mycket social</option>';activityControls.querySelector("#activity-sort").before(physicalSelect,socialSelect);
+  physicalSelect.onchange=e=>{activityPhysical=e.target.value;renderActivities();};socialSelect.onchange=e=>{activitySocial=e.target.value;renderActivities();};
+  const physicalLevel=$("#activity-form").elements.activityLevel;physicalLevel.closest("label").childNodes[0].textContent="Fysisk nivå";
+  const note=$(".daily-note");note.insertAdjacentHTML("afterend",'<section class="contact-reminders" id="contact-reminders-section" hidden><div class="section-heading"><h2>Påminnelser</h2><span class="count">Dags att höras</span></div><div id="contact-reminders"></div></section>');
+  const personForm=$("#person-form"),birthday=personForm.elements.birthday.closest("label");birthday.insertAdjacentHTML("beforebegin",'<fieldset class="social-links-fields"><legend>Sociala medier</legend><label>Facebook<input name="facebook" type="url" inputmode="url" placeholder="https://facebook.com/…" /></label><label>Instagram<input name="instagram" type="url" inputmode="url" placeholder="https://instagram.com/…" /></label><label>LinkedIn<input name="linkedin" type="url" inputmode="url" placeholder="https://linkedin.com/in/…" /></label><label>Annan profil<input name="socialOther" type="url" inputmode="url" placeholder="https://…" /></label></fieldset>');
+  const personFrequency=personForm.elements.frequency;personFrequency.replaceChildren(...[[1,"Varje dag"],[2,"Varannan dag"],[3,"Var tredje dag"],[5,"Var femte dag"],[7,"Varje vecka"],[10,"Var tionde dag"],[14,"Varannan vecka"],[30,"Varje månad"],[90,"Några gånger per år"]].map(([value,label])=>new Option(label,value)));personFrequency.closest("label").insertAdjacentHTML("afterend",'<label class="toggle-row"><input name="reminderEnabled" type="checkbox" /><span><b>Påminn mig</b><small>Visas på Today när det är dags.</small></span></label><label>Typ av påminnelse<select name="reminderType"><option value="contact">Ta kontakt eller ring</option><option value="plan">Gör en plan tillsammans</option></select></label>');
+  const circleForm=$("#circle-form"),circlePeople=$("#circle-people");circlePeople.parentElement.insertAdjacentHTML("beforeend",'<button class="picker-create" id="circle-create-person" type="button">+ Skapa ny person</button>');circleForm.elements.notes.closest("label").insertAdjacentHTML("beforebegin",'<label>Hur ofta vill du interagera med cirkeln?<select name="frequency"><option value="1">Varje dag</option><option value="2">Varannan dag</option><option value="3">Var tredje dag</option><option value="7">Varje vecka</option><option value="10">Var tionde dag</option><option value="14">Varannan vecka</option><option value="30">Varje månad</option><option value="90">Några gånger per år</option></select></label><label class="toggle-row"><input name="reminderEnabled" type="checkbox" /><span><b>Påminn mig om cirkeln</b><small>Visas på Today när det är dags.</small></span></label><label>Typ av påminnelse<select name="reminderType"><option value="contact">Ta kontakt</option><option value="plan">Gör en plan med cirkeln</option></select></label>');
+  $("#plan-form").elements.isRoutine.closest("label").insertAdjacentHTML("afterend",'<label>Vid redigering av en serie<select name="seriesScope"><option value="occurrence">Ändra bara detta tillfälle</option><option value="future">Ändra detta och alla framtida</option></select></label>');
+  const showPlans=document.createElement("button");showPlans.id="show-entity-plans";showPlans.className="secondary-button outlined";showPlans.textContent="Inbokat";$("#show-entity-history").before(showPlans);showPlans.onclick=()=>{const activity=read(keys.activities).find(item=>item.id===currentEntity?.id);if(activity)openFuturePlans("activity",activity.id,activity.title);};
+  const dialog=document.createElement("dialog");dialog.id="future-plans-dialog";dialog.innerHTML='<div class="entity-panel"><div class="dialog-heading"><div><p class="eyebrow">Framtida bokningar</p><h2 id="future-plans-title"></h2></div><button class="close-button" type="button" aria-label="Stäng">×</button></div><div id="future-plans-list" class="history-list"></div><div id="future-plans-empty" class="mini-empty compact"><p>Inga framtida bokningar.</p></div></div>';document.body.append(dialog);dialog.querySelector(".close-button").onclick=()=>dialog.close();dialog.onclick=e=>{if(e.target===dialog)dialog.close();};
+  const contentDialog=document.createElement("dialog");contentDialog.id="content-detail-dialog";contentDialog.innerHTML='<div class="entity-panel"><div class="dialog-heading"><div><p class="eyebrow" id="content-detail-type"></p><h2 id="content-detail-title"></h2></div><button class="close-button" type="button" aria-label="Stäng">×</button></div><div class="entity-actions"><button class="primary-button" id="content-detail-plan">Planera</button><button class="secondary-button outlined" id="content-detail-bookings">Inbokat</button><button class="secondary-button outlined" id="content-detail-edit">Redigera</button></div><section class="activity-detail" id="content-detail-info"></section><h3 class="list-title">Historik</h3><div id="content-detail-history" class="history-list"></div><div id="content-detail-history-empty" class="mini-empty compact"><p>Ingen historik ännu.</p></div></div>';document.body.append(contentDialog);contentDialog.querySelector(".close-button").onclick=()=>contentDialog.close();contentDialog.onclick=e=>{if(e.target===contentDialog)contentDialog.close();};
+  $("#circle-create-person").onclick=()=>{const name=prompt("Vad heter den nya personen?")?.trim();if(!name)return;const selected=[...circlePeople.querySelectorAll('input:checked')].map(input=>input.value),people=read(keys.people),person={id:uid(),name,group:"Övrigt",interests:[],frequency:30,reminderEnabled:false,notes:"",lastContact:null};people.push(person);write(keys.people,people);checkboxList(circlePeople,people,"personIds",[...selected,person.id]);};
 }
 
-function renderWalkthrough() {
-  $("#walkthrough-screen").classList.toggle("language-practice", Boolean(selectedTopic.languageFocused));
-  const step = selectedTopic.walkthrough[walkthroughIndex];
-  $("#walkthrough-progress").textContent = `Steg ${walkthroughIndex + 1} av ${selectedTopic.walkthrough.length}`;
-  $("#walkthrough-heading").textContent = step[0];
-  $("#walkthrough-example").textContent = step[1];
-  $("#walkthrough-text").textContent = step[2];
-  $("#extra-explanation").textContent = step[3];
-  $("#extra-explanation").hidden = true;
-  $("#more-explanation").hidden = false;
-  $("#previous-step").disabled = walkthroughIndex === 0;
-  $("#next-step").textContent = walkthroughIndex === selectedTopic.walkthrough.length - 1 ? "Klar" : "Nästa";
-}
+function openFuturePlans(kind,id,title){const plans=read(keys.plans),activities=read(keys.activities),bundles=read(keys.bundles),place=kind==="place"?read(keys.places).find(item=>item.id===id):null,bundleIdsForPlace=new Set(kind==="place"?bundles.filter(bundle=>bundle.placeId===id).map(bundle=>bundle.id):[]),matches=plans.filter(plan=>plan.status!=="completed"&&plan.date>=todayKey&&(kind==="activity"?(plan.activityId===id||bundles.find(bundle=>bundle.id===plan.bundleId)?.activityIds?.includes(id)):kind==="bundle"?plan.bundleId===id:(plan.placeId===id||bundleIdsForPlace.has(plan.bundleId)||activities.find(activity=>activity.id===plan.activityId)?.place===place?.name))).sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)),target=$("#future-plans-list");$("#future-plans-title").textContent=title;target.replaceChildren();$("#future-plans-empty").hidden=matches.length>0;matches.forEach(plan=>{const row=document.createElement("button");row.type="button";row.className="entity-plan-row";row.innerHTML=`<span>${escapeHtml(plan.title)}</span><small>${prettyDate(plan.date,{day:"numeric",month:"short"})} · ${escapeHtml(plan.time||"")}</small>`;row.onclick=()=>{$("#future-plans-dialog").close();openPlanDialog("",plan);};target.append(row);});$("#future-plans-dialog").showModal();}
+function openContentDetails(kind,id){const bundles=read(keys.bundles),places=read(keys.places),activities=read(keys.activities),item=(kind==="bundle"?bundles:places).find(entry=>entry.id===id);if(!item)return;const place=kind==="bundle"?places.find(entry=>entry.id===item.placeId):item,activityNames=kind==="bundle"?namesFor(item.activityIds||[],activities,"title"):[],environmentNames={indoor:"Inomhus",outdoor:"Utomhus"},rows=kind==="bundle"?[["Typ",item.eventType==="own"?"Eget evenemang":"Publikt evenemang"],["Datum",item.startDate?[prettyDate(item.startDate,{day:"numeric",month:"long",year:"numeric"}),item.endDate&&item.endDate!==item.startDate?prettyDate(item.endDate,{day:"numeric",month:"long",year:"numeric"}):""].filter(Boolean).join(" – "):""],["Arrangör",item.organizer],["Kostnad",item.estimatedCost!=null?`${item.estimatedCost} kr`:""],["Status",{idea:"Intressant",planning:"Planerar besök",booked:"Bokat",past:"Avslutat"}[item.status]],["Webbsida",item.website],["Taggar",tagList(item).join(", ")],["Aktiviteter",activityNames.join(", ")],["Plats",place?.name],["Anteckning",item.notes]]:[["Taggar",tagList(item).join(", ")],["Adress",item.address],["Avstånd",item.distanceKm!=null?`${item.distanceKm} km`:""],["Restid",item.travelMinutes!=null?`${item.travelMinutes} min`:""],["Miljö",(item.environments||[]).map(value=>environmentNames[value]).filter(Boolean).join(" + ")],["Anteckning",item.notes]],info=$("#content-detail-info");$("#content-detail-type").textContent=kind==="bundle"?"Evenemang":"Plats";$("#content-detail-title").textContent=item.name;info.innerHTML=`<dl>${rows.filter(([,value])=>value).map(([label,value])=>`<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>`;const bundleIds=new Set(kind==="place"?bundles.filter(bundle=>bundle.placeId===id).map(bundle=>bundle.id):[id]),history=read(keys.events).filter(event=>kind==="bundle"?event.bundleId===id:(event.placeId===id||bundleIds.has(event.bundleId))).sort((a,b)=>`${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`)),target=$("#content-detail-history");target.replaceChildren();$("#content-detail-history-empty").hidden=history.length>0;history.forEach(event=>makeEventCard(event,target));$("#content-detail-plan").textContent=kind==="bundle"?"Planera besök":"Planera";$("#content-detail-plan").onclick=()=>{$("#content-detail-dialog").close();kind==="bundle"?openPlanDialog(item.name,null,item.activityIds?.[0]||"",item.id):(()=>{openPlanDialog(`Besök ${item.name}`);planPlaceSelection=item.id;$("#plan-form").elements.placeId.value=item.id;$("#plan-place-search").value=item.name;})();};$("#content-detail-bookings").onclick=()=>{$("#content-detail-dialog").close();openFuturePlans(kind,id,item.name);};$("#content-detail-edit").onclick=()=>{$("#content-detail-dialog").close();kind==="bundle"?openBundleDialog(item):openPlaceDialog(item);};$("#content-detail-dialog").showModal();}
 
-function progressData() {
-  try { return JSON.parse(localStorage.getItem("mathclass-progress") || "{}"); } catch { return {}; }
-}
+function setBackupStatus(message,state="neutral"){const status=$("#backup-status");status.textContent=message;status.dataset.state=state;}
+const MARKDOWN_TEMPLATE=`# Social Circle Import
 
-function saveAttempt(correct) {
-  const all = progressData();
-  const data = all[level] || { attempts: 0, correct: 0, latest: "" };
-  data.attempts += 1;
-  if (correct) data.correct += 1;
-  data.latest = selectedTopic.title;
-  data.latestTopicId = Object.keys(topics).find((id) => topics[id] === selectedTopic);
-  data.latestCategoryId = selectedCategory.id;
-  all[level] = data;
-  localStorage.setItem("mathclass-progress", JSON.stringify(all));
-}
+## Personer
+### Anna Andersson
+- Grupp: Vänner
+- Intressen: konst, vandring, mat
+- Kontaktintervall: 14
+- Anteckning: Träffades genom bokklubben
 
-function saveLastVisited() {
-  const all = progressData();
-  const data = all[level] || { attempts: 0, correct: 0, latest: "" };
-  data.latest = selectedTopic.title;
-  data.latestTopicId = Object.keys(topics).find((id) => topics[id] === selectedTopic);
-  data.latestCategoryId = selectedCategory.id;
-  all[level] = data;
-  localStorage.setItem("mathclass-progress", JSON.stringify(all));
-}
+## Aktiviteter
+### Gå på museum
+- Taggar: kultur, underhållning, lugnt
+- Kostnad: 180
+- Tid: 120
+- Aktivitetsnivå: 1
+- Social nivå: 2
+- Miljö: inomhus
+- Plats: Stadsmuseet
 
-function renderProgress() {
-  const data = progressData()[level] || { attempts: 0, correct: 0, latest: "" };
-  $("#progress-level").textContent = curriculum[level].name;
-  $("#attempt-count").textContent = data.attempts;
-  $("#correct-count").textContent = data.correct;
-  $("#accuracy-count").textContent = `${data.attempts ? Math.round(data.correct / data.attempts * 100) : 0} %`;
-  $("#latest-progress").textContent = data.latest ? `Senast tränade du på ${data.latest}.` : "När du börjar träna visas dina resultat här.";
-}
+## Platser
+### Stadsmuseet
+- Taggar: kultur, historia, inomhus
+- Adress: Exempelgatan 1
+- Avstånd: 4.5
+- Restid: 25
+- Miljö: inomhus
+- Anteckning: Fri entré på torsdagar
 
-function renderLibrary() {
-  renderSearch("library");
-  $("#library-level").textContent = curriculum[level].name;
-  $("#level-select").value = level;
-  const grid = $("#library-categories");
-  grid.replaceChildren();
-  curriculum[level].categories.forEach((category, index) => {
-    const button = document.createElement("button");
-    button.className = "category-button";
-    const count = topicIdsFor(category).length;
-    button.innerHTML = `<span>${index + 1}</span><strong>${category.title}</strong><small>${count ? `${category.subcategories.length} underkategorier · ${count} moment` : "Kommer senare"}</small>`;
-    button.addEventListener("click", () => openCategory(category.id, "library"));
-    grid.append(button);
-  });
-}
+## Evenemang
+### Kulturkväll
+- Taggar: kultur, underhållning
+- Aktiviteter: Gå på museum
+- Plats: Stadsmuseet
+- Anteckning: Börja med museet och ta fika efteråt
+`;
+const normalizeImportKey=value=>String(value||"").trim().toLocaleLowerCase("sv").replace(/\s+/g," ");
+function parseMarkdownImport(text){const sectionNames={personer:"people",people:"people",aktiviteter:"activities",activities:"activities",platser:"places",places:"places",evenemang:"bundles",events:"bundles"},groups={people:[],activities:[],places:[],bundles:[]};let section=null,current=null;for(const raw of text.replace(/\r/g,"").split("\n")){const line=raw.trim();if(/^##\s+[^#]/.test(line)){section=sectionNames[normalizeImportKey(line.replace(/^##\s+/,""))]||null;current=null;continue;}if(/^###\s+/.test(line)&&section){current={name:line.replace(/^###\s+/,"").trim(),fields:{}};if(current.name)groups[section].push(current);continue;}const match=line.match(/^[-*]\s*([^:]+):\s*(.*)$/);if(match&&current)current.fields[normalizeImportKey(match[1])]=match[2].trim();}return groups;}
+const importField=(entry,...names)=>names.map(normalizeImportKey).map(name=>entry.fields[name]).find(value=>value!==undefined)||"";
+const importNumber=(value,fallback=0)=>String(value).trim()!==""&&Number.isFinite(Number(String(value).replace(",",".")))?Number(String(value).replace(",",".")):fallback;
+const importEnvironments=value=>{const lower=normalizeImportKey(value),result=[];if(lower.includes("inne")||lower.includes("indoor"))result.push("indoor");if(lower.includes("ute")||lower.includes("outdoor"))result.push("outdoor");return result.length?result:["indoor"];};
+function buildMarkdownDatabase(text){const parsed=parseMarkdownImport(text),database=store.snapshot(),collections=database.collections,counts={people:0,activities:0,places:0,bundles:0},skipped=[];const exists=(items,name,key)=>items.some(item=>normalizeImportKey(item[key])===normalizeImportKey(name));parsed.people.forEach(entry=>{if(exists(collections.people,entry.name,"name")){skipped.push(entry.name);return;}collections.people.push({id:uid(),name:entry.name,group:importField(entry,"grupp","group")||"Övrigt",interests:parseTags(importField(entry,"intressen","interests")),frequency:importNumber(importField(entry,"kontaktintervall","frequency"),30),notes:importField(entry,"anteckning","notes"),lastContact:null});counts.people++;});parsed.activities.forEach(entry=>{if(exists(collections.activities,entry.name,"title")){skipped.push(entry.name);return;}const tags=parseTags(importField(entry,"taggar","tags","kategorier","categories","kategori","category"));collections.activities.push({id:uid(),title:entry.name,tags:tags.length?tags:["Annat"],category:tags[0]||"Annat",estimatedCost:importNumber(importField(entry,"kostnad","cost"),0),duration:importNumber(importField(entry,"tid","duration"),60),activityLevel:Math.min(3,Math.max(0,importNumber(importField(entry,"aktivitetsnivå","activity level"),1))),socialLevel:Math.min(3,Math.max(0,importNumber(importField(entry,"social nivå","social level"),1))),environments:importEnvironments(importField(entry,"miljö","environment")),place:importField(entry,"plats","place")||"Ej angivet",favorite:false});counts.activities++;});parsed.places.forEach(entry=>{if(exists(collections.places,entry.name,"name")){skipped.push(entry.name);return;}const tags=parseTags(importField(entry,"taggar","tags","kategorier","categories","kategori","category"));collections.places.push({id:uid(),name:entry.name,address:importField(entry,"adress","address"),tags:tags.length?tags:["Annat"],category:tags[0]||"Annat",distanceKm:importField(entry,"avstånd","distance")===""?null:importNumber(importField(entry,"avstånd","distance")),travelMinutes:importField(entry,"restid","travel time")===""?null:importNumber(importField(entry,"restid","travel time")),environments:importEnvironments(importField(entry,"miljö","environment")),notes:importField(entry,"anteckning","notes")});counts.places++;});parsed.bundles.forEach(entry=>{if(exists(collections.bundles,entry.name,"name")){skipped.push(entry.name);return;}const tags=parseTags(importField(entry,"taggar","tags","kategorier","categories")),activityNames=parseTags(importField(entry,"aktiviteter","activities")),placeName=importField(entry,"plats","place");collections.bundles.push({id:uid(),name:entry.name,tags,category:tags[0]||"",activityIds:activityNames.map(name=>collections.activities.find(activity=>normalizeImportKey(activity.title)===normalizeImportKey(name))?.id).filter(Boolean),placeId:collections.places.find(place=>normalizeImportKey(place.name)===normalizeImportKey(placeName))?.id||"",notes:importField(entry,"anteckning","notes"),createdAt:new Date().toISOString()});counts.bundles++;});database.updatedAt=new Date().toISOString();return {database,counts,skipped};}
+function initMarkdownImport(){const input=$("#import-markdown-file"),status=$("#markdown-import-status");$("#import-markdown").onclick=()=>input.click();$("#download-markdown-template").onclick=()=>{const blob=new Blob([MARKDOWN_TEMPLATE],{type:"text/markdown;charset=utf-8"}),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="social-circle-import-mall.md";document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent="Markdown-mallen har hämtats.";status.dataset.state="success";};input.onchange=async()=>{const file=input.files?.[0];if(!file)return;try{if(file.size>5*1024*1024)throw new Error("Filen är större än 5 MB.");const result=buildMarkdownDatabase(await file.text()),total=Object.values(result.counts).reduce((sum,value)=>sum+value,0),summary=`${result.counts.people} personer, ${result.counts.activities} aktiviteter, ${result.counts.places} platser och ${result.counts.bundles} evenemang`;if(!total)throw new Error("Inga nya poster hittades. Kontrollera rubrikerna i mallen.");if(!confirm(`Filen innehåller ${summary}. ${result.skipped.length} dubbletter hoppas över. Vill du lägga till posterna?`))return;store.replace(result.database);status.textContent=`Klart: ${summary} importerades. ${result.skipped.length} dubbletter hoppades över.`;status.dataset.state="success";}catch(error){status.textContent=`Importen misslyckades: ${error.message}`;status.dataset.state="error";}finally{input.value="";}};}
+function initBackupTools(){const fileInput=$("#import-data-file");$("#export-data").onclick=()=>{const backup={format:"social-circle-backup",exportVersion:1,appVersion:APP_VERSION,exportedAt:new Date().toISOString(),database:store.snapshot()},blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download=`social-circle-backup-${todayKey}.json`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);setBackupStatus(`Säkerhetskopian social-circle-backup-${todayKey}.json har skapats.`,"success");};$("#import-data").onclick=()=>fileInput.click();fileInput.onchange=async()=>{const file=fileInput.files?.[0];if(!file)return;if(file.size>20*1024*1024){setBackupStatus("Filen är större än 20 MB och importerades inte.","error");fileInput.value="";return;}try{const parsed=JSON.parse(await file.text()),database=parsed?.format==="social-circle-backup"?parsed.database:parsed;if(!confirm("Importen ersätter all nuvarande lokal data. Vill du fortsätta?")){fileInput.value="";return;}store.replace(database);setBackupStatus(`Importerade ${file.name}. All data är nu sparad i localStorage.`,"success");}catch(error){setBackupStatus(`Filen kunde inte importeras: ${error.message}`,"error");}fileInput.value="";};$("#clear-local-data").onclick=()=>{if(!confirm("Vill du tömma all Social Circle-data i den här webbläsaren? Exportera gärna en säkerhetskopia först."))return;try{if(!store.clear())throw new Error("Rensningen kunde inte verifieras");setBackupStatus("All lokal Social Circle-data har tagits bort.","success");alert("Klart! All lokal Social Circle-data har tagits bort.");location.hash="today";}catch(error){setBackupStatus(`Data kunde inte tas bort: ${error.message}`,"error");alert("Data kunde inte tas bort. Försök igen eller kontrollera webbläsarens lagringsinställningar.");}};}
 
-$("#level-select").addEventListener("change", (event) => {
-  level = event.target.value;
-  localStorage.setItem("mathclass-level", level);
-  renderHome();
-  renderLibrary();
-});
+$$('[data-open]').forEach(button=>button.onclick=()=>button.dataset.open==="person-dialog"?openPersonDialog():button.dataset.open==="circle-dialog"?openCircleDialog():button.dataset.open==="bundle-dialog"?openBundleDialog():button.dataset.open==="place-dialog"?openPlaceDialog():openActivityDialog());
+$$('[data-add-plan]').forEach(button=>button.onclick=()=>openPlanDialog());$$('.close-button, .dialog-actions [value="cancel"]').forEach(button=>button.onclick=e=>{e.preventDefault();button.closest("dialog")?.close();});$$('dialog').forEach(d=>d.addEventListener("click",e=>{if(e.target===d)d.close();}));
+$$('[data-go]').forEach(button=>button.onclick=()=>{location.hash=button.dataset.go;});
+$("#add-relationship").onclick=()=>relationshipMode==="people"?openPersonDialog():openCircleDialog();
+$("#relationship-tabs").onclick=e=>{if(!e.target.dataset.mode)return;relationshipMode=e.target.dataset.mode;$$('#relationship-tabs button').forEach(b=>b.classList.toggle("is-active",b===e.target));$("#people-panel").hidden=relationshipMode!=="people";$("#circles-panel").hidden=relationshipMode!=="circles";$("#add-relationship").setAttribute("aria-label",relationshipMode==="people"?"Lägg till person":"Skapa cirkel");};
+$("#entity-tabs").onclick=e=>{if(!e.target.dataset.entityTab)return;$$('#entity-tabs button').forEach(b=>b.classList.toggle("is-active",b===e.target));$("#agenda-panel").hidden=e.target.dataset.entityTab!=="agenda";$("#entity-plans-panel").hidden=e.target.dataset.entityTab!=="plans";$("#history-panel").hidden=e.target.dataset.entityTab!=="history";};
+$("#edit-entity").onclick=()=>{const type=currentEntity.type,id=currentEntity.id;$("#entity-dialog").close();type==="person"?openPersonDialog(read(keys.people).find(i=>i.id===id)):type==="circle"?openCircleDialog(read(keys.circles).find(i=>i.id===id)):openActivityDialog(read(keys.activities).find(i=>i.id===id));};$("#log-for-entity").onclick=()=>openEventDialog();
+$("#plan-entity").onclick=()=>{const entity={...currentEntity};$("#entity-dialog").close();if(entity.type==="activity"){const activity=read(keys.activities).find(item=>item.id===entity.id);if(activity)openPlanDialog(activity.title,null,activity.id);return;}const item=read(entity.type==="person"?keys.people:keys.circles).find(entry=>entry.id===entity.id);openPlanDialog(item?`Plan med ${item.name}`:"");if(entity.type==="person")planPersonSelection.add(entity.id);else planCircleSelection.add(entity.id);renderPlanRelationPicker(entity.type==="person"?"people":"circles");};
+$("#show-entity-history").onclick=()=>{$("#activity-detail").hidden=true;$("#entity-plans-panel").hidden=true;$("#history-panel").hidden=false;$("#history-panel").scrollIntoView({behavior:"smooth",block:"start"});};
 
-function returnToSearch(origin) {
-  showScreen(origin);
-  renderSearch(origin);
-  requestAnimationFrame(() => $(`#${origin}-search`).focus({ preventScroll: true }));
-}
+$("#agenda-form").onsubmit=e=>{e.preventDefault();const text=new FormData(e.currentTarget).get("text").trim();if(!text)return;const agenda=read(keys.agenda);agenda.push({id:uid(),ownerType:currentEntity.type,ownerId:currentEntity.id,text,createdAt:new Date().toISOString(),completedAt:null});write(keys.agenda,agenda);e.currentTarget.reset();renderEntity();};
+$("#relation-idea-form").onsubmit=e=>{e.preventDefault();const text=new FormData(e.currentTarget).get("text").trim(),people=read(keys.people),person=people.find(item=>item.id===currentEntity?.id);if(!text||!person)return;person.customRelationIdeas=[...new Set([...(person.customRelationIdeas||[]),text])];write(keys.people,people);e.currentTarget.reset();openRelationIdeas(person.id);};
+$("#plan-form").onsubmit=e=>{if(e.submitter?.value==="cancel")return;e.preventDefault();const d=new FormData(e.currentTarget),plans=read(keys.plans),old=plans.find(p=>p.id===d.get("id")),recurrence=d.get("recurrence"),recurrenceEnd=d.get("recurrenceEnd"),recurrenceWeekdays=d.getAll("weekdays").map(Number);if(recurrence!=="none"&&!recurrenceEnd){alert("Välj ett slutdatum för den återkommande planen.");return;}if(recurrence==="custom"&&!recurrenceWeekdays.length){alert("Välj minst en veckodag.");return;}if(recurrence!=="none"&&d.get("status")==="completed"){alert("En återkommande plan behöver vara i Planering eller Schemalagt. Markera varje genomfört tillfälle som Gjort efteråt.");return;}const seriesId=old?.recurrenceId||(recurrence!=="none"?uid():""),item={id:d.get("id")||uid(),title:d.get("title").trim(),date:d.get("date"),time:d.get("time"),activityId:planActivitySelection,bundleId:d.get("bundleId"),placeId:d.get("placeId"),personIds:[...planPersonSelection],circleIds:[...planCircleSelection],isRoutine:d.get("isRoutine")==="on",recurrence,recurrenceWeekdays:recurrence==="custom"?recurrenceWeekdays:[],recurrenceEnd:recurrence!=="none"?recurrenceEnd:"",recurrenceId:seriesId,notes:d.get("notes").trim(),status:d.get("status"),createdAt:old?.createdAt||new Date().toISOString()},index=plans.findIndex(p=>p.id===item.id),updateFuture=index>=0&&old?.recurrenceId&&d.get("seriesScope")==="future";if(updateFuture){const dayShift=Math.round((keyToDate(item.date)-keyToDate(old.date))/86400000),shared={title:item.title,time:item.time,activityId:item.activityId,bundleId:item.bundleId,placeId:item.placeId,personIds:item.personIds,circleIds:item.circleIds,isRoutine:item.isRoutine,recurrence:item.recurrence,recurrenceWeekdays:item.recurrenceWeekdays,recurrenceEnd:item.recurrenceEnd,notes:item.notes,status:item.status};plans.forEach(plan=>{if(plan.recurrenceId===old.recurrenceId&&plan.date>=old.date){Object.assign(plan,shared);if(dayShift)plan.date=dateKey(addDays(keyToDate(plan.date),dayShift));}});}else index>=0?plans[index]=item:plans.push(item);if(index<0&&recurrence!=="none")recurrenceDates(item.date,recurrenceEnd,recurrence,recurrenceWeekdays).forEach((date,occurrenceIndex)=>plans.push({...item,id:uid(),date,occurrenceIndex:occurrenceIndex+1,createdAt:new Date().toISOString()}));if(item.status==="completed"){const events=read(keys.events),linked=events.find(event=>event.sourcePlanId===item.id),details={title:item.title,date:item.date,time:item.time,activityId:item.activityId,bundleId:item.bundleId,placeId:item.placeId,personIds:expandCircleMembers(item.personIds,item.circleIds),circleIds:item.circleIds,notes:item.notes};if(linked)Object.assign(linked,details);else events.push({id:uid(),sourcePlanId:item.id,...details,createdAt:new Date().toISOString()});store.set(keys.events,events);}write(keys.plans,plans);$("#plan-dialog").close();};
+$("#person-form").onsubmit=e=>{if(e.submitter?.value==="cancel")return;e.preventDefault();const d=new FormData(e.currentTarget),people=read(keys.people),old=people.find(p=>p.id===d.get("id")),item={id:d.get("id")||uid(),name:d.get("name").trim(),group:d.get("group"),interests:[...new Set(d.get("interests").split(",").map(value=>value.trim()).filter(Boolean))],job:d.get("job").trim(),address:d.get("address").trim(),phone:d.get("phone").trim(),email:d.get("email").trim(),birthday:d.get("birthday"),facebook:d.get("facebook").trim(),instagram:d.get("instagram").trim(),linkedin:d.get("linkedin").trim(),socialOther:d.get("socialOther").trim(),showProfileDetails:d.get("showProfileDetails")==="on",frequency:Number(d.get("frequency")),reminderEnabled:d.get("reminderEnabled")==="on",reminderType:d.get("reminderType"),reminderStartedAt:old?.reminderStartedAt||new Date().toISOString(),notes:d.get("notes").trim(),lastContact:old?.lastContact||null,customRelationIdeas:old?.customRelationIdeas||[]},index=people.findIndex(p=>p.id===item.id),selectedCircles=new Set(d.getAll("circleIds"));index>=0?people[index]=item:people.push(item);write(keys.people,people);const circles=read(keys.circles).map(circle=>{const members=new Set(circle.personIds||[]);selectedCircles.has(circle.id)?members.add(item.id):members.delete(item.id);return {...circle,personIds:[...members]};});write(keys.circles,circles);$("#person-dialog").close();};
+$("#circle-form").onsubmit=e=>{if(e.submitter?.value==="cancel")return;e.preventDefault();const d=new FormData(e.currentTarget),circles=read(keys.circles),old=circles.find(circle=>circle.id===d.get("id")),item={id:d.get("id")||uid(),name:d.get("name").trim(),personIds:d.getAll("personIds"),frequency:Number(d.get("frequency")),reminderEnabled:d.get("reminderEnabled")==="on",reminderType:d.get("reminderType"),reminderStartedAt:old?.reminderStartedAt||new Date().toISOString(),notes:d.get("notes").trim()},index=circles.findIndex(c=>c.id===item.id);index>=0?circles[index]=item:circles.push(item);write(keys.circles,circles);$("#circle-dialog").close();};
+$("#activity-form").onsubmit=e=>{if(e.submitter?.value==="cancel")return;e.preventDefault();const d=new FormData(e.currentTarget),tags=parseTags(d.get("tags"));if(!tags.length){alert("Lägg till minst en tagg eller kategori.");return;}if(!d.getAll("environments").length){alert("Välj inomhus, utomhus eller båda.");return;}const activities=read(keys.activities),old=activities.find(a=>a.id===d.get("id")),item={id:d.get("id")||uid(),title:d.get("title").trim(),tags,category:tags[0],estimatedCost:Number(d.get("estimatedCost")||0),duration:Number(d.get("duration")),activityLevel:Number(d.get("activityLevel")),socialLevel:Number(d.get("socialLevel")),environments:d.getAll("environments"),place:d.get("place").trim()||"Ej angivet",favorite:old?.favorite||false},index=activities.findIndex(a=>a.id===item.id);index>=0?activities[index]=item:activities.push(item);write(keys.activities,activities);$("#activity-dialog").close();};
+$("#bundle-form").onsubmit=e=>{if(e.submitter?.value==="cancel")return;e.preventDefault();const d=new FormData(e.currentTarget),bundles=read(keys.bundles),old=bundles.find(b=>b.id===d.get("id")),tags=parseTags(d.get("tags"));if(d.get("startDate")&&d.get("endDate")&&d.get("endDate")<d.get("startDate")){alert("Slutdatum kan inte vara före startdatum.");return;}const item={id:d.get("id")||uid(),name:d.get("name").trim(),eventType:d.get("eventType"),startDate:d.get("startDate"),endDate:d.get("endDate"),organizer:d.get("organizer").trim(),website:d.get("website").trim(),estimatedCost:d.get("estimatedCost")===""?null:Number(d.get("estimatedCost")),status:d.get("status"),tags,category:tags[0]||"",activityIds:[...bundleActivitySelection],placeId:bundlePlaceSelection,notes:d.get("notes").trim(),createdAt:old?.createdAt||new Date().toISOString()},index=bundles.findIndex(b=>b.id===item.id);index>=0?bundles[index]=item:bundles.push(item);write(keys.bundles,bundles);$("#bundle-dialog").close();};
+$("#place-form").onsubmit=e=>{if(e.submitter?.value==="cancel")return;e.preventDefault();const d=new FormData(e.currentTarget),tags=parseTags(d.get("tags"));if(!tags.length){alert("Lägg till minst en tagg eller kategori.");return;}if(!d.getAll("environments").length){alert("Välj inomhus, utomhus eller båda.");return;}const places=read(keys.places),item={id:d.get("id")||uid(),name:d.get("name").trim(),address:d.get("address").trim(),tags,category:tags[0],distanceKm:d.get("distanceKm")===""?null:Number(d.get("distanceKm")),travelMinutes:d.get("travelMinutes")===""?null:Number(d.get("travelMinutes")),environments:d.getAll("environments"),notes:d.get("notes").trim()},index=places.findIndex(p=>p.id===item.id);index>=0?places[index]=item:places.push(item);write(keys.places,places);$("#place-dialog").close();};
+$("#event-form").onsubmit=e=>{if(e.submitter?.value==="cancel")return;e.preventDefault();const d=new FormData(e.currentTarget),circleIds=d.getAll("circleIds"),events=read(keys.events);events.push({id:uid(),title:d.get("title").trim(),date:d.get("date"),time:d.get("time"),activityId:d.get("activityId"),personIds:expandCircleMembers(d.getAll("personIds"),circleIds),circleIds,notes:d.get("notes").trim(),createdAt:new Date().toISOString()});write(keys.events,events);$("#event-dialog").close();renderEntity();};
+$("#library-form").onsubmit=e=>{if(e.submitter?.value==="cancel")return;e.preventDefault();const d=new FormData(e.currentTarget),kind=d.get("kind"),items=read(keys[kind]),old=items.find(item=>item.id===d.get("id")),base={id:d.get("id")||uid(),name:d.get("name").trim(),tags:parseTags(d.get("tags")),personIds:d.getAll("personIds"),circleIds:d.getAll("circleIds"),notes:d.get("notes").trim(),createdAt:old?.createdAt||new Date().toISOString()},item=kind==="goals"?{...base,goalType:d.get("goalType"),why:d.get("why").trim(),nextStep:d.get("nextStep").trim(),checkIns:old?.checkIns||0,completedAt:old?.completedAt||null}:kind==="projects"?{...base,status:d.get("projectStatus"),deadline:d.get("deadline"),nextStep:d.get("projectNextStep").trim()}:({...base,origin:d.get("origin").trim(),destination:d.get("destination").trim(),departure:d.get("departure"),arrival:d.get("arrival"),transport:d.get("transport"),cost:d.get("tripCost")===""?null:Number(d.get("tripCost")),distance:d.get("distance")===""?null:Number(d.get("distance")),bookingReference:d.get("bookingReference").trim()});const index=items.findIndex(entry=>entry.id===item.id);index>=0?items[index]=item:items.push(item);write(keys[kind],items);$("#library-dialog").close();};
 
-$("#back-from-subcategories").addEventListener("click", () => {
-  if (topicsOrigin === "library") renderLibrary(); else renderHome();
-  showScreen(topicsOrigin);
-});
-$("#back-from-topics").addEventListener("click", () => {
-  if (subcategoryOrigin === "subcategories") openCategory(selectedCategory.id, topicsOrigin);
-  else returnToSearch(subcategoryOrigin);
-});
-$("#back-from-modes").addEventListener("click", () => {
-  if (modeOrigin === "topics") openSubcategory(selectedSubcategory.id, subcategoryOrigin);
-  else returnToSearch(modeOrigin);
-});
-$("#back-from-quiz").addEventListener("click", () => showScreen("mode"));
-$("#back-from-walkthrough").addEventListener("click", () => showScreen("mode"));
-$("#explanation-button").addEventListener("click", () => { $("#explanation").hidden = false; $("#explanation-button").hidden = true; $("#next-question-button").hidden = false; });
-$("#next-question-button").addEventListener("click", nextQuestion);
-$("#previous-step").addEventListener("click", () => { walkthroughIndex = Math.max(0, walkthroughIndex - 1); renderWalkthrough(); });
-$("#next-step").addEventListener("click", () => { if (walkthroughIndex === selectedTopic.walkthrough.length - 1) showScreen("mode"); else { walkthroughIndex += 1; renderWalkthrough(); } });
-$("#more-explanation").addEventListener("click", () => { $("#extra-explanation").hidden = false; $("#more-explanation").hidden = true; });
-$("#open-profile").addEventListener("click", () => { settingsOrigin = "home"; showScreen("settings"); });
-$("#back-from-settings").addEventListener("click", () => showScreen(settingsOrigin));
-$("#open-updates").addEventListener("click", () => showScreen("updates"));
-$("#back-from-updates").addEventListener("click", () => showScreen("settings"));
+[$("#person-form"),$("#circle-form")].forEach(form=>form.addEventListener("submit",e=>{if(e.submitter?.value==="cancel")return;const d=new FormData(form),id=d.get("id"),collection=form.id==="person-form"?keys.people:keys.circles;queueMicrotask(()=>{const items=read(collection),item=items.find(entry=>entry.id===id)||(id?null:items.at(-1));if(!item)return;["strengths","challenges","needs","boundaries","relationshipQuestions","appreciation"].forEach(field=>item[field]=d.get(field)?.trim()||"");write(collection,items);});}));
 
-navButtons.forEach((button) => button.addEventListener("click", () => {
-  const target = button.dataset.nav;
-  if (target === "home") renderHome();
-  if (target === "progress") renderProgress();
-  if (target === "library") renderLibrary();
-  showScreen(target);
-}));
+$("#people-filters").onclick=e=>{if(!e.target.dataset.group)return;peopleFilter=e.target.dataset.group;$$('#people-filters .filter-chip').forEach(b=>b.classList.toggle("is-active",b===e.target));renderPeople();};$("#activity-filters").onclick=e=>{if(!e.target.dataset.activityFilter)return;activityFilter=e.target.dataset.activityFilter;$$('#activity-filters .filter-chip').forEach(b=>b.classList.toggle("is-active",b===e.target));renderActivities();};$("#activity-category-filter").onchange=e=>{activityCategory=e.target.value;renderActivities();};$("#activity-cost-filter").onchange=e=>{activityMaxCost=e.target.value;renderActivities();};$("#activity-environment-filter").onchange=e=>{activityEnvironment=e.target.value;renderActivities();};$("#activity-sort").onchange=e=>{activitySort=e.target.value;renderActivities();};
+$("#people-search").oninput=e=>{peopleSearch=e.target.value;renderPeople();};$("#content-search").oninput=e=>{contentSearch=e.target.value;renderActivities();renderBundles();renderPlaces();renderLibraryCollection("goals");renderLibraryCollection("projects");renderLibraryCollection("trips");};$("#place-distance-filter").onchange=e=>{placeMaxDistance=e.target.value;renderPlaces();};$("#place-environment-filter").onchange=e=>{placeEnvironment=e.target.value;renderPlaces();};
+$("#plan-form").elements.recurrence.onchange=e=>{const label=$("#recurrence-end-label"),end=$("#plan-form").elements.recurrenceEnd;label.hidden=e.target.value==="none";$("#custom-weekdays").hidden=e.target.value!=="custom";if(e.target.value!=="none"&&!end.value)end.value=dateKey(addDays(keyToDate($("#plan-form").elements.date.value||todayKey),84));};
+$("#plan-activity-search").onfocus=()=>{$("#plan-activity-results").hidden=false;renderPlanActivityPicker();};$("#plan-activity-search").oninput=()=>{planActivitySelection="";$("#plan-form").elements.activityId.value="";$("#plan-activity-results").hidden=false;renderPlanActivityPicker();};$("#plan-activity-search").onblur=()=>setTimeout(()=>$("#plan-activity-results").hidden=true,180);
+$("#plan-place-search").onfocus=()=>{$("#plan-place-results").hidden=false;renderPlanPlacePicker();};$("#plan-place-search").oninput=()=>{planPlaceSelection="";$("#plan-form").elements.placeId.value="";$("#plan-place-results").hidden=false;renderPlanPlacePicker();};$("#plan-place-search").onblur=()=>setTimeout(()=>$("#plan-place-results").hidden=true,180);
+$("#plan-people-search").onfocus=()=>{$("#plan-people").hidden=false;renderPlanRelationPicker("people");};$("#plan-people-search").oninput=()=>{$("#plan-people").hidden=false;renderPlanRelationPicker("people");};$("#plan-people-search").onblur=()=>setTimeout(()=>$("#plan-people").hidden=true,180);$("#plan-circles-search").onfocus=()=>{$("#plan-circles").hidden=false;renderPlanRelationPicker("circles");};$("#plan-circles-search").oninput=()=>{$("#plan-circles").hidden=false;renderPlanRelationPicker("circles");};$("#plan-circles-search").onblur=()=>setTimeout(()=>$("#plan-circles").hidden=true,180);
+$("#quick-create-activity").onclick=()=>{const title=prompt("Vad ska den nya aktiviteten heta?",$("#plan-activity-search").value)?.trim();if(!title)return;const activities=read(keys.activities),activity={id:uid(),title,tags:["Annat"],category:"Annat",estimatedCost:0,duration:60,activityLevel:1,socialLevel:1,environments:["indoor"],place:"Ej angivet",favorite:false};activities.push(activity);write(keys.activities,activities);planActivitySelection=activity.id;$("#plan-form").elements.activityId.value=activity.id;$("#plan-activity-search").value=title;renderPlanActivityPicker();};
+$("#quick-create-place").onclick=()=>{const name=prompt("Vad ska den nya platsen heta?",$("#plan-place-search").value)?.trim();if(!name)return;const places=read(keys.places),place={id:uid(),name,address:"",tags:["Annat"],category:"Annat",distanceKm:null,travelMinutes:null,environments:["indoor"],notes:""};places.push(place);write(keys.places,places);planPlaceSelection=place.id;$("#plan-form").elements.placeId.value=place.id;$("#plan-place-search").value=name;$("#plan-place-results").hidden=true;};
+$("#quick-create-person").onclick=()=>{const name=prompt("Vad heter personen?",$("#plan-people-search").value)?.trim();if(!name)return;const people=read(keys.people),person={id:uid(),name,group:"Övrigt",interests:[],frequency:30,notes:"",lastContact:null};people.push(person);write(keys.people,people);planPersonSelection.add(person.id);$("#plan-people-search").value="";renderPlanRelationPicker("people");};
+$("#quick-create-circle").onclick=()=>{const name=prompt("Vad ska cirkeln heta?",$("#plan-circles-search").value)?.trim();if(!name)return;const circles=read(keys.circles),circle={id:uid(),name,personIds:[],notes:""};circles.push(circle);write(keys.circles,circles);planCircleSelection.add(circle.id);$("#plan-circles-search").value="";renderPlanRelationPicker("circles");};
+$("#bundle-activity-search").oninput=renderBundleActivityPicker;$("#bundle-place-search").oninput=()=>{bundlePlaceSelection="";$("#bundle-form").elements.placeId.value="";renderBundlePlacePicker();};
+$("#bundle-create-activity").onclick=()=>{const title=prompt("Vad ska den nya aktiviteten heta?",$("#bundle-activity-search").value)?.trim();if(!title)return;const activities=read(keys.activities),activity={id:uid(),title,tags:["Annat"],category:"Annat",estimatedCost:0,duration:60,activityLevel:1,socialLevel:1,environments:["indoor"],place:"Ej angivet",favorite:false};activities.push(activity);write(keys.activities,activities);bundleActivitySelection.add(activity.id);$("#bundle-activity-search").value="";renderBundleActivityPicker();};
+$("#bundle-create-place").onclick=()=>{const name=prompt("Vad ska den nya platsen heta?",$("#bundle-place-search").value)?.trim();if(!name)return;const places=read(keys.places),place={id:uid(),name,address:"",tags:["Annat"],category:"Annat",distanceKm:null,travelMinutes:null,environments:["indoor"],notes:""};places.push(place);write(keys.places,places);bundlePlaceSelection=place.id;$("#bundle-form").elements.placeId.value=place.id;$("#bundle-place-search").value=name;renderBundlePlacePicker();};
+$("#quick-add-activity").onclick=()=>{selectedDate=todayKey;openPlanDialog();$("#plan-activity-search").focus();};$("#quick-add-social").onclick=()=>{selectedDate=todayKey;openPlanDialog();$("#plan-title").focus();};
+$("#activity-tabs").onclick=e=>{if(!e.target.dataset.contentMode)return;activityContentMode=e.target.dataset.contentMode;$$('#activity-tabs button').forEach(b=>b.classList.toggle("is-active",b===e.target));["activities","bundles","places","goals","projects","trips"].forEach(mode=>$("#"+mode+"-panel").hidden=mode!==activityContentMode);$("#activity-view-switch").hidden=activityContentMode!=="activities";const labels={activities:"Lägg till aktivitet",bundles:"Skapa evenemang",places:"Lägg till plats",goals:"Skapa mål",projects:"Skapa projekt",trips:"Skapa resa"};$("#add-activity-content").setAttribute("aria-label",labels[activityContentMode]);};$("#add-activity-content").onclick=()=>activityContentMode==="activities"?openActivityDialog():activityContentMode==="bundles"?openBundleDialog():activityContentMode==="places"?openPlaceDialog():openLibraryDialog(activityContentMode);
+$("#activity-view-switch").onclick=e=>{if(!e.target.dataset.activityView)return;activityView=e.target.dataset.activityView;$$('#activity-view-switch button').forEach(button=>button.classList.toggle("is-active",button===e.target));renderActivities();};
+$("#toggle-activity-filters").onclick=e=>{const panel=$("#activity-filter-panel"),opening=panel.hidden;panel.hidden=!opening;e.currentTarget.setAttribute("aria-expanded",String(opening));e.currentTarget.classList.toggle("is-active",opening);};
+$("#calendar-modes").onclick=e=>{if(!e.target.dataset.calendarMode)return;calendarMode=e.target.dataset.calendarMode;shownMonth=calendarMode==="month"?new Date(new Date().getFullYear(),new Date().getMonth(),1):new Date();selectedDate=todayKey;$$('#calendar-modes button').forEach(b=>b.classList.toggle("is-active",b===e.target));renderCalendar();};$("#prev-month").onclick=()=>shiftCalendar(-1);$("#next-month").onclick=()=>shiftCalendar(1);
+$("#calendar-agenda-tabs").onclick=e=>{if(!e.target.dataset.agendaMode)return;calendarAgendaMode=e.target.dataset.agendaMode;$$('#calendar-agenda-tabs button').forEach(button=>button.classList.toggle("is-active",button===e.target));renderCalendar();};
+$("#show-calendar-routines").onchange=e=>{showCalendarRoutines=e.target.checked;$("#calendar-settings-routines").checked=showCalendarRoutines;store.setPreference("calendarRoutines",showCalendarRoutines);renderCalendar();};
+$("#show-calendar-birthdays").onchange=e=>{showCalendarBirthdays=e.target.checked;$("#calendar-settings-birthdays").checked=showCalendarBirthdays;store.setPreference("calendarBirthdays",showCalendarBirthdays);renderCalendar();};
 
-function animatePageChange(direction) {
-  if (swipeAnimating) return;
-  swipeAnimating = true;
-  const card = $("#quiz-screen .quiz-card");
-  const exitY = direction < 0 ? "-110%" : "110%";
-  const enterY = direction < 0 ? "110%" : "-110%";
-  card.classList.remove("is-dragging");
-  card.classList.add("is-snapping");
-  card.style.transform = `translateY(${exitY})`;
-  card.style.opacity = "0";
-  window.setTimeout(() => {
-    changeQuestion(direction);
-    card.classList.remove("is-snapping");
-    card.style.transform = `translateY(${enterY})`;
-    card.style.opacity = "0";
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      card.classList.add("is-snapping");
-      card.style.transform = "translateY(0)";
-      card.style.opacity = "1";
-      window.setTimeout(() => {
-        card.classList.remove("is-snapping");
-        card.style.transform = "";
-        card.style.opacity = "";
-        swipeAnimating = false;
-      }, 240);
-    }));
-  }, 230);
-}
-
-function snapPageBack() {
-  const card = $("#quiz-screen .quiz-card");
-  card.classList.remove("is-dragging");
-  card.classList.add("is-snapping");
-  card.style.transform = "translateY(0)";
-  card.style.opacity = "1";
-  window.setTimeout(() => {
-    card.classList.remove("is-snapping");
-    card.style.transform = "";
-    card.style.opacity = "";
-  }, 240);
-}
-
-document.addEventListener("touchstart", (event) => {
-  if (activeScreen !== "quiz" || swipeAnimating) return;
-  touchStartY = event.touches[0].clientY;
-  touchCurrentY = touchStartY;
-  touchStartedAt = performance.now();
-  $("#quiz-screen .quiz-card").classList.add("is-dragging");
-}, { passive: true });
-
-document.addEventListener("touchmove", (event) => {
-  if (activeScreen !== "quiz" || touchStartY === null || swipeAnimating) return;
-  event.preventDefault();
-  touchCurrentY = event.touches[0].clientY;
-  const delta = Math.max(-180, Math.min(180, touchCurrentY - touchStartY));
-  const card = $("#quiz-screen .quiz-card");
-  card.style.transform = `translateY(${delta}px) scale(${1 - Math.abs(delta) / 5000})`;
-  card.style.opacity = String(1 - Math.abs(delta) / 700);
-}, { passive: false });
-
-document.addEventListener("touchend", () => {
-  if (activeScreen !== "quiz" || touchStartY === null || swipeAnimating) return;
-  const delta = touchCurrentY - touchStartY;
-  const elapsed = Math.max(1, performance.now() - touchStartedAt);
-  const velocity = Math.abs(delta) / elapsed;
-  touchStartY = null;
-  touchCurrentY = null;
-  if (Math.abs(delta) >= 95 || (Math.abs(delta) >= 45 && velocity > .55)) animatePageChange(Math.sign(delta));
-  else snapPageBack();
-}, { passive: true });
-document.addEventListener("wheel", (event) => {
-  if (activeScreen !== "quiz") return;
-  event.preventDefault();
-  if (wheelLocked || Math.abs(event.deltaY) < 20) return;
-  wheelLocked = true;
-  animatePageChange(-Math.sign(event.deltaY));
-  setTimeout(() => { wheelLocked = false; }, 450);
-}, { passive: false });
-
-
-function normalizeSearch(text) {
-  return text.toLocaleLowerCase("sv").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
-}
-
-function searchSections(query) {
-  const terms = normalizeSearch(query).split(/\s+/).filter(Boolean);
-  if (!terms.length) return [];
-  const entries = curriculum[level].categories.flatMap((category) => category.subcategories.flatMap((group) => {
-    const path = `${category.title} → ${group.title}`;
-    const topicEntries = topicIdsFor(group).map((topicId) => {
-      const topic = topics[topicId];
-      const questions = Object.values(topic.modes).flat().filter((question) => question.levels.includes(level));
-      const vocabulary = questions.flatMap((question) => [question.prompt, question.example, question.choices[question.correct], question.explanation]);
-      return { title: topic.title, description: path, category, group, topicId, ready: true,
-        text: [path, topic.title, topic.description, ...(topic.walkthrough || []).flat(), ...vocabulary].join(" ") };
-    });
-    return [...topicEntries, { title: group.title, description: category.title, category, group, ready: topicEntries.length > 0,
-      text: [category.title, group.title, group.description, group.keywords].join(" ") }];
-  }));
-  return entries.filter((entry) => terms.every((term) => normalizeSearch(entry.text).includes(term)))
-    .sort((a, b) => Number(b.ready) - Number(a.ready) || Number(Boolean(b.topicId)) - Number(Boolean(a.topicId)) || a.title.localeCompare(b.title, "sv"));
-}
-
-function renderSearch(origin) {
-  const input = $(`#${origin}-search`);
-  const results = $(`#${origin}-search-results`);
-  const status = $(`#${origin}-search-status`);
-  $(`#${origin}-search-label`).textContent = `Sök avsnitt · ${curriculum[level].name}`;
-  $(`#${origin}-search-clear`).hidden = !input.value;
-  const query = input.value.trim();
-  results.replaceChildren();
-  results.hidden = !query;
-  status.hidden = !query;
-  if (!query) { status.textContent = ""; return; }
-  const matches = searchSections(query);
-  status.textContent = matches.length ? `${matches.length} ${matches.length === 1 ? "träff" : "träffar"}` : `Inga avsnitt hittades i ${curriculum[level].name.toLowerCase()}. Prova ett annat ord.`;
-  matches.forEach((entry) => {
-    const statusText = entry.topicId ? "Öppna träningslägen" : entry.ready ? "Visa moment" : "Kommer senare · inga övningar ännu";
-    results.append(sectionButton(entry.title, entry.description, statusText, () => {
-      selectedCategory = entry.category;
-      topicsOrigin = origin;
-      if (entry.topicId) openTopic(entry.topicId, origin);
-      else openSubcategory(entry.group.id, origin);
-    }));
-  });
-}
-
-["home", "library"].forEach((origin) => {
-  const input = $(`#${origin}-search`);
-  input.addEventListener("input", () => renderSearch(origin));
-  $(`#${origin}-search-clear`).addEventListener("click", () => {
-    input.value = "";
-    renderSearch(origin);
-    input.focus();
-  });
-  $(`#${origin}-search-form`).addEventListener("submit", (event) => {
-    event.preventDefault();
-    renderSearch(origin);
-    $(`#${origin}-search-results button`)?.focus();
-  });
-});
-
-renderHome();
+function initMobileSearch(){$$('.section-search').forEach(input=>input.addEventListener("focus",()=>{input.scrollIntoView({behavior:"auto",block:"start"});}));}
+function initRelationshipForms(){[["#person-dialog",keys.people],["#circle-dialog",keys.circles]].forEach(([selector,collection])=>{const dialog=$(selector),form=dialog.querySelector("form");dialog.addEventListener("focusin",()=>{const item=read(collection).find(entry=>entry.id===form.elements.id.value);["strengths","challenges","needs","boundaries","relationshipQuestions","appreciation"].forEach(field=>{if(form.elements[field]&&item&&form.elements[field].value!==item[field])form.elements[field].value=item[field]||"";});},{capture:true});});}
+function dismissSplash(){const splash=$("#splash-screen");setTimeout(()=>{splash.classList.add("is-hidden");setTimeout(()=>splash.remove(),450);},650);}
+const formatted=prettyDate(todayKey);$("#today-date").textContent=formatted.charAt(0).toUpperCase()+formatted.slice(1);initExtendedUi();initPageFeatures();archivePastPlans();store.subscribe(()=>{renderAll();queueMicrotask(archivePastPlans);});window.addEventListener("hashchange",showView);$("#open-settings").onclick=()=>{location.hash="settings";};initFileTest();initBackupTools();initMarkdownImport();initVersionInfo();initMobileSearch();initRelationshipForms();showView();renderAll();dismissSplash();
