@@ -13,6 +13,7 @@ window.addEventListener("load", () => window.setTimeout(dismissSplash, 850));
 window.setTimeout(dismissSplash, 2500);
 
 const modeCatalog = {
+  graphic: { name: "Grafisk", description: "Tolka figurer, lägen och samband", icon: "▧" },
   walkthrough: { name: "Genomgång", description: "Lär dig steg för steg", icon: "▶" },
   rules: { name: "Regler och begrepp", description: "Välj rätt regel eller begrepp", icon: "?" },
   calculate: { name: "Räkna ut", description: "Välj rätt svar", icon: "=" },
@@ -23,11 +24,85 @@ const modeCatalog = {
   methods: { name: "Förstå metoden", description: "Välj och förklara ett arbetssätt", icon: "→" },
 };
 
-const q = (prompt, example, choices, correct, explanation, levels = ["high"]) => ({
-  prompt, example, choices, correct, explanation, levels,
+const q = (prompt, example, choices, correct, explanation, levels = ["high"], visual = null) => ({
+  prompt, example, choices, correct, explanation, levels, visual,
 });
 
 const topics = {
+  coordinateLanguage: {
+    title: "Läs koordinater",
+    description: "Förstå axlar, origo och en punkts läge.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["Två riktningar", "x först, sedan y", "x-axeln är vågrät och y-axeln lodrät. Koordinaterna anger en punkts läge i dessa två riktningar.", "I ett koordinatpar kommer x-värdet först och y-värdet sedan."],
+      ["Utgå från mitten", "Origo", "Axlarna möts i origo. Där är både x och y noll.", "Till höger är x positivt. Ovanför är y positivt. Åt motsatta hållen blir värdena negativa.", {"type": "coordinates", "points": [{"x": 0, "y": 0, "label": "A"}], "alt": "Koordinatsystem med enhetssteg. Punkt A ligger vid x=0 och y=0."}],
+      ["Läs en punkt", "Sidled, sedan höjd", "Läs först punktens läge längs x-axeln och sedan längs y-axeln.", "Kontrollera axlarnas skala. Ett steg i rutnätet behöver inte alltid motsvara ett."],
+    ],
+    modes: {
+      graphic: [
+        q("Vilka koordinater har A?", "Läs x först och sedan y", ["(1, 2)", "(2, 1)", "(−2, 1)"], 1, "A ligger två steg åt höger och ett steg upp från origo.", ["high"], {"type": "coordinates", "points": [{"x": 2, "y": 1, "label": "A"}], "alt": "Koordinatsystem med enhetssteg. Punkt A ligger vid x=2 och y=1."}),
+        q("Vad stämmer om A?", "Läs tecknen på koordinaterna", ["Båda är positiva", "x är positivt, y negativt", "x är negativt, y positivt"], 2, "A ligger till vänster om y-axeln och ovanför x-axeln.", ["high"], {"type": "coordinates", "points": [{"x": -2, "y": 1, "label": "A"}], "alt": "Koordinatsystem med enhetssteg. Punkt A ligger vid x=-2 och y=1."}),
+        q("Var ligger A?", "Axlarna möts", ["I origo", "På läget (1, 1)", "Utanför koordinatsystemet"], 0, "A ligger där båda koordinaterna är noll.", ["high"], {"type": "coordinates", "points": [{"x": 0, "y": 0, "label": "A"}], "alt": "Koordinatsystem med enhetssteg. Punkt A ligger vid x=0 och y=0."}),
+        q("Vilken koordinat är noll?", "A ligger på en axel", ["y-koordinaten", "x-koordinaten", "Ingen av dem"], 1, "På y-axeln är läget i sidled noll, så x är noll.", ["high"], {"type": "coordinates", "points": [{"x": 0, "y": 2, "label": "A"}], "alt": "Koordinatsystem med enhetssteg. Punkt A ligger vid x=0 och y=2."}),
+      ],
+      rules: [
+        q("Vilken axel är vågrät?", "Koordinatsystem", ["x-axeln", "y-axeln", "Båda axlarna"], 0, "x-axeln går i sidled. y-axeln går i höjdled.", ["high"]),
+        q("Vad kallas axlarnas möte?", "Skärningspunkten", ["En katet", "Origo", "En täljare"], 1, "Axlarna möts i origo, där båda koordinaterna är noll.", ["high"], {"type": "coordinates", "points": [{"x": 0, "y": 0, "label": "A"}], "alt": "Koordinatsystem med enhetssteg. Punkt A ligger vid x=0 och y=0."}),
+        q("Vad anger första koordinaten?", "(x, y)", ["Punktens namn", "Läget i höjdled", "Läget i sidled"], 2, "x-koordinaten skrivs först och anger läget i sidled.", ["high"]),
+        q("Vilken koordinat är positiv?", "En punkt ovanför x-axeln", ["y-koordinaten", "Alltid båda", "Alltid x-koordinaten"], 0, "Ovanför x-axeln är y positivt. x beror på punktens läge i sidled.", ["high"]),
+      ],
+      methods: [
+        q("Vad läser du först?", "Bestäm punktens koordinater", ["Punktens färg", "Läget längs x-axeln", "Avståndet till närmaste hörn"], 1, "Läs x först och sedan y. Det är ordningen i koordinatparet.", ["high"]),
+        q("Hur går du vid negativt x?", "Utgå från origo", ["Uppåt", "Nedåt", "Åt vänster"], 2, "Negativa x-värden finns till vänster om y-axeln.", ["high"]),
+        q("Hur går du vid negativt y?", "Utgå från x-axeln", ["Nedåt", "Åt höger", "Uppåt"], 0, "Negativa y-värden ligger under x-axeln.", ["high"]),
+        q("Vad kontrollerar du innan du räknar rutor?", "Koordinatsystemets gradering", ["Hur tjocka linjerna är", "Vad varje steg motsvarar", "Vilken bokstav punkten har"], 1, "Läs axlarnas skalvärden. Graderingen avgör värdet av varje steg.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "x och y kan byta plats utan att punktens läge ändras", ["Sant", "Falskt"], 1, "Ordningen spelar roll. Att byta x och y kan ge en annan punkt.", ["high"]),
+        q("Sant eller falskt?", "En punkt på y-axeln har x-värdet noll", ["Sant", "Falskt"], 0, "Punkten ligger inte åt höger eller vänster om y-axeln, så x är noll.", ["high"]),
+        q("Sant eller falskt?", "Origo har båda koordinaterna noll", ["Sant", "Falskt"], 0, "Origo är axlarnas gemensamma nollpunkt.", ["high"]),
+        q("Sant eller falskt?", "Alla punkter under x-axeln har negativt x", ["Sant", "Falskt"], 1, "Under x-axeln är y negativt. x kan vara positivt, negativt eller noll.", ["high"]),
+      ],
+    },
+  },
+  pythagorasLanguage: {
+    title: "Förstå Pythagoras sats",
+    description: "Skilj mellan kateter och hypotenusa och välj rätt metod.",
+    levels: ["high"],
+    languageFocused: true,
+    walkthrough: [
+      ["Börja med vinkeln", "En rätvinklig triangel", "Pythagoras sats gäller för rätvinkliga trianglar. Den lilla fyrkanten markerar den räta vinkeln.", "Sidan mitt emot den räta vinkeln heter hypotenusa. De andra två heter kateter.", {"type": "triangle", "alt": "Rätvinklig triangel. Sidorna a och b möts vid markeringen för rät vinkel. Sida c ligger mitt emot. Sida c är tjockt markerad.", "emphasis": "hypotenuse"}],
+      ["Sambandet mellan sidorna", "a² + b² = c²", "Kvadraterna på kateternas längder har tillsammans samma värde som kvadraten på hypotenusans längd.", "Här står a och b för kateterna och c för hypotenusan. Kvadrat betyder att längdtalet multipliceras med sig självt."],
+      ["Välj vilken sida du söker", "Addera eller subtrahera", "Söker du hypotenusan adderar du kateternas kvadrater. Söker du en katet subtraherar du den andra katetens kvadrat från hypotenusans kvadrat.", "Till sist tar du kvadratroten för att få längden, eftersom du först har beräknat längdens kvadrat."],
+    ],
+    modes: {
+      graphic: [
+        q("Vilken sida är hypotenusan?", "Hitta den räta vinkeln", ["a", "b", "c"], 2, "c ligger mitt emot den räta vinkeln och är hypotenusan.", ["high"], {"type": "triangle", "alt": "Rätvinklig triangel. Sidorna a och b möts vid markeringen för rät vinkel. Sida c ligger mitt emot."}),
+        q("Vad heter den tjockt markerade sidan?", "Sidans roll", ["En katet", "En radie", "Hypotenusan"], 0, "b är en av de två sidor som bildar den räta vinkeln.", ["high"], {"type": "triangle", "alt": "Rätvinklig triangel. Sidorna a och b möts vid markeringen för rät vinkel. Sida c ligger mitt emot. Sida b är tjockt markerad.", "emphasis": "leg"}),
+        q("Vilket samband passar figuren?", "Sidorna heter a, b och c", ["a + b = c", "a² + b² = c²", "a² + c² = b²"], 1, "a och b är kateterna. Deras kvadrater har summan c².", ["high"], {"type": "triangle", "alt": "Rätvinklig triangel. Sidorna a och b möts vid markeringen för rät vinkel. Sida c ligger mitt emot."}),
+        q("Vad visar den lilla fyrkanten?", "Villkoret för satsen", ["Alla sidor är lika långa", "Triangeln har fyra sidor", "Triangeln har en rät vinkel"], 2, "Markeringen visar den räta vinkeln. Därför passar Pythagoras sats.", ["high"], {"type": "triangle", "alt": "Rätvinklig triangel. Sidorna a och b möts vid markeringen för rät vinkel. Sida c ligger mitt emot."}),
+      ],
+      rules: [
+        q("När gäller Pythagoras sats?", "Triangelns form", ["När triangeln är rätvinklig", "För alla trianglar", "Bara om alla sidor är lika"], 0, "Satsen gäller i en triangel som har en rät vinkel.", ["high"], {"type": "triangle", "alt": "Rätvinklig triangel. Sidorna a och b möts vid markeringen för rät vinkel. Sida c ligger mitt emot."}),
+        q("Vad heter sidan mitt emot den räta vinkeln?", "Triangelns längsta sida", ["Katet", "Hypotenusa", "Diameter"], 1, "Hypotenusan är sidan mitt emot den räta vinkeln.", ["high"]),
+        q("Vad heter de andra två sidorna?", "Sidorna som möts i den räta vinkeln", ["Radier", "Diagonaler", "Kateter"], 2, "De två kateterna bildar den räta vinkeln.", ["high"]),
+        q("Vad betyder a²?", "Längdens kvadrat", ["a multiplicerat med a", "a adderat med a", "a dividerat med två"], 0, "a² betyder a gånger a, inte två gånger a.", ["high"], {"type": "triangle", "alt": "Rätvinklig triangel. Sidorna a och b möts vid markeringen för rät vinkel. Sida c ligger mitt emot."}),
+      ],
+      methods: [
+        q("Vad gör du först?", "Välj om satsen passar", ["Mäter figurens färg", "Kontrollerar att vinkeln är rät", "Antar att längsta sidan är en katet"], 1, "Pythagoras sats kräver en rätvinklig triangel.", ["high"]),
+        q("Vad adderar du när hypotenusan söks?", "a² + b² = c²", ["Bara sidornas längder", "Alla tre sidorna", "Kateternas kvadrater"], 2, "Summan av kateternas kvadrater ger hypotenusans kvadrat.", ["high"]),
+        q("Vad gör du när en katet söks?", "Hypotenusan och en katet är kända", ["Subtraherar den kända katetens kvadrat", "Addera alla längder", "Delar alltid hypotenusan med två"], 0, "Subtrahera den kända katetens kvadrat från hypotenusans kvadrat.", ["high"]),
+        q("Vilket steg återstår?", "Du har beräknat sidans kvadrat", ["Dubbla värdet", "Ta kvadratroten", "Lägg till den räta vinkeln"], 1, "Kvadratroten ger den sökta positiva sidlängden.", ["high"]),
+      ],
+      truefalse: [
+        q("Sant eller falskt?", "Hypotenusan ligger mitt emot den räta vinkeln", ["Sant", "Falskt"], 0, "Den sidan är också den längsta i en rätvinklig triangel.", ["high"]),
+        q("Sant eller falskt?", "Pythagoras sats säger att kateternas längder ska adderas", ["Sant", "Falskt"], 1, "Det är kvadraterna på längderna som adderas.", ["high"]),
+        q("Sant eller falskt?", "Alla trianglar är rätvinkliga", ["Sant", "Falskt"], 1, "En triangel måste ha en rät vinkel för att Pythagoras sats ska kunna användas direkt.", ["high"]),
+        q("Sant eller falskt?", "Figurens vridning ändrar vilken sida som är hypotenusa", ["Sant", "Falskt"], 1, "Sidan mitt emot den räta vinkeln är hypotenusan oavsett hur bilden är vriden.", ["high"]),
+      ],
+    },
+  },
   negativeLanguage: {
     title: "Förstå negativa tal",
     description: "Beskriv ordning, motsatta tal och subtraktion.",
@@ -39,6 +114,12 @@ const topics = {
       ["Två roller för minus", "Tecken och räknesätt", "Ett minustecken kan visa att ett tal är negativt. Det kan också stå för räknesättet subtraktion.", "Att subtrahera ett tal är samma sak som att addera dess motsatta tal."],
     ],
     modes: {
+      graphic: [
+        q("Vilket markerat tal är störst?", "Jämför punkternas lägen", ["A", "B", "De är lika stora"], 1, "B ligger längre åt höger på tallinjen och är därför större.", ["high"], {"type": "numberLine", "min": -3, "max": 3, "points": [{"value": -2, "label": "A"}, {"value": 1, "label": "B"}], "alt": "Tallinje från minus tre till tre. A ligger vid -2, B ligger vid 1"}),
+        q("Vad har de markerade talen gemensamt?", "Jämför med noll", ["Båda är positiva", "De är lika stora", "De är motsatta tal"], 2, "De ligger lika långt från noll på var sin sida.", ["high"], {"type": "numberLine", "min": -3, "max": 3, "points": [{"value": -2, "label": "A"}, {"value": 2, "label": "B"}], "alt": "Tallinje från minus tre till tre. A ligger vid -2, B ligger vid 2"}),
+        q("Vilken förändring visar pilen?", "Från start till slut", ["Värdet minskar", "Värdet ökar", "Värdet är oförändrat"], 0, "Pilen går åt vänster, mot mindre tal.", ["high"], {"type": "numberLine", "min": -3, "max": 3, "points": [], "alt": "Tallinje från minus tre till tre. . Pilen går från 1 till -2", "arrow": {"from": 1, "to": -2}}),
+        q("Vilket tecken har talet vid A?", "Punktens läge", ["Positivt", "Negativt", "Varken positivt eller negativt"], 1, "A ligger till vänster om noll och markerar ett negativt tal.", ["high"], {"type": "numberLine", "min": -3, "max": 3, "points": [{"value": -1, "label": "A"}], "alt": "Tallinje från minus tre till tre. A ligger vid -1"}),
+      ],
       rules: [
         q("Vilket ord passar?", "Ett tal till vänster om noll", ["Negativt", "Positivt", "Alltid noll"], 0, "På en vanlig tallinje ligger de negativa talen till vänster om noll.", ["high"]),
         q("Vilken beskrivning stämmer?", "Talet noll", ["Är både positivt och negativt", "Är varken positivt eller negativt", "Är alltid negativt"], 1, "Noll är gränsen mellan positiva och negativa tal.", ["high"]),
@@ -220,16 +301,22 @@ const topics = {
     levels: ["high"],
     languageFocused: true,
     walkthrough: [
-      ["Vinkelns delar", "Vinkelspets och vinkelben", "Två strålar med samma startpunkt bildar en vinkel. Startpunkten är vinkelspetsen.", "Strålarna kallas vinkelben. Vinkelns storlek beror på öppningen mellan dem."],
+      ["Vinkelns delar", "Vinkelspets och vinkelben", "Två strålar med samma startpunkt bildar en vinkel. Startpunkten är vinkelspetsen.", "Strålarna kallas vinkelben. Vinkelns storlek beror på öppningen mellan dem.", {"type": "angle", "degrees": 45, "alt": "Två vinkelben med en öppning på 45 grader."}],
       ["Jämför med ett hörn", "Spetsig, rät och trubbig", "En rät vinkel motsvarar ett kvarts varv. En spetsig är mindre; en trubbig är större men mindre än ett halvt varv.", "En spetsig vinkel är större än noll. En liten fyrkant vid spetsen markerar en rät vinkel."],
       ["Mät öppningen", "Grader och gradskiva", "Lägg gradskivans centrum på vinkelspetsen och dess nolllinje längs ett vinkelben.", "Läs den skala som börjar på noll vid det vinkelbenet. Följ den till det andra vinkelbenet."],
     ],
     modes: {
+      graphic: [
+        q("Vilken sorts vinkel ser du?", "Titta på öppningen", ["Rät", "Trubbig", "Spetsig"], 2, "Öppningen är större än noll men mindre än en rät vinkel.", ["high"], {"type": "angle", "degrees": 45, "alt": "Två vinkelben med en öppning på 45 grader."}),
+        q("Vad visar markeringen?", "Den lilla fyrkanten", ["En rät vinkel", "Lika långa vinkelben", "En hel cirkel"], 0, "Den lilla fyrkanten visar att vinkeln är rät.", ["high"], {"type": "angle", "degrees": 90, "alt": "Två vinkelben med en öppning på 90 grader. En liten fyrkant finns vid spetsen."}),
+        q("Vilken sorts vinkel ser du?", "Jämför med ett kvarts varv", ["Spetsig", "Trubbig", "Rak"], 1, "Öppningen är större än ett kvarts varv men mindre än ett halvt.", ["high"], {"type": "angle", "degrees": 125, "alt": "Två vinkelben med en öppning på 125 grader."}),
+        q("Vilken vridning motsvarar vinkeln?", "Jämför med ett helt varv", ["Ett helt varv", "Ett halvt varv", "Ett kvarts varv"], 2, "En rät vinkel motsvarar ett kvarts varv.", ["high"], {"type": "angle", "degrees": 90, "alt": "Två vinkelben med en öppning på 90 grader. En liten fyrkant finns vid spetsen."}),
+      ],
       rules: [
         q("Vad kallas mötespunkten?", "Vinkelbenens gemensamma start", ["Vinkelspets", "Vinkelsumma", "Omkrets"], 0, "Den gemensamma startpunkten kallas vinkelspets.", ["high"]),
         q("Vilken vinkel beskrivs?", "Större än noll men mindre än en rät", ["Trubbig", "Spetsig", "Rak"], 1, "En spetsig vinkel är mindre än en rät vinkel och större än noll.", ["high"]),
         q("Vilken vinkel beskrivs?", "Större än rät, mindre än rak", ["Spetsig", "Rät", "Trubbig"], 2, "En trubbig vinkel ligger mellan en rät vinkel och ett halvt varv.", ["high"]),
-        q("Vad visar den lilla fyrkanten?", "En markering vid vinkelspetsen", ["Att vinkeln är rät", "Att benen är lika långa", "Att figuren är en kvadrat"], 0, "Den lilla fyrkanten markerar en rät vinkel, inte en viss längd på benen.", ["high"]),
+        q("Vad visar den lilla fyrkanten?", "En markering vid vinkelspetsen", ["Att vinkeln är rät", "Att benen är lika långa", "Att figuren är en kvadrat"], 0, "Den lilla fyrkanten markerar en rät vinkel, inte en viss längd på benen.", ["high"], {"type": "angle", "degrees": 90, "alt": "Två vinkelben med en öppning på 90 grader. En liten fyrkant finns vid spetsen."}),
       ],
       methods: [
         q("Vad ska du jämföra?", "Vilken vinkel är störst?", ["Hur långa benen är ritade", "Hur stor öppningen är", "Vilken figur som är störst"], 1, "Vinkelstorleken avgörs av öppningen, inte av de ritade benens längd.", ["high"]),
@@ -253,11 +340,17 @@ const topics = {
     walkthrough: [
       ["Börja med helheten", "Lika stora delar", "När ett bråk beskriver en del av en figur behöver du veta vad som är hela figuren. Dela helheten i lika stora delar.", "Att bara räkna bitar fungerar inte om bitarna har olika storlek."],
       ["Läs delarnas namn", "Täljare och nämnare", "Nämnaren anger hur många lika stora delar helheten delas i. Täljaren anger hur många sådana delar bråket avser.", "Bråkstrecket betyder division. Bråk kan också beskriva mer än en hel."],
-      ["Samma värde, ny form", "Förkorta och förlänga", "Dividera eller multiplicera täljare och nämnare med samma positiva heltal. Värdet bevaras.", "Vid förkortning väljer du en gemensam delare så att täljare och nämnare fortfarande är heltal."],
+      ["Samma värde, ny form", "Förkorta och förlänga", "Dividera eller multiplicera täljare och nämnare med samma positiva heltal. Värdet bevaras.", "Vid förkortning väljer du en gemensam delare så att täljare och nämnare fortfarande är heltal.", {"type": "fraction", "rows": [{"parts": 2, "filled": 1, "label": "1/2"}, {"parts": 4, "filled": 2, "label": "2/4"}], "alt": "En halv och två fjärdedelar visar lika stor markerad andel."}],
     ],
     modes: {
+      graphic: [
+        q("Vilken del är markerad?", "En hel rektangel", ["En fjärdedel", "Tre fjärdedelar", "Tre halvor"], 1, "Tre av fyra lika stora delar är markerade: tre fjärdedelar.", ["high"], {"type": "fraction", "rows": [{"parts": 4, "filled": 3}], "alt": "En rektangel delad i 4 lika stora delar. 3 delar är blå och markerade med prickar."}),
+        q("Vilken regel syns?", "Två lika stora helheter", ["Fler delar ger större bråkvärde", "Bara färgen avgör värdet", "Olika bråk kan ha samma värde"], 2, "Den markerade delen är lika stor: en halv och två fjärdedelar.", ["high"], {"type": "fraction", "rows": [{"parts": 2, "filled": 1, "label": "1/2"}, {"parts": 4, "filled": 2, "label": "2/4"}], "alt": "Två lika långa rektanglar. En av två delar är markerad i den övre och två av fyra i den nedre."}),
+        q("Vad visar nämnaren här?", "Bråket av hela figuren", ["Sex lika stora delar", "Två markerade delar", "Fyra omarkerade delar"], 0, "Nämnaren anger hur många lika stora delar helheten är delad i.", ["high"], {"type": "fraction", "rows": [{"parts": 6, "filled": 2}], "alt": "En rektangel delad i 6 lika stora delar. 2 delar är blå och markerade med prickar."}),
+        q("Hur mycket är markerat?", "Jämför med en halv", ["Mindre än hälften", "Precis hälften", "Mer än hälften"], 0, "Två av sex lika stora delar är mindre än tre av sex, som är hälften.", ["high"], {"type": "fraction", "rows": [{"parts": 6, "filled": 2}], "alt": "En rektangel delad i 6 lika stora delar. 2 delar är blå och markerade med prickar."}),
+      ],
       rules: [
-        q("Vad berättar nämnaren?", "Ett bråk av en helhet", ["Hur många lika delar helheten delas i", "Hur många delar som är markerade", "Hur stor hela figuren är i centimeter"], 0, "Nämnaren anger indelningen av helheten i lika stora delar.", ["high"]),
+        q("Vad berättar nämnaren?", "Ett bråk av en helhet", ["Hur många lika delar helheten delas i", "Hur många delar som är markerade", "Hur stor hela figuren är i centimeter"], 0, "Nämnaren anger indelningen av helheten i lika stora delar.", ["high"], {"type": "fraction", "rows": [{"parts": 4, "filled": 3}], "alt": "En rektangel delad i 4 lika stora delar. 3 delar är blå och markerade med prickar."}),
         q("Vad berättar täljaren?", "Ett bråk av en helhet", ["Antalet delar i varje helhet", "Hur många delar bråket avser", "Att delarna alltid är olika stora"], 1, "Täljaren anger antalet delar av den storlek som nämnaren beskriver.", ["high"]),
         q("Vad betyder bråkstrecket?", "Täljare över nämnare", ["Addition", "Multiplikation", "Division"], 2, "Ett bråk kan läsas som täljaren dividerad med nämnaren.", ["high"]),
         q("Vilket begrepp passar?", "Samma bråkvärde med större heltal", ["Förlängning", "Avrundning", "Subtraktion"], 0, "Vid förlängning multipliceras både täljare och nämnare med samma positiva heltal större än ett.", ["high"]),
@@ -595,7 +688,7 @@ const highCategories = [
     "id": "pythagoras",
     "title": "Pythagoras sats",
     "description": "Sambandet mellan sidorna i en rätvinklig triangel.",
-    "topicIds": [],
+    "topicIds": ["pythagorasLanguage"],
     "keywords": "hypotenusa kateter"
   },
   {
@@ -702,7 +795,7 @@ const highCategories = [
     "id": "functions",
     "title": "Koordinater och funktioner",
     "description": "Koordinatsystem, linjära samband och proportionalitet.",
-    "topicIds": [],
+    "topicIds": ["coordinateLanguage"],
     "keywords": "origo x-axel y-axel graf lutning startvärde räta linjens ekvation"
   }
 ] },
@@ -882,14 +975,27 @@ function startMode(mode) {
   }
 }
 
+function renderExample(container, text, visual) {
+  container.replaceChildren();
+  container.classList.toggle("has-visual", Boolean(visual));
+  container.closest(".practice-screen").classList.toggle("visual-practice", Boolean(visual));
+  if (visual) {
+    container.append(MathGraphics.render(visual));
+    const caption = document.createElement("span");
+    caption.className = "visual-caption";
+    caption.textContent = text;
+    container.append(caption);
+  } else container.textContent = text;
+}
+
 function renderQuestion() {
   const questions = modeQuestions(currentMode);
   const question = questions[questionIndex];
-  $("#quiz-screen").classList.toggle("language-practice", Boolean(selectedTopic.languageFocused));
+  $("#quiz-screen").classList.toggle("language-practice", Boolean(selectedTopic.languageFocused || question.visual));
   $("#mode-label").textContent = currentMode === "quick" ? `Snabbträning · ${quickScore} rätt` : modeCatalog[currentMode].name;
   $("#question-progress").textContent = `Fråga ${questionIndex + 1} av ${questions.length}`;
   $("#question-heading").textContent = question.prompt;
-  $("#question-example").textContent = question.example;
+  renderExample($("#question-example"), question.example, question.visual);
   $("#answer-instruction").textContent = "Välj ett svar.";
   $("#feedback").hidden = true;
   $("#explanation").hidden = true;
@@ -940,7 +1046,7 @@ function renderWalkthrough() {
   const step = selectedTopic.walkthrough[walkthroughIndex];
   $("#walkthrough-progress").textContent = `Steg ${walkthroughIndex + 1} av ${selectedTopic.walkthrough.length}`;
   $("#walkthrough-heading").textContent = step[0];
-  $("#walkthrough-example").textContent = step[1];
+  renderExample($("#walkthrough-example"), step[1], step[4]);
   $("#walkthrough-text").textContent = step[2];
   $("#extra-explanation").textContent = step[3];
   $("#extra-explanation").hidden = true;
@@ -1137,9 +1243,9 @@ function searchSections(query) {
     const topicEntries = topicIdsFor(group).map((topicId) => {
       const topic = topics[topicId];
       const questions = Object.values(topic.modes).flat().filter((question) => question.levels.includes(level));
-      const vocabulary = questions.flatMap((question) => [question.prompt, question.example, question.choices[question.correct], question.explanation]);
+      const vocabulary = questions.flatMap((question) => [question.prompt, question.example, question.choices[question.correct], question.explanation, question.visual?.alt || ""]);
       return { title: topic.title, description: path, category, group, topicId, ready: true,
-        text: [path, topic.title, topic.description, ...(topic.walkthrough || []).flat(), ...vocabulary].join(" ") };
+        text: [path, topic.title, topic.description, ...(topic.walkthrough || []).flatMap((step) => [...step.slice(0, 4), step[4]?.alt || ""]), ...vocabulary].join(" ") };
     });
     return [...topicEntries, { title: group.title, description: category.title, category, group, ready: topicEntries.length > 0,
       text: [category.title, group.title, group.description, group.keywords].join(" ") }];
