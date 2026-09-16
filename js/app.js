@@ -13,6 +13,7 @@ window.addEventListener("load", () => window.setTimeout(dismissSplash, 850));
 window.setTimeout(dismissSplash, 2500);
 
 const modeCatalog = {
+  animate: { name: "Animera", description: "Bygg uttryck steg för steg med Nästa", icon: "▷" },
   graphic: { name: "Grafisk", description: "Tolka figurer, lägen och samband", icon: "▧" },
   walkthrough: { name: "Genomgång", description: "Lär dig steg för steg", icon: "▶" },
   rules: { name: "Regler och begrepp", description: "Välj rätt regel eller begrepp", icon: "?" },
@@ -29,6 +30,597 @@ const q = (prompt, example, choices, correct, explanation, levels = ["high"], vi
 });
 
 const topics = {
+  priorityLanguage: {
+  "title": "Prioriteringsregler",
+  "description": "Förklara ordningen mellan parenteser, potenser och räknesätt.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Gruppera först",
+      "(4 + 3) × 2 = 7 × 2",
+      "En parentes visar vilka delar som hör ihop. Beräkna det som står i parentesen först.",
+      "Inuti parentesen gäller samma prioriteringsregler som i resten av uttrycket."
+    ],
+    [
+      "Olika prioritet",
+      "2 + 3² = 2 + 9 = 11",
+      "Efter parenteser beräknas potenser. Sedan multiplikation och division, och sist addition och subtraktion.",
+      "Multiplikation och division har samma prioritet. Addition och subtraktion har också samma prioritet."
+    ],
+    [
+      "Vid samma prioritet",
+      "12 ÷ 3 × 2 = 4 × 2 = 8",
+      "Räknesätt med samma prioritet utförs från vänster till höger.",
+      "Multiplikation går alltså inte alltid före division. Här kommer divisionen först."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad visar parentesen?",
+        "example": "(4 + 3) × 2",
+        "choices": [
+          "Vad som ska beräknas först",
+          "Att multiplikation ska hoppas över",
+          "Att svaret måste bli negativt"
+        ],
+        "correct": 0,
+        "explanation": "Beräkna summan i parentesen innan du multiplicerar med två.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad kommer före addition?",
+        "example": "4 + 3 × 2",
+        "choices": [
+          "Det vänstra talet",
+          "Multiplikationen",
+          "Likhetstecknet"
+        ],
+        "correct": 1,
+        "explanation": "Multiplikation har högre prioritet än addition.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilka har samma prioritet?",
+        "example": "Räknesättens ordning",
+        "choices": [
+          "Addition och multiplikation",
+          "Potenser och subtraktion",
+          "Multiplikation och division"
+        ],
+        "correct": 2,
+        "explanation": "Multiplikation och division beräknas på samma prioriteringsnivå.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilket håll gäller vid samma prioritet?",
+        "example": "12 − 3 + 2",
+        "choices": [
+          "Från vänster till höger",
+          "Alltid plus först",
+          "Från höger till vänster"
+        ],
+        "correct": 0,
+        "explanation": "Addition och subtraktion har samma prioritet. Börja därför från vänster.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Vad gör du först?",
+        "example": "2 + 3²",
+        "choices": [
+          "Adderar 2 och 3",
+          "Beräknar 3²",
+          "Multiplicerar 2 och 3"
+        ],
+        "correct": 1,
+        "explanation": "Potensen beräknas före additionen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilket steg bevarar uttryckets värde?",
+        "example": "4 + 3 × 2",
+        "choices": [
+          "7 × 2",
+          "4 × 6",
+          "4 + 6"
+        ],
+        "correct": 2,
+        "explanation": "Beräkna produkten 3 × 2 först och behåll termen 4.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur får du additionen att ske först?",
+        "example": "4 + 3 × 2",
+        "choices": [
+          "Sätt parentes runt 4 + 3",
+          "Sätt parentes runt 3 × 2",
+          "Byt bara plats på 4 och 3"
+        ],
+        "correct": 0,
+        "explanation": "(4 + 3) × 2 anger en annan beräkningsordning och ger ett annat värde.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur börjar du här?",
+        "example": "12 ÷ 3 × 2",
+        "choices": [
+          "Beräknar 3 × 2",
+          "Beräknar 12 ÷ 3",
+          "Adderar alla talen"
+        ],
+        "correct": 1,
+        "explanation": "Division och multiplikation har samma prioritet. Börja från vänster.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Addition ska alltid utföras från vänster innan man multiplicerar",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Multiplikation har högre prioritet än addition, om inte parenteser anger annat.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En parentes kan ändra uttryckets värde",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "4 + 3 × 2 = 10, men (4 + 3) × 2 = 14.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Division ska alltid utföras efter multiplikation",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "De har samma prioritet och beräknas från vänster till höger.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Prioriteringsregler gäller även inuti parenteser",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "I parentesen (2 + 3 × 4) beräknas multiplikationen först.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "multiply-first",
+      "title": "Multiplikation före addition",
+      "levels": [
+        "high"
+      ],
+      "compact": false,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "first",
+              "text": "4"
+            },
+            {
+              "id": "plus",
+              "text": "+"
+            },
+            {
+              "id": "product",
+              "text": "3 × 2"
+            }
+          ],
+          "text": "Här finns både addition och multiplikation. Produkten tre gånger två ska beräknas först.",
+          "spoken": "Fyra plus tre gånger två."
+        },
+        {
+          "parts": [
+            {
+              "id": "first",
+              "text": "4"
+            },
+            {
+              "id": "plus",
+              "text": "+"
+            },
+            {
+              "id": "product",
+              "text": "6"
+            }
+          ],
+          "text": "Tre gånger två är sex. Vi ersätter produkten med sex och behåller termen fyra.",
+          "spoken": "Fyra plus sex."
+        },
+        {
+          "parts": [
+            {
+              "id": "first",
+              "text": "4"
+            },
+            {
+              "id": "plus",
+              "text": "+"
+            },
+            {
+              "id": "product",
+              "text": "6"
+            },
+            {
+              "id": "equals",
+              "text": "="
+            },
+            {
+              "id": "sum",
+              "text": "10"
+            }
+          ],
+          "text": "Nu adderar vi. Summan blir tio.",
+          "spoken": "Fyra plus sex är lika med tio."
+        }
+      ]
+    }
+  ]
+},
+  percentChangeLanguage: {
+  "title": "Procentuell förändring",
+  "description": "Skilj mellan förändringen, ursprungsvärdet och det nya värdet.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Välj jämförelsevärde",
+      "100 kr → 120 kr",
+      "En procentuell förändring jämförs med värdet från början. Här är ursprungsvärdet 100 kronor.",
+      "Skillnaden är 20 kronor. Dividera förändringen med ursprungsvärdet för att få förändringen i decimalform."
+    ],
+    [
+      "Beskriv det som blir kvar",
+      "100 % − 20 % = 80 %",
+      "En sänkning med 20 procent betyder att 80 procent av ursprungsvärdet återstår.",
+      "80 procent skrivs 0,8 i decimalform. Det är förändringsfaktorn vid denna sänkning."
+    ],
+    [
+      "Använd en faktor",
+      "100 kr × 1,2 = 120 kr",
+      "Vid en höjning med 20 procent är förändringsfaktorn 1 + 0,2 = 1,2. Multiplicera det gamla värdet med faktorn.",
+      "Vid en sänkning med 20 procent är faktorn 1 − 0,2 = 0,8. Talet 1 står för hela ursprungsvärdet."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad jämförs förändringen med?",
+        "example": "Pris från 100 kr till 120 kr",
+        "choices": [
+          "Priset från början",
+          "Bara det nya priset",
+          "Antalet varor"
+        ],
+        "correct": 0,
+        "explanation": "Procentuell förändring utgår från ursprungsvärdet, här 100 kronor.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad menas med ordinarie pris?",
+        "example": "En vara säljs med rabatt",
+        "choices": [
+          "Priset efter rabatten",
+          "Priset utan rabatt",
+          "Bara rabattens storlek"
+        ],
+        "correct": 1,
+        "explanation": "Det ordinarie priset är priset innan rabatten dras av.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder förändringsfaktor 0,8?",
+        "example": "Nytt värde = gammalt värde × 0,8",
+        "choices": [
+          "Värdet har ökat med 80 %",
+          "Värdet har minskat med 80 %",
+          "80 % av ursprungsvärdet återstår"
+        ],
+        "correct": 2,
+        "explanation": "0,8 motsvarar 80 procent. Minskningen är 20 procent.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken faktor hör till en ökning med 20 %?",
+        "example": "100 % + 20 % = 120 %",
+        "choices": [
+          "1,2",
+          "0,2",
+          "0,8"
+        ],
+        "correct": 0,
+        "explanation": "120 procent är 1,2 i decimalform.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Hur beskriver du en minskning med 30 %?",
+        "example": "Välj förändringsfaktor",
+        "choices": [
+          "1 + 0,3",
+          "1 − 0,3",
+          "1 ÷ 0,3"
+        ],
+        "correct": 1,
+        "explanation": "Dra av förändringen från hela ursprungsvärdet: 1 − 0,3 = 0,7.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken metod ger det nya värdet?",
+        "example": "Ursprungsvärdet och faktorn är kända",
+        "choices": [
+          "Addera värdet och faktorn",
+          "Dividera alltid med hundra",
+          "Multiplicera värdet med faktorn"
+        ],
+        "correct": 2,
+        "explanation": "Förändringsfaktorn anger hur stor del av ursprungsvärdet det nya värdet är.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken kvot beskriver ökningen?",
+        "example": "Pris från 100 kr till 120 kr",
+        "choices": [
+          "20 ÷ 100",
+          "20 ÷ 120",
+          "100 ÷ 20"
+        ],
+        "correct": 0,
+        "explanation": "Ökningen är 20 kronor och jämförs med ursprungsvärdet 100 kronor.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad utgår nästa procentändring från?",
+        "example": "Först höjning, sedan sänkning",
+        "choices": [
+          "Alltid det första priset",
+          "Det senast ändrade priset",
+          "Bara den första förändringen"
+        ],
+        "correct": 1,
+        "explanation": "Varje ändring utgår från det värde som gäller just då.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Faktor 1 betyder oförändrat värde",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Att multiplicera med 1 bevarar värdet.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En sänkning med 20 % betyder att 20 % återstår",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "80 procent återstår, eftersom 100 − 20 = 80.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En höjning och sedan sänkning med samma procentsats tar alltid ut varandra",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "De räknas på olika värden. 100 ökat med 20 procent blir 120; minskat med 20 procent blir det sedan 96.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Faktor 1,3 innebär en ökning med 30 %",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Hela ursprungsvärdet är 1 och ökningen är 0,3, så faktorn är 1,3.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "discount",
+      "title": "En rabatt på 20 procent",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "price",
+              "text": "100 kr"
+            }
+          ],
+          "text": "Vi börjar med priset hundra kronor. Det motsvarar hela ursprungsvärdet.",
+          "spoken": "Hundra kronor."
+        },
+        {
+          "parts": [
+            {
+              "id": "whole",
+              "text": "100 %"
+            },
+            {
+              "id": "minus",
+              "text": "−"
+            },
+            {
+              "id": "discount",
+              "text": "20 %"
+            },
+            {
+              "id": "equals",
+              "text": "="
+            },
+            {
+              "id": "remaining",
+              "text": "80 %"
+            }
+          ],
+          "text": "Rabatten är tjugo procent. Då återstår åttio procent av priset.",
+          "spoken": "Hundra procent minus tjugo procent är lika med åttio procent."
+        },
+        {
+          "parts": [
+            {
+              "id": "price",
+              "text": "100 kr"
+            },
+            {
+              "id": "times",
+              "text": "×"
+            },
+            {
+              "id": "factor",
+              "text": "0,8"
+            }
+          ],
+          "text": "Åttio procent skrivs 0,8. Vi multiplicerar ursprungspriset med förändringsfaktorn.",
+          "spoken": "Hundra kronor gånger noll komma åtta."
+        },
+        {
+          "parts": [
+            {
+              "id": "price",
+              "text": "100 kr"
+            },
+            {
+              "id": "times",
+              "text": "×"
+            },
+            {
+              "id": "factor",
+              "text": "0,8"
+            },
+            {
+              "id": "equals",
+              "text": "="
+            },
+            {
+              "id": "result",
+              "text": "80 kr"
+            }
+          ],
+          "text": "Det nya priset är åttio kronor. Det är priset efter rabatten.",
+          "spoken": "Hundra kronor gånger noll komma åtta är lika med åttio kronor."
+        }
+      ]
+    }
+  ]
+},
+
   powerRootLanguage: {
   "title": "Potenser och kvadratrötter",
   "description": "Förstå bas, exponent, kvadrat och kvadratrot.",
@@ -971,6 +1563,264 @@ const topics = {
     },
   },
   operationLanguage: {
+    animations: [
+  {
+    "id": "addition",
+    "title": "Addition",
+    "levels": [
+      "high"
+    ],
+    "compact": false,
+    "steps": [
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "4"
+          }
+        ],
+        "text": "Vi börjar med en term, till exempel fyra.",
+        "spoken": "Fyra."
+      },
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "4"
+          },
+          {
+            "id": "operator",
+            "text": "+"
+          },
+          {
+            "id": "second",
+            "text": "3"
+          }
+        ],
+        "text": "Vi adderar en term till, till exempel tre.",
+        "spoken": "Fyra plus tre."
+      },
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "4"
+          },
+          {
+            "id": "operator",
+            "text": "+"
+          },
+          {
+            "id": "second",
+            "text": "3"
+          },
+          {
+            "id": "equals",
+            "text": "="
+          },
+          {
+            "id": "result",
+            "text": "7"
+          }
+        ],
+        "text": "Då blir summan totalt sju. Termerna fyra och tre bildar summan sju.",
+        "spoken": "Fyra plus tre är lika med sju."
+      }
+    ]
+  },
+  {
+    "id": "subtraction",
+    "title": "Subtraktion",
+    "levels": [
+      "high"
+    ],
+    "compact": false,
+    "steps": [
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "7"
+          }
+        ],
+        "text": "Vi börjar med termen sju.",
+        "spoken": "Sju."
+      },
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "7"
+          },
+          {
+            "id": "operator",
+            "text": "−"
+          },
+          {
+            "id": "second",
+            "text": "3"
+          }
+        ],
+        "text": "Vi subtraherar termen tre från sju.",
+        "spoken": "Sju minus tre."
+      },
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "7"
+          },
+          {
+            "id": "operator",
+            "text": "−"
+          },
+          {
+            "id": "second",
+            "text": "3"
+          },
+          {
+            "id": "equals",
+            "text": "="
+          },
+          {
+            "id": "result",
+            "text": "4"
+          }
+        ],
+        "text": "Differensen blir fyra. Den visar skillnaden mellan sju och tre.",
+        "spoken": "Sju minus tre är lika med fyra."
+      }
+    ]
+  },
+  {
+    "id": "multiplication",
+    "title": "Multiplikation",
+    "levels": [
+      "high"
+    ],
+    "compact": false,
+    "steps": [
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "4"
+          }
+        ],
+        "text": "Vi börjar med en faktor, fyra.",
+        "spoken": "Fyra."
+      },
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "4"
+          },
+          {
+            "id": "operator",
+            "text": "×"
+          },
+          {
+            "id": "second",
+            "text": "3"
+          }
+        ],
+        "text": "Vi multiplicerar med en annan faktor, tre.",
+        "spoken": "Fyra gånger tre."
+      },
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "4"
+          },
+          {
+            "id": "operator",
+            "text": "×"
+          },
+          {
+            "id": "second",
+            "text": "3"
+          },
+          {
+            "id": "equals",
+            "text": "="
+          },
+          {
+            "id": "result",
+            "text": "12"
+          }
+        ],
+        "text": "Produkten blir tolv. Faktorerna fyra och tre bildar produkten tolv.",
+        "spoken": "Fyra gånger tre är lika med tolv."
+      }
+    ]
+  },
+  {
+    "id": "division",
+    "title": "Division",
+    "levels": [
+      "high"
+    ],
+    "compact": false,
+    "steps": [
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "12"
+          }
+        ],
+        "text": "Vi börjar med talet som ska delas: tolv. Det kallas täljare.",
+        "spoken": "Tolv."
+      },
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "12"
+          },
+          {
+            "id": "operator",
+            "text": "÷"
+          },
+          {
+            "id": "second",
+            "text": "3"
+          }
+        ],
+        "text": "Vi delar tolv med tre. Talet vi delar med kallas nämnare.",
+        "spoken": "Tolv delat med tre."
+      },
+      {
+        "parts": [
+          {
+            "id": "first",
+            "text": "12"
+          },
+          {
+            "id": "operator",
+            "text": "÷"
+          },
+          {
+            "id": "second",
+            "text": "3"
+          },
+          {
+            "id": "equals",
+            "text": "="
+          },
+          {
+            "id": "result",
+            "text": "4"
+          }
+        ],
+        "text": "Kvoten blir fyra. Kvot är namnet på resultatet av divisionen.",
+        "spoken": "Tolv delat med tre är lika med fyra."
+      }
+    ]
+  }
+],
     title: "Räknesättens språk",
     description: "Förstå orden term, summa, faktor och kvot.",
     levels: ["high"],
@@ -1189,6 +2039,90 @@ const topics = {
     },
   },
   algebra: {
+    animations: [
+  {
+    "id": "balance",
+    "title": "Bevara balansen",
+    "levels": [
+      "high"
+    ],
+    "compact": true,
+    "steps": [
+      {
+        "parts": [
+          {
+            "id": "left",
+            "text": "x + 3"
+          },
+          {
+            "id": "equals",
+            "text": "="
+          },
+          {
+            "id": "right",
+            "text": "8"
+          }
+        ],
+        "text": "Vi söker talet x. Båda sidor om likhetstecknet ska ha samma värde.",
+        "spoken": "x plus tre är lika med åtta."
+      },
+      {
+        "parts": [
+          {
+            "id": "left",
+            "text": "x + 3 − 3"
+          },
+          {
+            "id": "equals",
+            "text": "="
+          },
+          {
+            "id": "right",
+            "text": "8 − 3"
+          }
+        ],
+        "text": "Vi subtraherar tre på båda sidor. Då bevaras likheten.",
+        "spoken": "x plus tre minus tre är lika med åtta minus tre."
+      },
+      {
+        "parts": [
+          {
+            "id": "left",
+            "text": "x"
+          },
+          {
+            "id": "equals",
+            "text": "="
+          },
+          {
+            "id": "right",
+            "text": "5"
+          }
+        ],
+        "text": "Tre minus tre blir noll. Kvar står x på vänster sida och fem på höger sida.",
+        "spoken": "x är lika med fem."
+      },
+      {
+        "parts": [
+          {
+            "id": "left",
+            "text": "5 + 3"
+          },
+          {
+            "id": "equals",
+            "text": "="
+          },
+          {
+            "id": "right",
+            "text": "8"
+          }
+        ],
+        "text": "Vi kontrollerar genom att sätta in fem i stället för x. Fem plus tre är åtta, så lösningen stämmer.",
+        "spoken": "Fem plus tre är lika med åtta."
+      }
+    ]
+  }
+],
     title: "Lösa enkla ekvationer",
     description: "Hitta det okända talet och kontrollera lösningen.",
     walkthrough: [
@@ -1226,6 +2160,7 @@ const highCategories = [
     "title": "De fyra räknesätten",
     "description": "Begrepp, räknemetoder och prioriteringsregler.",
     "topicIds": [
+      "priorityLanguage",
       "operationLanguage",
       "calculationMethods"
     ],
@@ -1336,7 +2271,7 @@ const highCategories = [
     "id": "percent-change",
     "title": "Förändring och ränta",
     "description": "Procentuell förändring, förändringsfaktor och ränta.",
-    "topicIds": [],
+    "topicIds": ["percentChangeLanguage"],
     "keywords": "rabatt ökning minskning lån årsränta"
   }
 ] },
@@ -1441,6 +2376,8 @@ let subcategoryOrigin = "subcategories";
 let currentMode = null;
 let questionIndex = 0;
 let walkthroughIndex = 0;
+let animationIndex = 0;
+let animationStepIndex = 0;
 let quickScore = 0;
 let topicsOrigin = "home";
 let settingsOrigin = "home";
@@ -1560,7 +2497,7 @@ function openTopic(topicId, origin = "topics") {
   $("#mode-introduction").textContent = selectedTopic.title;
   const grid = $("#mode-grid");
   grid.replaceChildren();
-  const available = [...(selectedTopic.walkthrough?.length ? ["walkthrough"] : []), ...Object.keys(selectedTopic.modes).filter((mode) => modeQuestions(mode).length)];
+  const available = [...(topicAnimations().length ? ["animate"] : []), ...(selectedTopic.walkthrough?.length ? ["walkthrough"] : []), ...Object.keys(selectedTopic.modes).filter((mode) => modeQuestions(mode).length)];
   available.forEach((mode) => {
     const info = modeCatalog[mode];
     const button = document.createElement("button");
@@ -1572,6 +2509,11 @@ function openTopic(topicId, origin = "topics") {
   showScreen("mode");
 }
 
+function topicAnimations(topic = selectedTopic) {
+  if (!topic?.levels.includes(level)) return [];
+  return (topic.animations || []).filter((animation) => animation.levels.includes(level) && animation.steps.length > 0);
+}
+
 function modeQuestions(mode) {
   return selectedTopic.modes[mode].filter((question) => question.levels.includes(level));
 }
@@ -1581,7 +2523,9 @@ function startMode(mode) {
   questionIndex = 0;
   quickScore = 0;
   saveLastVisited();
-  if (mode === "walkthrough") {
+  if (mode === "animate") {
+    startAnimation();
+  } else if (mode === "walkthrough") {
     walkthroughIndex = 0;
     renderWalkthrough();
     showScreen("walkthrough");
@@ -1589,6 +2533,56 @@ function startMode(mode) {
     renderQuestion();
     showScreen("quiz");
   }
+}
+
+function startAnimation() {
+  const animations = topicAnimations();
+  if (!animations.length) { showScreen("mode"); return; }
+  animationIndex = 0;
+  animationStepIndex = 0;
+  const select = $("#animation-select");
+  select.replaceChildren();
+  animations.forEach((animation, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = animation.title;
+    select.append(option);
+  });
+  $("#animation-picker").hidden = animations.length < 2;
+  $("#animation-expression").replaceChildren();
+  renderAnimationStep();
+  showScreen("animation");
+}
+
+function renderAnimationStep() {
+  const animation = topicAnimations()[animationIndex];
+  const step = animation.steps[animationStepIndex];
+  const complete = animationStepIndex === animation.steps.length - 1;
+  $("#animation-heading").textContent = animation.title;
+  $("#animation-progress").textContent = `Steg ${animationStepIndex + 1} av ${animation.steps.length}${complete ? " · Klart" : ""}`;
+  $("#animation-text").textContent = step.text;
+  $("#animation-spoken").textContent = step.spoken;
+  const expression = $("#animation-expression");
+  expression.classList.toggle("is-compact", Boolean(animation.compact));
+  // Reuse unchanged symbols. Only new or changed parts animate, and future steps
+  // do not exist in the DOM (including the screen-reader description).
+  const previous = new Map([...expression.children].map((node) => [node.dataset.part, node]));
+  const parts = step.parts.map((part) => {
+    const existing = previous.get(part.id);
+    if (existing?.textContent === part.text) return existing;
+    const span = document.createElement("span");
+    span.dataset.part = part.id;
+    span.className = "animation-part";
+    span.textContent = part.text;
+    return span;
+  });
+  [...expression.children].forEach((node) => { if (!parts.includes(node)) node.remove(); });
+  parts.forEach((node, index) => {
+    if (expression.children[index] !== node) expression.insertBefore(node, expression.children[index] || null);
+  });
+  $("#animation-previous").disabled = animationStepIndex === 0;
+  $("#animation-replay").hidden = !complete;
+  $("#animation-next").textContent = complete ? "Klar" : "Nästa";
 }
 
 function renderExample(container, text, visual) {
@@ -1756,6 +2750,28 @@ $("#back-from-modes").addEventListener("click", () => {
   else returnToSearch(modeOrigin);
 });
 $("#back-from-quiz").addEventListener("click", () => showScreen("mode"));
+$("#back-from-animation").addEventListener("click", () => showScreen("mode"));
+$("#animation-select").addEventListener("change", (event) => {
+  animationIndex = Number(event.target.value);
+  animationStepIndex = 0;
+  $("#animation-expression").replaceChildren();
+  renderAnimationStep();
+});
+$("#animation-previous").addEventListener("click", () => {
+  animationStepIndex = Math.max(0, animationStepIndex - 1);
+  renderAnimationStep();
+});
+$("#animation-next").addEventListener("click", () => {
+  const animation = topicAnimations()[animationIndex];
+  if (animationStepIndex === animation.steps.length - 1) showScreen("mode");
+  else { animationStepIndex += 1; renderAnimationStep(); }
+});
+$("#animation-replay").addEventListener("click", () => {
+  animationStepIndex = 0;
+  $("#animation-expression").replaceChildren();
+  renderAnimationStep();
+  $("#animation-next").focus();
+});
 $("#back-from-walkthrough").addEventListener("click", () => showScreen("mode"));
 $("#explanation-button").addEventListener("click", () => { $("#explanation").hidden = false; $("#explanation-button").hidden = true; $("#next-question-button").hidden = false; });
 $("#next-question-button").addEventListener("click", nextQuestion);
@@ -1869,7 +2885,7 @@ function searchSections(query) {
       const questions = Object.values(topic.modes).flat().filter((question) => question.levels.includes(level));
       const vocabulary = questions.flatMap((question) => [question.prompt, question.example, question.choices[question.correct], question.explanation, question.visual?.alt || ""]);
       return { title: topic.title, description: path, category, group, topicId, ready: true,
-        text: [path, topic.title, topic.description, ...(topic.walkthrough || []).flatMap((step) => [...step.slice(0, 4), step[4]?.alt || ""]), ...vocabulary].join(" ") };
+        text: [path, topic.title, topic.description, ...(topic.walkthrough || []).flatMap((step) => [...step.slice(0, 4), step[4]?.alt || ""]), ...vocabulary, ...topicAnimations(topic).flatMap((animation) => ["Animera", animation.title, ...animation.steps.flatMap((step) => [step.text, step.spoken, ...step.parts.map((part) => part.text)])])].join(" ") };
     });
     return [...topicEntries, { title: group.title, description: category.title, category, group, ready: topicEntries.length > 0,
       text: [category.title, group.title, group.description, group.keywords].join(" ") }];
