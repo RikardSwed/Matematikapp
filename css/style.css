@@ -444,3 +444,12 @@ button:focus-visible, select:focus-visible { outline: 4px solid rgba(23,111,198,
   .visual-practice .quiz-card > h1 { font-size: 1.3rem; }
   .visual-practice .feedback, .visual-practice .explanation { padding: 8px; margin-top: 6px; }
 }
+
+/* Equations and vocabulary remain selectable, accessible text. */
+.example-vocabulary { display: block; font-size: .78rem; font-weight: 650; line-height: 1.35; }
+.example-expression { max-width: 100%; }
+
+@media (max-height: 680px) {
+  #quiz-screen .quiz-card:has(> .explanation:not([hidden])) #feedback-message,
+  #quiz-screen .quiz-card:has(> .feedback:not([hidden])) .instruction { display: none; }
+}

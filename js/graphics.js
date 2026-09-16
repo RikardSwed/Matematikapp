@@ -62,6 +62,28 @@ const MathGraphics = (() => {
       line(...B, ...C, { "stroke-width": data.emphasis === "hypotenuse" ? 5 : 3, stroke: data.emphasis === "hypotenuse" ? accent : ink });
       add("path", { d: "M92 122h16v16", fill: "none", stroke: ink, "stroke-width": 2 });
       label(76, 90, "a"); label(160, 161, "b"); label(174, 74, "c");
+    } else if (data.type === "rectangleGrid") {
+      const size = 32, left = (320 - data.columns * size) / 2, top = 30;
+      for (let row = 0; row < data.rows; row++) {
+        for (let col = 0; col < data.columns; col++) {
+          add("rect", { x: left + col * size, y: top + row * size, width: size, height: size, fill: light, stroke: ink, "stroke-width": 2 });
+        }
+      }
+      label(160, top + data.rows * size + 26, "Varje ruta: 1 cm²", { "font-size": 16 });
+    } else if (data.type === "barChart") {
+      const bottom = 142, step = 24;
+      label(46, 17, "Antal", { "font-size": 15 });
+      for (let value = 0; value <= 4; value++) {
+        const y = bottom - value * step;
+        line(62, y, 286, y, { stroke: "#aac7e1", "stroke-width": 1 });
+        label(47, y + 5, value, { "font-size": 15 });
+      }
+      line(62, 34, 62, bottom); line(62, bottom, 286, bottom);
+      data.values.forEach((value, index) => {
+        const x = 88 + index * 70;
+        add("rect", { x, y: bottom - value * step, width: 34, height: value * step, fill: blue, stroke: ink });
+        label(x + 17, 164, data.labels[index]);
+      });
     } else if (data.type === "coordinates") {
       const x = (v) => 160 + v * 30, y = (v) => 90 - v * 30;
       for (let v = -2; v <= 2; v++) {

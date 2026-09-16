@@ -29,6 +29,431 @@ const q = (prompt, example, choices, correct, explanation, levels = ["high"], vi
 });
 
 const topics = {
+  powerRootLanguage: {
+  "title": "Potenser och kvadratrötter",
+  "description": "Förstå bas, exponent, kvadrat och kvadratrot.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Upprepad multiplikation",
+      "2³ = 2 × 2 × 2 = 8",
+      "En potens kan beskriva upprepad multiplikation. Här är 2 basen och 3 exponenten.",
+      "En positiv heltalsexponent anger hur många gånger basen finns med som faktor."
+    ],
+    [
+      "Ett tal i kvadrat",
+      "5² = 5 × 5 = 25",
+      "Att kvadrera ett tal betyder att multiplicera talet med sig självt.",
+      "Upphöjt till två kallas i kvadrat. Det betyder inte att dubbla talet."
+    ],
+    [
+      "Gå tillbaka med roten",
+      "√25 = 5",
+      "Kvadratroten ur ett icke-negativt tal är det icke-negativa tal vars kvadrat är det ursprungliga talet.",
+      "Både 5 och −5 har kvadraten 25, men symbolen √25 betecknar bara 5."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad kallas tvåan?",
+        "example": "2³ = 8",
+        "choices": [
+          "Bas",
+          "Exponent",
+          "Kvot"
+        ],
+        "correct": 0,
+        "explanation": "Basen är talet som multipliceras med sig självt.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad anger trean?",
+        "example": "2³ = 2 × 2 × 2",
+        "choices": [
+          "Summan av faktorerna",
+          "Antalet faktorer 2",
+          "Antalet additioner"
+        ],
+        "correct": 1,
+        "explanation": "Exponent 3 betyder tre faktorer som alla är 2.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder i kvadrat?",
+        "example": "5² = 25",
+        "choices": [
+          "Dela talet med två",
+          "Dubbla talet",
+          "Multiplicera talet med sig självt"
+        ],
+        "correct": 2,
+        "explanation": "5² betyder 5 × 5.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilket ord hör till symbolen?",
+        "example": "√25 = 5",
+        "choices": [
+          "Kvadratrot",
+          "Differens",
+          "Procent"
+        ],
+        "correct": 0,
+        "explanation": "√ är tecknet för kvadratrot.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Hur skriver du produkten kortare?",
+        "example": "3 × 3 × 3 × 3",
+        "choices": [
+          "3 × 4",
+          "3⁴",
+          "4³"
+        ],
+        "correct": 1,
+        "explanation": "Basen är 3 och den finns med som faktor fyra gånger.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken fråga hjälper dig hitta √36?",
+        "example": "Kvadratrot",
+        "choices": [
+          "Vilket tal ska dubblas?",
+          "Vilket tal ska delas med två?",
+          "Vilket icke-negativt tal har kvadraten 36?"
+        ],
+        "correct": 2,
+        "explanation": "6 × 6 = 36, alltså är √36 = 6.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur kontrollerar du kvadratroten?",
+        "example": "√49 = 7",
+        "choices": [
+          "Beräkna 7 × 7",
+          "Beräkna 7 + 7",
+          "Beräkna 49 × 7"
+        ],
+        "correct": 0,
+        "explanation": "Kvadrera det föreslagna icke-negativa svaret: 7² = 49.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilket uttryck betyder dubbla fem?",
+        "example": "Skilj dubbelt från kvadrat",
+        "choices": [
+          "5²",
+          "2 × 5",
+          "√5"
+        ],
+        "correct": 1,
+        "explanation": "Dubbla är multiplicera med två. Kvadrera är multiplicera talet med sig självt.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Exponent 2 betyder alltid att basen ska dubblas",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Exponent 2 betyder att basen multipliceras med sig självt.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "4² och 2⁴ har samma värde",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "4 × 4 = 16 och 2 × 2 × 2 × 2 = 16. Olika potenser kan ha samma värde.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "√9 betecknar både 3 och −3",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "√9 betecknar det icke-negativa värdet 3.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Ett tal i kubik har exponenten 3",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Till exempel är 2³ = 2 × 2 × 2 = 8.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ]
+  }
+},
+  lengthLanguage: {
+  "title": "Längd och enhetsbyten",
+  "description": "Beskriv samma längd med olika enheter.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Tal och enhet hör ihop",
+      "1 m = 10 dm = 100 cm",
+      "En längd anges med ett mätetal och en enhet. Samma längd kan uttryckas med olika enheter.",
+      "Mätetalet ändras när du byter enhet, men längden är densamma."
+    ],
+    [
+      "Mindre enhet, fler delar",
+      "2 cm = 20 mm",
+      "En centimeter består av tio millimeter. Därför behövs fler millimeter för samma längd.",
+      "Från centimeter till millimeter multiplicerar du mätetalet med tio."
+    ],
+    [
+      "Större enhet, färre delar",
+      "3 000 m = 3 km",
+      "En kilometer är tusen meter. Från meter till kilometer dividerar du mätetalet med tusen.",
+      "Kontrollera att mätetalet blir mindre när enheten blir större."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad är enheten?",
+        "example": "12 cm",
+        "choices": [
+          "Centimeter",
+          "Tolv",
+          "Längdskillnad"
+        ],
+        "correct": 0,
+        "explanation": "cm är enhetens beteckning. 12 är mätetalet.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken enhet är minst?",
+        "example": "Meter, centimeter, millimeter",
+        "choices": [
+          "Meter",
+          "Millimeter",
+          "Centimeter"
+        ],
+        "correct": 1,
+        "explanation": "En millimeter är en tiondels centimeter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad ändras vid ett enhetsbyte?",
+        "example": "1 m = 100 cm",
+        "choices": [
+          "Själva längden",
+          "Bara föremålet",
+          "Mätetalet och enheten"
+        ],
+        "correct": 2,
+        "explanation": "Längden bevaras men beskrivs med ett annat mätetal och en annan enhet.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilket samband stämmer?",
+        "example": "Kilometer och meter",
+        "choices": [
+          "1 km = 1 000 m",
+          "1 km = 100 m",
+          "1 km = 10 m"
+        ],
+        "correct": 0,
+        "explanation": "Prefixet kilo betyder tusen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Hur byter du från cm till mm?",
+        "example": "Samma längd, mindre enhet",
+        "choices": [
+          "Dividera med tio",
+          "Multiplicera med tio",
+          "Addera tio"
+        ],
+        "correct": 1,
+        "explanation": "Varje centimeter innehåller tio millimeter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur byter du från cm till m?",
+        "example": "100 cm = 1 m",
+        "choices": [
+          "Multiplicera med hundra",
+          "Subtrahera hundra",
+          "Dividera med hundra"
+        ],
+        "correct": 2,
+        "explanation": "Hundra centimeter bildar en meter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad gör du före en jämförelse?",
+        "example": "80 cm och 1 m",
+        "choices": [
+          "Skriv längderna i samma enhet",
+          "Jämför bara 80 och 1",
+          "Ignorera enheterna"
+        ],
+        "correct": 0,
+        "explanation": "1 m = 100 cm, så 80 cm är kortare.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken kontroll passar?",
+        "example": "Från meter till kilometer",
+        "choices": [
+          "Mätetalet ska bli större",
+          "Mätetalet ska bli mindre",
+          "Längden ska bli längre"
+        ],
+        "correct": 1,
+        "explanation": "En kilometer är större än en meter, så färre kilometer behövs.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "1 dm och 10 cm är lika långa",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "En decimeter består av tio centimeter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Enhetsbyte ändrar föremålets längd",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Du beskriver samma längd på ett annat sätt.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "2 m är kortare än 50 cm eftersom 2 är mindre än 50",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "2 m = 200 cm, vilket är längre än 50 cm.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En meter består av tusen millimeter",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "1 m = 100 cm och varje centimeter är 10 mm.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ]
+  }
+},
+
   coordinateLanguage: {
     title: "Läs koordinater",
     description: "Förstå axlar, origo och en punkts läge.",
@@ -380,6 +805,120 @@ const topics = {
       ["Läs innan du jämför", "Rubrik, enhet och skala", "Kontrollera vad diagrammet visar, vilka enheter som används och vad markeringarna på axlarna betyder.", "Olika skalor kan få samma skillnad att se olika stor ut. Läs värdena, inte bara bilden."],
     ],
     modes: {
+      graphic: [
+  {
+    "prompt": "Vad visar staplarnas höjd?",
+    "example": "Elever röstade på A, B eller C",
+    "choices": [
+      "Antalet röster",
+      "Bokstävernas storlek",
+      "Stap­larnas bredd"
+    ],
+    "correct": 0,
+    "explanation": "Höjden läses mot skalan och visar antalet röster.",
+    "levels": [
+      "high"
+    ],
+    "visual": {
+      "type": "barChart",
+      "values": [
+        2,
+        4,
+        3
+      ],
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "alt": "Stapeldiagram. Antal röster: A har 2, B har 4 och C har 3. Skalan börjar vid noll och går i steg om ett."
+    }
+  },
+  {
+    "prompt": "Vilket alternativ fick flest röster?",
+    "example": "Jämför staplarnas höjd",
+    "choices": [
+      "A",
+      "B",
+      "C"
+    ],
+    "correct": 1,
+    "explanation": "B:s stapel är högst och når till fyra röster.",
+    "levels": [
+      "high"
+    ],
+    "visual": {
+      "type": "barChart",
+      "values": [
+        2,
+        4,
+        3
+      ],
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "alt": "Stapeldiagram. Antal röster: A har 2, B har 4 och C har 3. Skalan börjar vid noll och går i steg om ett."
+    }
+  },
+  {
+    "prompt": "Vad bör du läsa innan du jämför?",
+    "example": "Tolka diagrammet",
+    "choices": [
+      "Bara färgen",
+      "Bara bredden",
+      "Skalan och etiketterna"
+    ],
+    "correct": 2,
+    "explanation": "Skalan visar antal. Etiketterna visar vilket alternativ varje stapel gäller.",
+    "levels": [
+      "high"
+    ],
+    "visual": {
+      "type": "barChart",
+      "values": [
+        2,
+        4,
+        3
+      ],
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "alt": "Stapeldiagram. Antal röster: A har 2, B har 4 och C har 3. Skalan börjar vid noll och går i steg om ett."
+    }
+  },
+  {
+    "prompt": "Vad betyder att A:s stapel når 2?",
+    "example": "Antal röster",
+    "choices": [
+      "Två elever valde A",
+      "A fick två procent",
+      "A är dubbelt så bred"
+    ],
+    "correct": 0,
+    "explanation": "Skalan anger antal röster, så höjden 2 betyder två röster.",
+    "levels": [
+      "high"
+    ],
+    "visual": {
+      "type": "barChart",
+      "values": [
+        2,
+        4,
+        3
+      ],
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "alt": "Stapeldiagram. Antal röster: A har 2, B har 4 och C har 3. Skalan börjar vid noll och går i steg om ett."
+    }
+  }
+],
       rules: [
         q("Vad betyder frekvens?", "I en frekvenstabell", ["Antal gånger något förekommer", "Det största värdet", "Alla värdens medelvärde"], 0, "Frekvens är antalet förekomster av ett visst värde eller en kategori.", ["high"]),
         q("Vad visar kolumnrubriken?", "Läs en tabell", ["Att värdena måste vara störst", "Vad uppgifterna i kolumnen betyder", "Att alla rader har samma värde"], 1, "Rubriken talar om vad som står i kolumnen och kan även ange enheten.", ["high"]),
@@ -436,18 +975,13 @@ const topics = {
     description: "Förstå orden term, summa, faktor och kvot.",
     levels: ["high"],
     languageFocused: true,
-    walkthrough: [
-      ["Ord för olika roller", "Talens roller", "Matematikord berättar vad talen gör och vad resultatet kallas.", "Skilj på talen du arbetar med och resultatet du får."],
-      ["Lägga ihop och ta skillnaden", "Term → summa eller differens", "Tal som adderas eller subtraheras kallas termer. Resultatet heter summa vid addition och differens vid subtraktion.", "Ordet term hör alltså till två räknesätt. Resultatets namn visar vilket du använder."],
-      ["Multiplicera", "Faktorer → produkt", "Talen som multipliceras kallas faktorer. Resultatet kallas produkt.", "En faktor är en del av beräkningen. Produkten är det du får fram."],
-      ["Dividera", "Täljare, nämnare och kvot", "I en division skriven som ett bråk står täljaren över bråkstrecket och nämnaren under. Resultatet kallas kvot.", "Täljaren är talet som delas. Nämnaren är talet du delar med och får inte vara noll."],
-    ],
+    walkthrough: [["Addition", "4 + 3 = 7\nterm + term = summa", "Vid addition läggs termer ihop och bildar en summa.", "4 och 3 är termer. 7 är summan."], ["Subtraktion", "7 − 3 = 4\nterm − term = differens", "Vid subtraktion bestämmer du skillnaden mellan två termer. Resultatet heter differens.", "7 och 3 är termer. 4 är differensen."], ["Multiplikation", "4 × 3 = 12\nfaktor × faktor = produkt", "Talen som multipliceras kallas faktorer. Resultatet heter produkt.", "4 och 3 är faktorer. 12 är produkten."], ["Division", "12 ÷ 3 = 4\ntäljare ÷ nämnare = kvot", "Vid division delas täljaren med nämnaren. Resultatet heter kvot.", "12 är täljare, 3 är nämnare och 4 är kvot. Nämnaren får inte vara noll."]],
     modes: {
       rules: [
-        q("Vad heter resultatet?", "Addition", ["Summa", "Produkt", "Term"], 0, "Vid addition lägger du ihop termer. Resultatet kallas summa.", ["high"]),
-        q("Vad heter resultatet?", "Subtraktion", ["Kvot", "Differens", "Faktor"], 1, "Resultatet av en subtraktion kallas differens.", ["high"]),
-        q("Vad heter talen som multipliceras?", "Multiplikation", ["Termer", "Kvoter", "Faktorer"], 2, "Talen som multipliceras är faktorer. Resultatet är en produkt.", ["high"]),
-        q("Vad heter resultatet?", "Division", ["Kvot", "Nämnare", "Differens"], 0, "Kvoten är resultatet av divisionen.", ["high"]),
+        q("Vad heter resultatet?", "4 + 3 = 7", ["Summa", "Produkt", "Term"], 0, "Vid addition lägger du ihop termer. Resultatet kallas summa.", ["high"]),
+        q("Vad heter resultatet?", "7 − 3 = 4", ["Kvot", "Differens", "Faktor"], 1, "Resultatet av en subtraktion kallas differens.", ["high"]),
+        q("Vad heter talen som multipliceras?", "4 × 3 = 12", ["Termer", "Kvoter", "Faktorer"], 2, "Talen som multipliceras är faktorer. Resultatet är en produkt.", ["high"]),
+        q("Vad heter resultatet?", "12 ÷ 3 = 4", ["Kvot", "Nämnare", "Differens"], 0, "Kvoten är resultatet av divisionen.", ["high"]),
         q("Vilket ord passar?", "Tal som adderas", ["Produkter", "Termer", "Faktorer"], 1, "Talen som adderas kallas termer. Även tal i en subtraktion kallas termer.", ["high"]),
         q("Vilket ord passar?", "Ovanför bråkstrecket", ["Kvot", "Nämnare", "Täljare"], 2, "Täljaren står ovanför bråkstrecket. Nämnaren står under.", ["high"]),
         q("Vilket ord passar?", "Under bråkstrecket", ["Nämnare", "Produkt", "Täljare"], 0, "Nämnaren står under bråkstrecket och är talet du delar med.", ["high"]),
@@ -470,10 +1004,10 @@ const topics = {
     languageFocused: true,
     walkthrough: [
       ["En metod har en anledning", "Gör beräkningen enklare", "En räknemetod ändrar hur du räknar. Den ska bevara resultatet.", "Fråga både vad som ändras och varför svaret blir detsamma."],
-      ["Bevara summan", "Öka en term, minska den andra", "Vid addition kan du öka den ena termen och minska den andra lika mycket.", "Det du lägger till på ett ställe tar du bort på det andra. Summan bevaras."],
-      ["Bevara differensen", "Ändra båda lika mycket", "Vid subtraktion kan du öka båda termerna lika mycket eller minska båda lika mycket.", "Tänk på avståndet mellan två punkter på en tallinje. Om båda flyttas lika långt åt samma håll är avståndet kvar."],
-      ["Bevara produkten", "Dubbla och halvera", "Dubbla den ena faktorn och halvera den andra. Produkten blir densamma.", "Dubbelt så många grupper med hälften så mycket i varje ger samma mängd totalt."],
-      ["Bevara kvoten", "Ändra båda på samma sätt", "Multiplicera täljare och nämnare med samma tal, som inte är noll. Kvoten bevaras.", "Du kan också dividera båda med samma tal, som inte är noll. Att dubbla båda är ett exempel."],
+      ["Bevara summan", "19 + 6 = 20 + 5 = 25", "Vid addition kan du öka den ena termen och minska den andra lika mycket.", "Det du lägger till på ett ställe tar du bort på det andra. Summan bevaras."],
+      ["Bevara differensen", "23 − 9 = 24 − 10 = 14", "Vid subtraktion kan du öka båda termerna lika mycket eller minska båda lika mycket.", "Tänk på avståndet mellan två punkter på en tallinje. Om båda flyttas lika långt åt samma håll är avståndet kvar."],
+      ["Bevara produkten", "4 × 15 = 8 × 7,5 = 60", "Dubbla den ena faktorn och halvera den andra. Produkten blir densamma.", "Dubbelt så många grupper med hälften så mycket i varje ger samma mängd totalt."],
+      ["Bevara kvoten", "12 ÷ 3 = 24 ÷ 6 = 4", "Multiplicera täljare och nämnare med samma tal, som inte är noll. Kvoten bevaras.", "Du kan också dividera båda med samma tal, som inte är noll. Att dubbla båda är ett exempel."],
     ],
     modes: {
       methods: [
@@ -519,6 +1053,88 @@ const topics = {
       ["Rektangelns area", "A = längd × bredd", "Multiplicera längden med bredden.", "Enheten blir kvadratisk, till exempel cm²."],
     ],
     modes: {
+      graphic: [
+  {
+    "prompt": "Vad mäter arean?",
+    "example": "Varje ruta är 1 cm²",
+    "choices": [
+      "Ytan inne i rektangeln",
+      "Längden runt rektangeln",
+      "Bara en sida"
+    ],
+    "correct": 0,
+    "explanation": "Arean beskriver hur stor yta figuren täcker.",
+    "levels": [
+      "high"
+    ],
+    "visual": {
+      "type": "rectangleGrid",
+      "columns": 4,
+      "rows": 3,
+      "alt": "Rektangel med fyra kolumner och tre rader lika stora rutor. Varje ruta är en kvadratcentimeter."
+    }
+  },
+  {
+    "prompt": "Vilket uttryck beskriver antalet rutor?",
+    "example": "Läs rader och kolumner",
+    "choices": [
+      "4 + 3",
+      "4 × 3",
+      "4 − 3"
+    ],
+    "correct": 1,
+    "explanation": "Tre rader med fyra rutor i varje ger 4 × 3 = 12 rutor.",
+    "levels": [
+      "high"
+    ],
+    "visual": {
+      "type": "rectangleGrid",
+      "columns": 4,
+      "rows": 3,
+      "alt": "Rektangel med fyra kolumner och tre rader lika stora rutor. Varje ruta är en kvadratcentimeter."
+    }
+  },
+  {
+    "prompt": "Vilken enhet passar arean?",
+    "example": "Rutornas sidor är 1 cm",
+    "choices": [
+      "cm",
+      "m",
+      "cm²"
+    ],
+    "correct": 2,
+    "explanation": "Area mäts i kvadratenheter. Varje liten ruta har arean 1 cm².",
+    "levels": [
+      "high"
+    ],
+    "visual": {
+      "type": "rectangleGrid",
+      "columns": 4,
+      "rows": 3,
+      "alt": "Rektangel med fyra kolumner och tre rader lika stora rutor. Varje ruta är en kvadratcentimeter."
+    }
+  },
+  {
+    "prompt": "Vad skulle du mäta för omkretsen?",
+    "example": "Skilj på kant och yta",
+    "choices": [
+      "Längden längs ytterkanten",
+      "Antalet rutor inuti",
+      "Bara de inre linjerna"
+    ],
+    "correct": 0,
+    "explanation": "Omkretsen är längden runt figuren. Här är den 4 + 3 + 4 + 3 = 14 cm.",
+    "levels": [
+      "high"
+    ],
+    "visual": {
+      "type": "rectangleGrid",
+      "columns": 4,
+      "rows": 3,
+      "alt": "Rektangel med fyra kolumner och tre rader lika stora rutor. Varje ruta är en kvadratcentimeter."
+    }
+  }
+],
       rules: [q("Vilket begrepp beskriver ytan inuti?", "Ytan inuti figuren", ["Area", "Omkrets", "Diameter"], 0, "Area beskriver hur stor ytan är."), q("Vilken enhet passar för area?", "Area av ett rum", ["m", "m²", "m³"], 1, "Area mäts i kvadratenheter, exempelvis m².")],
       calculate: [q("Vad är rektangelns area?", "6 cm × 4 cm", ["10 cm²", "20 cm²", "24 cm²"], 2, "6 × 4 = 24 cm²."), q("Vad är omkretsen?", "Längd 5 m · bredd 3 m", ["8 m", "15 m", "16 m"], 2, "5 + 3 + 5 + 3 = 16 m.")],
       missing: [q("Vilken längd saknas?", "Area 24 cm² · bredd 4 cm", ["5 cm", "6 cm", "8 cm"], 1, "24 ÷ 4 = 6 cm.")],
@@ -642,7 +1258,7 @@ const highCategories = [
     "id": "powers-roots",
     "title": "Potenser och rötter",
     "description": "Bas, exponent, grundpotensform och kvadratrot.",
-    "topicIds": [],
+    "topicIds": ["powerRootLanguage"],
     "keywords": "upphöjt kvadrattal roten ur"
   },
   {
@@ -674,7 +1290,7 @@ const highCategories = [
     "id": "units",
     "title": "Längd och enheter",
     "description": "Mätning och omvandling av längdenheter.",
-    "topicIds": [],
+    "topicIds": ["lengthLanguage"],
     "keywords": "meter centimeter millimeter kilometer mil"
   },
   {
@@ -985,7 +1601,15 @@ function renderExample(container, text, visual) {
     caption.className = "visual-caption";
     caption.textContent = text;
     container.append(caption);
-  } else container.textContent = text;
+  } else {
+    const lines = text.split("\n");
+    lines.forEach((line, index) => {
+      const span = document.createElement("span");
+      span.className = index === 0 ? "example-expression" : "example-vocabulary";
+      span.textContent = line;
+      container.append(span);
+    });
+  }
 }
 
 function renderQuestion() {
