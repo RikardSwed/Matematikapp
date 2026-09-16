@@ -30,6 +30,675 @@ const q = (prompt, example, choices, correct, explanation, levels = ["high"], vi
 });
 
 const topics = {
+  prefixLanguage: {
+  "title": "Förstå prefix",
+  "description": "Tolka kilo, hekto, deci, centi, milli och mega.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "En förstavelse med betydelse",
+      "kilo = tusen\n1 kg = 1 000 g",
+      "Ett prefix framför en enhet anger en faktor. Kilo betyder tusen, så ett kilogram är tusen gram.",
+      "Prefixet berättar om storleken på enheten. kg och g kan beskriva samma massa med olika mätetal."
+    ],
+    [
+      "Hundra eller en hundradel",
+      "hekto = 100 · centi = 1/100",
+      "Hekto betyder hundra gånger enheten. Centi betyder en hundradel av enheten.",
+      "Hekto förstorar enheten medan centi förminskar den. Ett hektogram är 100 gram och en centimeter är 0,01 meter."
+    ],
+    [
+      "Bokstäverna spelar roll",
+      "m = milli · M = mega",
+      "Som prefix betyder litet m en tusendel och stort M en miljon. Stor och liten bokstav kan ändra betydelsen.",
+      "I mg står m för milli och g för gram. Enhetssymbolen m ensam betyder meter."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad beskriver ett prefix?",
+        "example": "kilo i kilogram",
+        "choices": [
+          "En faktor framför enheten",
+          "Antalet decimaler i svaret",
+          "Ett räknesätt"
+        ],
+        "correct": 0,
+        "explanation": "Prefixet kilo anger faktorn tusen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder hekto?",
+        "example": "1 hg = 100 g",
+        "choices": [
+          "En hundradel",
+          "Hundra",
+          "Tusen"
+        ],
+        "correct": 1,
+        "explanation": "Hekto betyder hundra gånger enheten.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilket prefix betyder en tusendel?",
+        "example": "1 mg = 0,001 g",
+        "choices": [
+          "Kilo",
+          "Centi",
+          "Milli"
+        ],
+        "correct": 2,
+        "explanation": "Milli betyder en tusendel, medan centi betyder en hundradel.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder mega?",
+        "example": "M som prefix",
+        "choices": [
+          "En miljon",
+          "En tusendel",
+          "Tio"
+        ],
+        "correct": 0,
+        "explanation": "Mega betecknas med stort M och betyder en miljon.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Hur tolkar du centi i centimeter?",
+        "example": "1 cm = 0,01 m",
+        "choices": [
+          "Hundra meter",
+          "En hundradels meter",
+          "En tusendels meter"
+        ],
+        "correct": 1,
+        "explanation": "Centi är en hundradel. Hundra centimeter bildar en meter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad händer med mätetalet från kg till g?",
+        "example": "Samma massa",
+        "choices": [
+          "Det divideras med tusen",
+          "Det ändras inte",
+          "Det multipliceras med tusen"
+        ],
+        "correct": 2,
+        "explanation": "Gram är en mindre enhet, så det behövs tusen gånger så många gram.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur skriver du milliliter som liter?",
+        "example": "1 000 ml = 1 l",
+        "choices": [
+          "Dividera mätetalet med tusen",
+          "Multiplicera med tusen",
+          "Subtrahera tusen"
+        ],
+        "correct": 0,
+        "explanation": "Varje milliliter är en tusendels liter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad bör du kontrollera i enhetssymbolen?",
+        "example": "mg och Mg",
+        "choices": [
+          "Bara sista bokstaven",
+          "Även stor eller liten bokstav",
+          "Bara antal bokstäver"
+        ],
+        "correct": 1,
+        "explanation": "mg är milligram och Mg är megagram. Prefixen har olika storlek.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Deci betyder en tiondel",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "En deciliter är en tiondels liter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Centi och milli betyder samma sak",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Centi betyder en hundradel och milli en tusendel.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Ett prefixbyte förändrar automatiskt föremålets massa",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Du kan beskriva samma massa i exempelvis kilogram och gram.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Kilo betecknas med litet k",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Exempelvis skrivs kilogram kg och kilometer km.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "kilo",
+      "title": "Från kilogram till gram",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "amount",
+              "text": "2 kg"
+            }
+          ],
+          "text": "Vi börjar med två kilogram. Kilo betyder tusen.",
+          "spoken": "Två kilogram."
+        },
+        {
+          "parts": [
+            {
+              "id": "amount",
+              "text": "2 kg"
+            },
+            {
+              "id": "equals",
+              "text": "="
+            },
+            {
+              "id": "base",
+              "text": "2 × 1 000 g"
+            }
+          ],
+          "text": "Varje kilogram är tusen gram. Därför tar vi två gånger tusen gram.",
+          "spoken": "Två kilogram är lika med två gånger tusen gram."
+        },
+        {
+          "parts": [
+            {
+              "id": "amount",
+              "text": "2 kg"
+            },
+            {
+              "id": "equals",
+              "text": "="
+            },
+            {
+              "id": "base",
+              "text": "2 000 g"
+            }
+          ],
+          "text": "Två kilogram är två tusen gram. Massan är oförändrad, men enheten är mindre.",
+          "spoken": "Två kilogram är lika med två tusen gram."
+        }
+      ]
+    },
+    {
+      "id": "milli",
+      "title": "Från milliliter till liter",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "amount",
+              "text": "500 ml"
+            }
+          ],
+          "text": "Vi börjar med femhundra milliliter. Milli betyder en tusendel.",
+          "spoken": "Femhundra milliliter."
+        },
+        {
+          "parts": [
+            {
+              "id": "amount",
+              "text": "500 ml"
+            },
+            {
+              "id": "equals",
+              "text": "="
+            },
+            {
+              "id": "base",
+              "text": "(500 ÷ 1 000) l"
+            }
+          ],
+          "text": "Tusen milliliter är en liter. Vi dividerar mätetalet med tusen.",
+          "spoken": "Femhundra milliliter är lika med femhundra dividerat med tusen, uttryckt i liter."
+        },
+        {
+          "parts": [
+            {
+              "id": "amount",
+              "text": "500 ml"
+            },
+            {
+              "id": "equals",
+              "text": "="
+            },
+            {
+              "id": "base",
+              "text": "0,5 l"
+            }
+          ],
+          "text": "Volymen är en halv liter. Samma volym har nu ett mindre mätetal och en större enhet.",
+          "spoken": "Femhundra milliliter är lika med noll komma fem liter."
+        }
+      ]
+    }
+  ]
+},
+  combinationLanguage: {
+  "title": "Räkna möjliga val",
+  "description": "Förstå ordning, upprepning och multiplikationsprincipen.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Ett val i varje steg",
+      "2 × 3 = 6",
+      "Om två tröjor kan kombineras med tre byxor, ger varje tröja tre val. Det blir sex klädkombinationer.",
+      "Multiplicera antalet val i stegen när varje val i ett steg kan följas av lika många val i nästa."
+    ],
+    [
+      "Får något väljas igen?",
+      "3 × 2 = 6",
+      "En kod har två platser och använder A, B eller C. Om en bokstav inte får upprepas finns tre val först och två sedan.",
+      "Om bokstäver får upprepas finns i stället tre val på båda platserna: 3 × 3 = 9."
+    ],
+    [
+      "Spelar ordningen roll?",
+      "AB och BA",
+      "Som koder är AB och BA olika eftersom ordningen spelar roll. Som ett par personer är A och B samma par som B och A.",
+      "Bestäm vad som räknas som ett nytt resultat innan du börjar räkna. Annars kan samma grupp räknas två gånger."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad används multiplikationsprincipen till?",
+        "example": "Val i flera steg",
+        "choices": [
+          "Räkna möjliga valföljder",
+          "Beräkna medelvärdet",
+          "Mäta längd"
+        ],
+        "correct": 0,
+        "explanation": "Antalet val i stegen multipliceras när antalet fortsättningar är detsamma för varje tidigare val.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder att upprepning är tillåten?",
+        "example": "En kod med bokstäver",
+        "choices": [
+          "Ordningen saknar betydelse",
+          "Samma bokstav får väljas igen",
+          "Alla bokstäver måste användas"
+        ],
+        "correct": 1,
+        "explanation": "Tillåten upprepning betyder att en redan vald bokstav kan användas igen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "När räknas AB och BA som olika?",
+        "example": "Två möjliga resultat",
+        "choices": [
+          "Alltid när de är ett par personer",
+          "Aldrig",
+          "När ordningen spelar roll"
+        ],
+        "correct": 2,
+        "explanation": "I en kod ger olika ordning olika koder.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder en fullständig placering?",
+        "example": "Personer som ställs i kö",
+        "choices": [
+          "Alla personer får en plats",
+          "Bara två personer väljs",
+          "Alla står på samma plats"
+        ],
+        "correct": 0,
+        "explanation": "Vid en fullständig placering placeras alla objekten i ordning.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Hur räknar du klädvalen?",
+        "example": "2 tröjor, 3 byxor; alla passar ihop",
+        "choices": [
+          "2 + 3",
+          "2 × 3",
+          "3 − 2"
+        ],
+        "correct": 1,
+        "explanation": "För var och en av två tröjor finns tre byxor att välja.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad frågar du innan du räknar koder?",
+        "example": "Två platser, bokstäverna A, B och C",
+        "choices": [
+          "Vilken bokstav är snyggast?",
+          "Vilken färg har texten?",
+          "Får en bokstav upprepas?"
+        ],
+        "correct": 2,
+        "explanation": "Regeln om upprepning avgör hur många val som finns på den andra platsen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur undviker du att räkna ett par två gånger?",
+        "example": "A och B ska bilda ett par",
+        "choices": [
+          "Räkna AB och BA som samma par",
+          "Räkna alltid båda ordningarna",
+          "Låt A bilda par med sig själv"
+        ],
+        "correct": 0,
+        "explanation": "När ordningen inte spelar roll är AB och BA samma par.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilket arbetssätt hjälper dig kontrollera alla val?",
+        "example": "Ett litet kombinationsproblem",
+        "choices": [
+          "Gissa antalet",
+          "Lista valen systematiskt",
+          "Räkna bara första valet"
+        ],
+        "correct": 1,
+        "explanation": "En ordnad lista eller tabell hjälper dig upptäcka saknade och dubbelt räknade val.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Alla kombinationsproblem har tillåten upprepning",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Uppgiften måste ange om samma objekt får väljas igen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Två tröjor och tre byxor ger sex klädval om alla passar ihop",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Varje tröja ger tre val: 2 × 3 = 6.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Ett par personer blir ett nytt par om namnen byter plats",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Personerna i paret är samma även om namnen står i annan ordning.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Om en bokstav inte får upprepas minskar antalet val efter första valet",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Med A, B och C finns tre val först och sedan två bokstäver kvar.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "repeat",
+      "title": "Kod med upprepning",
+      "levels": [
+        "high"
+      ],
+      "compact": false,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "first",
+              "text": "3"
+            }
+          ],
+          "text": "En kod har två platser. På första platsen kan vi välja A, B eller C: tre möjligheter.",
+          "spoken": "Tre."
+        },
+        {
+          "parts": [
+            {
+              "id": "first",
+              "text": "3"
+            },
+            {
+              "id": "times",
+              "text": "×"
+            },
+            {
+              "id": "second",
+              "text": "3"
+            }
+          ],
+          "text": "Samma bokstav får väljas igen. Därför finns tre val även på andra platsen.",
+          "spoken": "Tre gånger tre."
+        },
+        {
+          "parts": [
+            {
+              "id": "first",
+              "text": "3"
+            },
+            {
+              "id": "times",
+              "text": "×"
+            },
+            {
+              "id": "second",
+              "text": "3"
+            },
+            {
+              "id": "equals",
+              "text": "="
+            },
+            {
+              "id": "result",
+              "text": "9"
+            }
+          ],
+          "text": "Det finns nio koder, till exempel AA, AB och BA. Ordningen spelar roll.",
+          "spoken": "Tre gånger tre är lika med nio."
+        }
+      ]
+    },
+    {
+      "id": "no-repeat",
+      "title": "Kod utan upprepning",
+      "levels": [
+        "high"
+      ],
+      "compact": false,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "first",
+              "text": "3"
+            }
+          ],
+          "text": "En kod har två platser. På första platsen kan vi välja A, B eller C: tre möjligheter.",
+          "spoken": "Tre."
+        },
+        {
+          "parts": [
+            {
+              "id": "first",
+              "text": "3"
+            },
+            {
+              "id": "times",
+              "text": "×"
+            },
+            {
+              "id": "second",
+              "text": "2"
+            }
+          ],
+          "text": "En bokstav får inte väljas igen. Därför finns två val kvar på andra platsen.",
+          "spoken": "Tre gånger två."
+        },
+        {
+          "parts": [
+            {
+              "id": "first",
+              "text": "3"
+            },
+            {
+              "id": "times",
+              "text": "×"
+            },
+            {
+              "id": "second",
+              "text": "2"
+            },
+            {
+              "id": "equals",
+              "text": "="
+            },
+            {
+              "id": "result",
+              "text": "6"
+            }
+          ],
+          "text": "Det finns sex koder: AB, AC, BA, BC, CA och CB. Ordningen spelar roll.",
+          "spoken": "Tre gånger två är lika med sex."
+        }
+      ]
+    }
+  ]
+},
+
   priorityLanguage: {
   "title": "Prioriteringsregler",
   "description": "Förklara ordningen mellan parenteser, potenser och räknesätt.",
@@ -2200,7 +2869,7 @@ const highCategories = [
     "id": "prefixes",
     "title": "Prefix",
     "description": "Namn och beteckningar för stora och små tal.",
-    "topicIds": [],
+    "topicIds": ["prefixLanguage"],
     "keywords": "kilo mega giga deci centi milli mikro"
   }
 ] },
@@ -2314,7 +2983,7 @@ const highCategories = [
     "id": "combinations",
     "title": "Kombinatorik",
     "description": "Räkna möjliga kombinationer och placeringar.",
-    "topicIds": [],
+    "topicIds": ["combinationLanguage"],
     "keywords": "ordning urval handskakning"
   }
 ] },
@@ -2386,8 +3055,11 @@ let touchCurrentY = null;
 let touchStartedAt = 0;
 let swipeAnimating = false;
 let wheelLocked = false;
+let wheelUnlockTimer;
+let swipeRevision = 0;
 
 function showScreen(name) {
+  resetSwipe();
   screens.forEach((screen) => {
     const active = screen.id === `${name}-screen`;
     screen.hidden = !active;
@@ -2540,18 +3212,19 @@ function startAnimation() {
   if (!animations.length) { showScreen("mode"); return; }
   animationIndex = 0;
   animationStepIndex = 0;
-  const select = $("#animation-select");
-  select.replaceChildren();
-  animations.forEach((animation, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = animation.title;
-    select.append(option);
-  });
-  $("#animation-picker").hidden = animations.length < 2;
   $("#animation-expression").replaceChildren();
   renderAnimationStep();
   showScreen("animation");
+}
+
+function changeAnimation(direction) {
+  const animations = topicAnimations();
+  const step = direction < 0 ? 1 : -1;
+  animationIndex = (animationIndex + step + animations.length) % animations.length;
+  animationStepIndex = 0;
+  $("#animation-expression").replaceChildren();
+  renderAnimationStep();
+  $("#animation-heading").focus({ preventScroll: true });
 }
 
 function renderAnimationStep() {
@@ -2559,7 +3232,7 @@ function renderAnimationStep() {
   const step = animation.steps[animationStepIndex];
   const complete = animationStepIndex === animation.steps.length - 1;
   $("#animation-heading").textContent = animation.title;
-  $("#animation-progress").textContent = `Steg ${animationStepIndex + 1} av ${animation.steps.length}${complete ? " · Klart" : ""}`;
+  $("#animation-progress").textContent = `Övning ${animationIndex + 1} av ${topicAnimations().length} · Steg ${animationStepIndex + 1} av ${animation.steps.length}${complete ? " · Klart" : ""}`;
   $("#animation-text").textContent = step.text;
   $("#animation-spoken").textContent = step.spoken;
   const expression = $("#animation-expression");
@@ -2751,12 +3424,6 @@ $("#back-from-modes").addEventListener("click", () => {
 });
 $("#back-from-quiz").addEventListener("click", () => showScreen("mode"));
 $("#back-from-animation").addEventListener("click", () => showScreen("mode"));
-$("#animation-select").addEventListener("change", (event) => {
-  animationIndex = Number(event.target.value);
-  animationStepIndex = 0;
-  $("#animation-expression").replaceChildren();
-  renderAnimationStep();
-});
 $("#animation-previous").addEventListener("click", () => {
   animationStepIndex = Math.max(0, animationStepIndex - 1);
   renderAnimationStep();
@@ -2791,10 +3458,44 @@ navButtons.forEach((button) => button.addEventListener("click", () => {
   showScreen(target);
 }));
 
+function swipeCard() {
+  return ["quiz", "animation"].includes(activeScreen) ? $(`#${activeScreen}-screen .quiz-card`) : null;
+}
+
+function resetSwipe() {
+  // Invalidate pending transitions when navigating away or opening another topic.
+  swipeRevision += 1;
+  touchStartY = null;
+  touchCurrentY = null;
+  swipeAnimating = false;
+  wheelLocked = false;
+  clearTimeout(wheelUnlockTimer);
+  document.querySelectorAll(".quiz-card").forEach((card) => {
+    card.classList.remove("is-dragging", "is-snapping");
+    card.style.transform = "";
+    card.style.opacity = "";
+  });
+}
+
+function changePracticeExercise(direction) {
+  if (activeScreen === "animation") changeAnimation(direction);
+  else changeQuestion(direction);
+}
+
 function animatePageChange(direction) {
-  if (swipeAnimating) return;
+  const card = swipeCard();
+  if (!card || swipeAnimating) return;
+  const revision = ++swipeRevision;
+  touchStartY = null;
+  touchCurrentY = null;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    card.classList.remove("is-dragging", "is-snapping");
+    card.style.transform = "";
+    card.style.opacity = "";
+    changePracticeExercise(direction);
+    return;
+  }
   swipeAnimating = true;
-  const card = $("#quiz-screen .quiz-card");
   const exitY = direction < 0 ? "-110%" : "110%";
   const enterY = direction < 0 ? "110%" : "-110%";
   card.classList.remove("is-dragging");
@@ -2802,15 +3503,17 @@ function animatePageChange(direction) {
   card.style.transform = `translateY(${exitY})`;
   card.style.opacity = "0";
   window.setTimeout(() => {
-    changeQuestion(direction);
+    if (revision !== swipeRevision) return;
+    changePracticeExercise(direction);
     card.classList.remove("is-snapping");
     card.style.transform = `translateY(${enterY})`;
-    card.style.opacity = "0";
     requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (revision !== swipeRevision) return;
       card.classList.add("is-snapping");
       card.style.transform = "translateY(0)";
       card.style.opacity = "1";
       window.setTimeout(() => {
+        if (revision !== swipeRevision) return;
         card.classList.remove("is-snapping");
         card.style.transform = "";
         card.style.opacity = "";
@@ -2821,12 +3524,15 @@ function animatePageChange(direction) {
 }
 
 function snapPageBack() {
-  const card = $("#quiz-screen .quiz-card");
+  const card = swipeCard();
+  if (!card) return;
+  const revision = ++swipeRevision;
   card.classList.remove("is-dragging");
   card.classList.add("is-snapping");
   card.style.transform = "translateY(0)";
   card.style.opacity = "1";
   window.setTimeout(() => {
+    if (revision !== swipeRevision) return;
     card.classList.remove("is-snapping");
     card.style.transform = "";
     card.style.opacity = "";
@@ -2834,25 +3540,33 @@ function snapPageBack() {
 }
 
 document.addEventListener("touchstart", (event) => {
-  if (activeScreen !== "quiz" || swipeAnimating) return;
+  const card = swipeCard();
+  if (!card || swipeAnimating || !card.contains(event.target)) return;
+  if (event.touches.length !== 1) { resetSwipe(); return; }
+  // A new drag supersedes any unfinished spring-back.
+  swipeRevision += 1;
+  card.classList.remove("is-snapping");
   touchStartY = event.touches[0].clientY;
   touchCurrentY = touchStartY;
   touchStartedAt = performance.now();
-  $("#quiz-screen .quiz-card").classList.add("is-dragging");
+  card.classList.add("is-dragging");
 }, { passive: true });
 
 document.addEventListener("touchmove", (event) => {
-  if (activeScreen !== "quiz" || touchStartY === null || swipeAnimating) return;
+  const card = swipeCard();
+  if (!card || touchStartY === null || swipeAnimating) return;
+  if (event.touches.length !== 1) { resetSwipe(); return; }
   event.preventDefault();
   touchCurrentY = event.touches[0].clientY;
   const delta = Math.max(-180, Math.min(180, touchCurrentY - touchStartY));
-  const card = $("#quiz-screen .quiz-card");
-  card.style.transform = `translateY(${delta}px) scale(${1 - Math.abs(delta) / 5000})`;
-  card.style.opacity = String(1 - Math.abs(delta) / 700);
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    card.style.transform = `translateY(${delta}px) scale(${1 - Math.abs(delta) / 5000})`;
+    card.style.opacity = String(1 - Math.abs(delta) / 700);
+  }
 }, { passive: false });
 
 document.addEventListener("touchend", () => {
-  if (activeScreen !== "quiz" || touchStartY === null || swipeAnimating) return;
+  if (!swipeCard() || touchStartY === null || swipeAnimating) return;
   const delta = touchCurrentY - touchStartY;
   const elapsed = Math.max(1, performance.now() - touchStartedAt);
   const velocity = Math.abs(delta) / elapsed;
@@ -2861,14 +3575,23 @@ document.addEventListener("touchend", () => {
   if (Math.abs(delta) >= 95 || (Math.abs(delta) >= 45 && velocity > .55)) animatePageChange(Math.sign(delta));
   else snapPageBack();
 }, { passive: true });
+document.addEventListener("touchcancel", resetSwipe, { passive: true });
 document.addEventListener("wheel", (event) => {
-  if (activeScreen !== "quiz") return;
+  const card = swipeCard();
+  if (!card) return;
   event.preventDefault();
-  if (wheelLocked || Math.abs(event.deltaY) < 20) return;
+  if (wheelLocked || swipeAnimating || Math.abs(event.deltaY) < 20) return;
   wheelLocked = true;
   animatePageChange(-Math.sign(event.deltaY));
-  setTimeout(() => { wheelLocked = false; }, 450);
+  clearTimeout(wheelUnlockTimer);
+  wheelUnlockTimer = setTimeout(() => { wheelLocked = false; }, 450);
 }, { passive: false });
+document.addEventListener("keydown", (event) => {
+  if (activeScreen !== "animation" || !["ArrowUp", "ArrowDown"].includes(event.key) || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  if (!swipeCard().contains(event.target)) return;
+  event.preventDefault();
+  if (!event.repeat) animatePageChange(event.key === "ArrowDown" ? -1 : 1);
+});
 
 
 function normalizeSearch(text) {

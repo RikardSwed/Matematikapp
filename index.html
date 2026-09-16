@@ -130,10 +130,6 @@
         <div class="page-card quiz-card animation-card">
           <button class="back-button" id="back-from-animation" type="button" aria-label="Tillbaka till träningslägen">←</button>
           <p class="eyebrow">Animera</p>
-          <div class="animation-picker" id="animation-picker">
-            <label for="animation-select">Välj exempel</label>
-            <select id="animation-select"></select>
-          </div>
           <h1 id="animation-heading" tabindex="-1"></h1>
           <div id="animation-stage" aria-live="polite" aria-atomic="true">
             <p class="progress" id="animation-progress"></p>
@@ -146,6 +142,8 @@
             <button class="primary-button" id="animation-replay" type="button" hidden>Börja om</button>
             <button class="success-button" id="animation-next" type="button">Nästa</button>
           </div>
+          <p class="swipe-hint" id="animation-swipe-hint">Svep upp eller ned för att byta övning</p>
+          <p class="sr-only">Med tangentbord: pil ned för nästa övning, pil upp för föregående.</p>
         </div>
       </section>
 
@@ -211,7 +209,7 @@
           <p class="eyebrow">MathClass</p>
           <h1 id="settings-heading" tabindex="-1">Profil &amp; inställningar</h1>
           <div class="profile-summary"><span>RM</span><div><strong>Rikard Månsson</strong><small>Profilnamn och initialer kan anpassas senare.</small></div></div>
-          <div class="settings-row"><span>Version</span><strong>0.12.0 · Steg för steg</strong></div>
+          <div class="settings-row"><span>Version</span><strong>0.13.0 · Svep vidare</strong></div>
           <button class="list-button" id="open-updates" type="button"><span><strong>Uppdateringar</strong><small>Se vad som har lagts till</small></span><b>›</b></button>
         </div>
       </section>
@@ -221,6 +219,7 @@
           <button class="back-button" id="back-from-updates" type="button" aria-label="Tillbaka till inställningar">←</button>
           <p class="eyebrow">MathClass</p>
           <h1 id="updates-heading" tabindex="-1">Uppdateringar</h1>
+          <article class="release-note"><h2>Version 0.13.0 · Svep vidare</h2><p>Svep upp eller ned för att byta övning i Animera. Rullgardinen är borttagen och Nästa visar fortfarande nästa steg. Två nya moment om prefix och kombinatorik ger 24 frågor, sex genomgångssteg och fyra animationer.</p></article>
           <article class="release-note"><h2>Version 0.12.0 · Steg för steg</h2><p>Nya läget Animera låter dig bygga uttryck och följa förklaringar med Nästa. Sju animationer om räknesätt, ekvationer, prioritering och rabatt. Två nya moment med 24 frågor: Prioriteringsregler och Procentuell förändring.</p></article>
           <article class="release-note"><h2>Version 0.11.0 · Ord och exempel</h2><p>32 nya frågor om potenser, kvadratrötter, längdenheter, area och diagram. Räknesättens språk och räknemetoder visar nu konkreta talexempel. Grafisk finns även för area och diagram.</p></article>
           <article class="release-note"><h2>Version 0.10.0 · Se matematiken</h2><p>Nya läget Grafisk med 20 uppgifter i fem moment. Appen ritar bråk, vinklar, tallinjer, koordinater och trianglar. Två nya moment om koordinater och Pythagoras ger ytterligare 24 frågor. Några regler och genomgångar har också fått visuellt stöd.</p></article>
