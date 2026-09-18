@@ -84,6 +84,37 @@ const MathGraphics = (() => {
         add("rect", { x, y: bottom - value * step, width: 34, height: value * step, fill: blue, stroke: ink });
         label(x + 17, 164, data.labels[index]);
       });
+    } else if (data.type === "functionGraph") {
+      // Fixed teaching window: x = 0..4 and y = 0..8. Read the numbers,
+      // since one y-grid step is two units, unlike the x-grid step.
+      const x = (v) => 64 + 48 * v, y = (v) => 144 - 15 * v;
+      for (let v = 0; v <= 4; v++) {
+        line(x(v), y(8), x(v), y(0), { stroke: "#aac7e1", "stroke-width": 1 });
+        label(x(v), 165, v, { "font-size": 15 });
+      }
+      for (let v = 2; v <= 8; v += 2) {
+        line(x(0), y(v), x(4), y(v), { stroke: "#aac7e1", "stroke-width": 1 });
+        label(47, y(v) + 5, v, { "font-size": 15 });
+      }
+      line(x(0), 17, x(0), y(0)); line(x(0), y(0), 274, y(0));
+      label(286, 150, "x"); label(48, 17, "y");
+      data.lines.forEach((graph, index) => {
+        const color = index === 0 ? blue : accent;
+        // Clip each line mathematically to the window before drawing it.
+        let from = 0, to = 4;
+        if (graph.k !== 0) {
+          const edges = [(0 - graph.m) / graph.k, (8 - graph.m) / graph.k].sort((a, b) => a - b);
+          from = Math.max(from, edges[0]); to = Math.min(to, edges[1]);
+        } else if (graph.m < 0 || graph.m > 8) return;
+        if (from > to) return;
+        line(x(from), y(graph.k * from + graph.m), x(to), y(graph.k * to + graph.m), {
+          stroke: color, "stroke-width": 3, ...(index ? { "stroke-dasharray": "7 4" } : {}),
+        });
+        if (graph.label) {
+          const at = from + (to - from) * .83;
+          label(x(at) + 5, y(graph.k * at + graph.m) - 9, graph.label, { fill: color, "font-size": 16 });
+        }
+      });
     } else if (data.type === "coordinates") {
       const x = (v) => 160 + v * 30, y = (v) => 90 - v * 30;
       for (let v = -2; v <= 2; v++) {

@@ -30,6 +30,2701 @@ const q = (prompt, example, choices, correct, explanation, levels = ["high"], vi
 });
 
 const topics = {
+  fractionFormsLanguage: {
+  "title": "Bråk, decimal och procent",
+  "description": "Beskriv samma andel på tre sätt och skilj exakta värden från avrundningar.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Tre sätt att skriva samma andel",
+      "1/4 = 0,25 = 25 %",
+      "En fjärdedel, tjugofem hundradelar och tjugofem procent beskriver samma andel.",
+      "Formen ändras, men värdet bevaras. Procent betyder hundradel.",
+      {
+        "type": "fraction",
+        "rows": [
+          {
+            "parts": 4,
+            "filled": 1,
+            "label": "En av fyra lika delar"
+          }
+        ],
+        "alt": "En helhet är indelad i fyra lika stora delar. En del är markerad."
+      }
+    ],
+    [
+      "Skriv som hundradelar",
+      "3/5 = 60/100 = 60 %",
+      "Förläng bråket så att nämnaren blir hundra. Då visar täljaren antalet procent.",
+      "Multiplicera både täljare och nämnare med tjugo. Det räcker inte att bara ändra nämnaren."
+    ],
+    [
+      "Exakt eller ungefär?",
+      "1/3 ≈ 0,33 ≈ 33 %",
+      "En tredjedel har oändligt många treor i decimalformen. När vi stannar vid två decimaler använder vi ungefär lika med.",
+      "0,33 är exakt 33 %, men båda är lite mindre än en tredjedel. Tecknet ≈ markerar avrundningen."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad betyder procent?",
+        "example": "25 %",
+        "choices": [
+          "Hundradelar",
+          "Tiondelar",
+          "Hela mängder"
+        ],
+        "correct": 0,
+        "explanation": "Procent betyder hundradel. 25 % betyder 25 av 100.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad ändras mellan formerna?",
+        "example": "1/2 = 0,5 = 50 %",
+        "choices": [
+          "Andelens värde",
+          "Sättet att skriva andelen",
+          "Storleken på det hela"
+        ],
+        "correct": 1,
+        "explanation": "Alla tre formerna beskriver samma andel: hälften.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder tecknet ≈?",
+        "example": "1/3 ≈ 0,33",
+        "choices": [
+          "Exakt lika med",
+          "Större än",
+          "Ungefär lika med"
+        ],
+        "correct": 2,
+        "explanation": "Decimalen är avrundad. En tredjedel är inte exakt 0,33.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken decimalform är en hel?",
+        "example": "100 %",
+        "choices": [
+          "1",
+          "100",
+          "0,01"
+        ],
+        "correct": 0,
+        "explanation": "100 % är hundra hundradelar, alltså en hel: 1.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Vilket steg hjälper till procentform?",
+        "example": "3/4",
+        "choices": [
+          "Ändra bara nämnaren till 100",
+          "Förläng till 75/100",
+          "Addera 100 till täljaren"
+        ],
+        "correct": 1,
+        "explanation": "Multiplicera täljare och nämnare med 25. Då får du 75 hundradelar, alltså 75 %.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur tolkar du decimalen?",
+        "example": "0,07",
+        "choices": [
+          "Sju tiondelar",
+          "Sjuttio hundradelar",
+          "Sju hundradelar"
+        ],
+        "correct": 2,
+        "explanation": "Sju hundradelar skrivs 7/100 eller 7 %. Nollan efter kommat är viktig.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur skriver du bråket i decimalform?",
+        "example": "3/8",
+        "choices": [
+          "Dividera 3 med 8",
+          "Dividera 8 med 3",
+          "Multiplicera 3 med 8"
+        ],
+        "correct": 0,
+        "explanation": "Bråkstrecket betyder division. 3 ÷ 8 = 0,375.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur skriver du 40 % i decimalform?",
+        "example": "40 av 100",
+        "choices": [
+          "40 × 100",
+          "40 ÷ 100",
+          "100 ÷ 40"
+        ],
+        "correct": 1,
+        "explanation": "40 hundradelar är 0,40, vilket är samma tal som 0,4.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "0,5 och 0,50 är samma tal",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Fem tiondelar är lika mycket som femtio hundradelar.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "0,2 är samma andel som 2 %",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "0,2 är tjugo hundradelar och alltså 20 %. Två procent är 0,02.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "1/3 är exakt 33 %",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "33 % är 33/100. En tredjedel är lite större, så vi skriver ungefär 33 %.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En andel kan skrivas som mer än 100 %",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "150 % är till exempel 1,5 gånger det hela. Procenttal behöver inte stanna vid hundra.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "graphic": [
+      {
+        "prompt": "Vilka former beskriver markeringen?",
+        "example": "Samma andel på tre sätt",
+        "choices": [
+          "1/4 = 0,4 = 4 %",
+          "1/4 = 0,25 = 25 %",
+          "1/4 = 0,025 = 25 %"
+        ],
+        "correct": 1,
+        "explanation": "En av fyra lika stora delar är en fjärdedel, alltså 0,25 eller 25 %.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "fraction",
+          "rows": [
+            {
+              "parts": 4,
+              "filled": 1,
+              "label": "En av fyra lika delar"
+            }
+          ],
+          "alt": "En helhet är indelad i fyra lika stora delar. En del är markerad."
+        }
+      },
+      {
+        "prompt": "Vilken procentform visar figuren?",
+        "example": "Två av fem delar",
+        "choices": [
+          "20 %",
+          "25 %",
+          "40 %"
+        ],
+        "correct": 2,
+        "explanation": "Varje femtedel motsvarar 20 %. Två femtedelar är 40 %.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "fraction",
+          "rows": [
+            {
+              "parts": 5,
+              "filled": 2,
+              "label": "Två av fem lika delar"
+            }
+          ],
+          "alt": "En helhet är indelad i fem lika stora delar. Två delar är markerade."
+        }
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "quarter",
+      "title": "En fjärdedel i tre former",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "0",
+              "text": "1/4"
+            }
+          ],
+          "text": "Vi börjar med en fjärdedel. Det är en av fyra lika stora delar.",
+          "spoken": "En fjärdedel."
+        },
+        {
+          "parts": [
+            {
+              "id": "0",
+              "text": "1/4"
+            },
+            {
+              "id": "1",
+              "text": "= 0,25"
+            }
+          ],
+          "text": "Bråkstrecket betyder division. Ett delat med fyra är noll komma tjugofem.",
+          "spoken": "En fjärdedel är lika med noll komma tjugofem."
+        },
+        {
+          "parts": [
+            {
+              "id": "0",
+              "text": "1/4"
+            },
+            {
+              "id": "1",
+              "text": "= 0,25"
+            },
+            {
+              "id": "2",
+              "text": "= 25 %"
+            }
+          ],
+          "text": "Noll komma tjugofem är tjugofem hundradelar. Därför är det också tjugofem procent.",
+          "spoken": "En fjärdedel är lika med noll komma tjugofem, som är lika med tjugofem procent."
+        }
+      ]
+    },
+    {
+      "id": "hundredths",
+      "title": "Från femtedelar till procent",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "0",
+              "text": "3/5"
+            }
+          ],
+          "text": "Vi vill skriva tre femtedelar i procentform. Procent betyder hundradel.",
+          "spoken": "Tre femtedelar."
+        },
+        {
+          "parts": [
+            {
+              "id": "0",
+              "text": "3/5"
+            },
+            {
+              "id": "1",
+              "text": "= 60/100"
+            }
+          ],
+          "text": "Multiplicera täljaren och nämnaren med tjugo. Tre femtedelar är sextio hundradelar.",
+          "spoken": "Tre femtedelar är lika med sextio hundradelar."
+        },
+        {
+          "parts": [
+            {
+              "id": "0",
+              "text": "3/5"
+            },
+            {
+              "id": "1",
+              "text": "= 60/100"
+            },
+            {
+              "id": "2",
+              "text": "= 60 %"
+            }
+          ],
+          "text": "Sextio hundradelar är sextio procent. Vi har ändrat skrivsättet men bevarat andelen.",
+          "spoken": "Tre femtedelar är lika med sextio hundradelar, som är lika med sextio procent."
+        }
+      ]
+    }
+  ]
+},
+  fractionPartLanguage: {
+  "title": "Bråk av en mängd",
+  "description": "Skilj mellan andelen, delen och det hela. Förstå nämnarens och täljarens uppgifter.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Hitta det hela",
+      "2/3 av 24",
+      "Det hela är 24. Bråket två tredjedelar beskriver andelen som vi vill ta av den mängden.",
+      "Andelen är ett förhållande. Delen är mängden vi får, här 16."
+    ],
+    [
+      "Hitta en lika stor del",
+      "24 ÷ 3 = 8",
+      "Nämnaren tre berättar hur många lika stora delar vi delar hela mängden i. En tredjedel är åtta.",
+      "Vi delar mängden i tre grupper med lika många i varje grupp.",
+      {
+        "type": "fraction",
+        "rows": [
+          {
+            "parts": 3,
+            "filled": 2,
+            "label": "Hela mängden: 24"
+          }
+        ],
+        "alt": "En stapel visar hela mängden 24, uppdelad i tre lika stora delar. Två av delarna är markerade."
+      }
+    ],
+    [
+      "Ta rätt antal delar",
+      "2 × 8 = 16",
+      "Täljaren två berättar att vi ska ta två av tredjedelarna. Två grupper med åtta i varje blir sexton.",
+      "Det går också att multiplicera 24 med två först och sedan dividera med tre. Båda sätten ger samma del."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vilket tal är det hela?",
+        "example": "2/3 av 24",
+        "choices": [
+          "24",
+          "2",
+          "3"
+        ],
+        "correct": 0,
+        "explanation": "Det hela är mängden som andelen tas av. Här är det 24.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad beskriver bråket här?",
+        "example": "2/3 av 24 = 16",
+        "choices": [
+          "Antalet i delen",
+          "Andelen av det hela",
+          "Hela mängden"
+        ],
+        "correct": 1,
+        "explanation": "Två tredjedelar är andelen. 24 är det hela och 16 är delen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad berättar nämnaren?",
+        "example": "3/4 av en mängd",
+        "choices": [
+          "Hur många delar vi tar",
+          "Hur många som blir över",
+          "Hur många lika delar vi delar i"
+        ],
+        "correct": 2,
+        "explanation": "Nämnaren fyra anger att det hela delas i fyra lika stora delar.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad berättar täljaren?",
+        "example": "3/4 av en mängd",
+        "choices": [
+          "Hur många lika delar vi tar",
+          "Hur stor hela mängden är",
+          "Vilken enhet vi måste använda"
+        ],
+        "correct": 0,
+        "explanation": "Täljaren tre anger att vi tar tre av de fyra lika stora delarna.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Vilket steg hittar en femtedel?",
+        "example": "3/5 av 20",
+        "choices": [
+          "20 × 5",
+          "20 ÷ 5",
+          "20 ÷ 3"
+        ],
+        "correct": 1,
+        "explanation": "Dela det hela med nämnaren fem. Då får du storleken av en femtedel.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad gör du efter divisionen?",
+        "example": "3/5 av 20: en femtedel är 4",
+        "choices": [
+          "Dividera 4 med 3",
+          "Addera 5 till 4",
+          "Multiplicera 4 med 3"
+        ],
+        "correct": 2,
+        "explanation": "Täljaren tre visar att vi ska ta tre femtedelar. Varje femtedel är fyra.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilket uttryck beskriver metoden?",
+        "example": "2/3 av 24",
+        "choices": [
+          "(24 ÷ 3) × 2",
+          "(24 ÷ 2) × 3",
+          "24 ÷ (3 × 2)"
+        ],
+        "correct": 0,
+        "explanation": "Dividera med nämnaren för en del och multiplicera med täljaren för rätt antal delar.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken kontroll är rimlig?",
+        "example": "3/4 av 20",
+        "choices": [
+          "Svaret ska vara större än 20",
+          "Svaret ska ligga mellan 10 och 20",
+          "Svaret måste vara mindre än 10"
+        ],
+        "correct": 1,
+        "explanation": "Tre fjärdedelar är mer än hälften men mindre än en hel. Delen ska därför vara större än 10 men mindre än 20.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Hälften av 10 och hälften av 20 är samma mängd",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Andelen är samma, men delarna är 5 respektive 10 eftersom hela mängden skiljer sig.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "2/3 av 24 kan beräknas som (24 × 2) ÷ 3",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Multiplikation med två och division med tre ger samma resultat i den här ordningen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "1/4 av 20 fås genom att dividera 20 med 4",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Täljaren är ett, så vi tar en av de fyra lika stora delarna.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Täljaren anger alltid antalet föremål i svaret",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Täljaren anger antalet lika stora delar vi tar. Varje del kan innehålla flera föremål.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "graphic": [
+      {
+        "prompt": "Vilket steg ger en av de tre delarna?",
+        "example": "Två delar är markerade",
+        "choices": [
+          "24 × 3",
+          "24 ÷ 2",
+          "24 ÷ 3"
+        ],
+        "correct": 2,
+        "explanation": "Hela mängden 24 delas i tre lika stora delar. Varje del innehåller åtta.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "fraction",
+          "rows": [
+            {
+              "parts": 3,
+              "filled": 2,
+              "label": "Hela mängden: 24"
+            }
+          ],
+          "alt": "En stapel visar hela mängden 24, uppdelad i tre lika stora delar. Två av delarna är markerade."
+        }
+      },
+      {
+        "prompt": "Vilket uttryck ger den markerade mängden?",
+        "example": "Tre av fyra delar",
+        "choices": [
+          "(20 ÷ 4) × 3",
+          "(20 ÷ 3) × 4",
+          "20 ÷ 4"
+        ],
+        "correct": 0,
+        "explanation": "Dela 20 i fyra lika stora delar och ta tre av dem.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "fraction",
+          "rows": [
+            {
+              "parts": 4,
+              "filled": 3,
+              "label": "Hela mängden: 20"
+            }
+          ],
+          "alt": "En stapel visar hela mängden 20, uppdelad i fyra lika stora delar. Tre av delarna är markerade."
+        }
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "two-thirds",
+      "title": "Två tredjedelar av en mängd",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "2/3 av 24"
+            }
+          ],
+          "text": "Vi börjar med hela mängden 24 och vill ta två tredjedelar av den.",
+          "spoken": "Två tredjedelar av tjugofyra."
+        },
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "24 ÷ 3 = 8"
+            }
+          ],
+          "text": "Vi delar med nämnaren tre. Nu vet vi att en tredjedel av mängden är åtta.",
+          "spoken": "Tjugofyra delat med tre är lika med åtta."
+        },
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "2 × 8 = 16"
+            }
+          ],
+          "text": "Vi tar två sådana delar, eftersom täljaren är två. Delen blir sexton.",
+          "spoken": "Två gånger åtta är lika med sexton."
+        }
+      ]
+    },
+    {
+      "id": "three-quarters",
+      "title": "Tre fjärdedelar av en längd",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "3/4 av 20 m"
+            }
+          ],
+          "text": "Ett band är tjugo meter långt. Vi vill veta längden av tre fjärdedelar av bandet.",
+          "spoken": "Tre fjärdedelar av tjugo meter."
+        },
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "20 m ÷ 4 = 5 m"
+            }
+          ],
+          "text": "Vi delar hela längden i fyra lika långa delar. Varje fjärdedel är fem meter.",
+          "spoken": "Tjugo meter delat med fyra är lika med fem meter."
+        },
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "3 × 5 m = 15 m"
+            }
+          ],
+          "text": "Vi tar tre av delarna. Tre fjärdedelar av bandet är femton meter, och längden anges fortfarande i meter.",
+          "spoken": "Tre gånger fem meter är lika med femton meter."
+        }
+      ]
+    }
+  ]
+},
+  fractionMethodLanguage: {
+  "title": "Bråk med gemensam nämnare",
+  "description": "Förläng, förkorta och förstå addition och subtraktion av bråk.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Samma värde, nya delar",
+      "1/2 = 2/4",
+      "En halv och två fjärdedelar är lika mycket av samma helhet. Fler delar behöver alltså inte betyda ett större värde.",
+      "När varje halva delas i två blir delarna hälften så stora men dubbelt så många.",
+      {
+        "type": "fraction",
+        "rows": [
+          {
+            "parts": 2,
+            "filled": 1,
+            "label": "A"
+          },
+          {
+            "parts": 4,
+            "filled": 2,
+            "label": "B"
+          }
+        ],
+        "alt": "Två lika stora helheter. A har en av två lika stora delar markerad. B har två av fyra lika stora delar markerade."
+      }
+    ],
+    [
+      "Gör delarna jämförbara",
+      "1/2 + 1/4 = 2/4 + 1/4",
+      "Förläng en halv med två. Nu beskriver båda bråken fjärdedelar, så delarna är av samma storlek.",
+      "Multiplicera både täljare och nämnare med två. Bråkets värde ändras inte."
+    ],
+    [
+      "Räkna delarna",
+      "2/4 + 1/4 = 3/4",
+      "Två fjärdedelar plus en fjärdedel blir tre fjärdedelar. Addera täljarna och behåll nämnaren.",
+      "Vid subtraktion fungerar det likadant: 3/4 − 1/4 = 2/4. Nämnaren beskriver fortfarande fjärdedelar."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad bevaras vid förlängning?",
+        "example": "1/2 = 2/4",
+        "choices": [
+          "Bråkets värde",
+          "Antalet delar",
+          "Nämnaren"
+        ],
+        "correct": 0,
+        "explanation": "Täljare och nämnare multipliceras med samma tal, skilt från noll. Därför bevaras värdet.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder gemensam nämnare?",
+        "example": "2/6 och 3/6",
+        "choices": [
+          "Samma täljare",
+          "Samma nämnare",
+          "Samma värde"
+        ],
+        "correct": 1,
+        "explanation": "Båda bråken beskriver sjättedelar. Täljarna kan vara olika.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Varför behåller vi nämnaren?",
+        "example": "1/5 + 2/5 = 3/5",
+        "choices": [
+          "Delarna blir större",
+          "Nämnaren saknar betydelse",
+          "Vi räknar fortfarande femtedelar"
+        ],
+        "correct": 2,
+        "explanation": "Vi lägger ihop antalet femtedelar. Delarnas storlek ändras inte.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad innebär enklaste form?",
+        "example": "6/8 = 3/4",
+        "choices": [
+          "Ingen gemensam heltalsfaktor över 1",
+          "Täljaren måste vara 1",
+          "Nämnaren måste vara jämn"
+        ],
+        "correct": 0,
+        "explanation": "I 3/4 har täljare och nämnare ingen gemensam heltalsfaktor större än ett.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Vilket första steg passar?",
+        "example": "1/2 + 1/3",
+        "choices": [
+          "Addera nämnarna",
+          "Skriv båda med nämnaren 6",
+          "Ta bort bråkstrecken"
+        ],
+        "correct": 1,
+        "explanation": "Förläng till 3/6 och 2/6. Sedan går sjättedelarna att addera.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur förkortar du detta bråk?",
+        "example": "6/8",
+        "choices": [
+          "Subtrahera 2 från båda",
+          "Dividera bara täljaren med 2",
+          "Dividera båda med 2"
+        ],
+        "correct": 2,
+        "explanation": "6 ÷ 2 = 3 och 8 ÷ 2 = 4. Därför är 6/8 = 3/4.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur subtraherar du här?",
+        "example": "5/6 − 2/6",
+        "choices": [
+          "Subtrahera täljarna, behåll 6",
+          "Subtrahera nämnarna också",
+          "Multiplicera täljarna"
+        ],
+        "correct": 0,
+        "explanation": "Fem sjättedelar minus två sjättedelar är tre sjättedelar.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur jämför du bråken?",
+        "example": "2/3 och 3/4",
+        "choices": [
+          "Störst nämnare vinner alltid",
+          "Skriv som 8/12 och 9/12",
+          "Jämför bara täljarna"
+        ],
+        "correct": 1,
+        "explanation": "Med samma nämnare är delarna lika stora. Nio tolftedelar är mer än åtta tolftedelar.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Att förlänga ett bråk gör alltid värdet större",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Förlängning ändrar skrivsättet men bevarar värdet.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "1/3 + 1/3 = 2/6",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "En tredjedel plus en tredjedel är två tredjedelar: 2/3.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "12 kan vara gemensam nämnare till 1/2 och 1/3",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "1/2 = 6/12 och 1/3 = 4/12. En gemensam nämnare behöver inte vara den minsta.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "4/6 och 2/3 har samma värde",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Dividera både täljare och nämnare i 4/6 med två för att få 2/3.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "graphic": [
+      {
+        "prompt": "Vad visar de markerade delarna?",
+        "example": "Lika stora helheter",
+        "choices": [
+          "A är större",
+          "B är större",
+          "Lika stora andelar"
+        ],
+        "correct": 2,
+        "explanation": "En halv och två fjärdedelar täcker lika mycket av lika stora helheter.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "fraction",
+          "rows": [
+            {
+              "parts": 2,
+              "filled": 1,
+              "label": "A"
+            },
+            {
+              "parts": 4,
+              "filled": 2,
+              "label": "B"
+            }
+          ],
+          "alt": "Två lika stora helheter. A har en av två lika stora delar markerad. B har två av fyra lika stora delar markerade."
+        }
+      },
+      {
+        "prompt": "Vad har ändrats från A till B?",
+        "example": "Från halvor till fjärdedelar",
+        "choices": [
+          "Fler, mindre delar",
+          "Större markerad andel",
+          "Större helhet"
+        ],
+        "correct": 0,
+        "explanation": "Varje halva har delats i två fjärdedelar. Andelen är oförändrad.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "fraction",
+          "rows": [
+            {
+              "parts": 2,
+              "filled": 1,
+              "label": "A"
+            },
+            {
+              "parts": 4,
+              "filled": 2,
+              "label": "B"
+            }
+          ],
+          "alt": "Två lika stora helheter. A har en av två lika stora delar markerad. B har två av fyra lika stora delar markerade."
+        }
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "extend-add",
+      "title": "Från halvor till fjärdedelar",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "1/2 + 1/4"
+            }
+          ],
+          "text": "Vi vill addera en halv och en fjärdedel. Först behöver vi beskriva delarna med samma nämnare.",
+          "spoken": "En halv plus en fjärdedel."
+        },
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "(1 × 2)/(2 × 2) + 1/4"
+            }
+          ],
+          "text": "Vi multiplicerar både täljare och nämnare i en halv med två. Värdet bevaras.",
+          "spoken": "Ett gånger två delat med två gånger två, plus en fjärdedel."
+        },
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "2/4 + 1/4"
+            }
+          ],
+          "text": "En halv har skrivits som två fjärdedelar. Nu räknar båda bråken fjärdedelar.",
+          "spoken": "Två fjärdedelar plus en fjärdedel."
+        },
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "2/4 + 1/4 = 3/4"
+            }
+          ],
+          "text": "Två delar plus en del blir tre delar. Nämnaren fyra är kvar eftersom delarna fortfarande är fjärdedelar.",
+          "spoken": "Två fjärdedelar plus en fjärdedel är lika med tre fjärdedelar."
+        }
+      ]
+    },
+    {
+      "id": "reduce",
+      "title": "Förkorta utan att ändra värdet",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "6/8"
+            }
+          ],
+          "text": "Vi börjar med sex åttondelar. Både sex och åtta är delbara med två.",
+          "spoken": "Sex åttondelar."
+        },
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "(6 ÷ 2)/(8 ÷ 2)"
+            }
+          ],
+          "text": "Vi dividerar både täljare och nämnare med två. Det motsvarar att samla åttondelarna två och två.",
+          "spoken": "Sex delat med två, dividerat med åtta delat med två."
+        },
+        {
+          "parts": [
+            {
+              "id": "expression",
+              "text": "6/8 = 3/4"
+            }
+          ],
+          "text": "Sex åttondelar är tre fjärdedelar. Tre och fyra saknar gemensam heltalsfaktor över ett, så bråket är i enklaste form.",
+          "spoken": "Sex åttondelar är lika med tre fjärdedelar."
+        }
+      ]
+    }
+  ]
+},
+  proportionLanguage: {
+  "title": "Proportionella samband",
+  "description": "Förstå samma förhållande, fast styckepris och origo.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Samma förhållande",
+      "y = 15x",
+      "Om varje vara kostar 15 kronor utan extra avgift är totalkostnaden proportionell mot antalet varor.",
+      "x är antalet varor och y kostnaden i kronor. För x större än noll är kvoten y ÷ x alltid 15."
+    ],
+    [
+      "Dubbla båda",
+      "2 varor → 30 kr\n4 varor → 60 kr",
+      "När antalet varor dubblas dubblas också kostnaden, eftersom styckepriset är oförändrat.",
+      "Det är förhållandet som är konstant. Det betyder inte att antalet varor och kostnaden ökar med samma antal."
+    ],
+    [
+      "Börja i origo",
+      "x = 0 → y = 0",
+      "Grafen för y = kx är en rät linje genom origo. Utan varor blir kostnaden noll när det inte finns någon fast avgift.",
+      "En rät linje som inte går genom origo visar inte ett proportionellt samband.",
+      {
+        "type": "functionGraph",
+        "lines": [
+          {
+            "k": 2,
+            "m": 0,
+            "label": ""
+          }
+        ],
+        "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linjen går genom (0, 0), (1, 2), (2, 4) och (4, 8)."
+      }
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad kännetecknar proportionalitet?",
+        "example": "y = kx",
+        "choices": [
+          "Samma faktor mellan x och y",
+          "Samma tal adderas alltid till x",
+          "y måste alltid vara större än x"
+        ],
+        "correct": 0,
+        "explanation": "y fås genom att multiplicera x med en konstant faktor k.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad händer när mängden dubblas?",
+        "example": "Fast styckepris, ingen extra avgift",
+        "choices": [
+          "Kostnaden är oförändrad",
+          "Kostnaden dubblas",
+          "Kostnaden ökar med två kronor"
+        ],
+        "correct": 1,
+        "explanation": "Samma styckepris gör att dubbelt så många varor kostar dubbelt så mycket.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken punkt passerar grafen?",
+        "example": "Ett proportionellt samband",
+        "choices": [
+          "(1, 1) alltid",
+          "(0, 1) alltid",
+          "Origo"
+        ],
+        "correct": 2,
+        "explanation": "När x = 0 ger y = kx också y = 0.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad står 15 för?",
+        "example": "y = 15x, x varor och y kronor",
+        "choices": [
+          "Priset per vara",
+          "En extra startavgift",
+          "Antalet varor"
+        ],
+        "correct": 0,
+        "explanation": "Faktorn 15 anger hur många kronor varje vara kostar.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Hur undersöker du en värdetabell?",
+        "example": "Alla x-värden är positiva",
+        "choices": [
+          "Addera alla y-värden",
+          "Jämför kvoterna y ÷ x",
+          "Jämför bara största talen"
+        ],
+        "correct": 1,
+        "explanation": "Samma kvot i tabellens par är förenligt med proportionalitet. Hela sambandet måste följa samma regel.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad kontrollerar du i en rak graf?",
+        "example": "Är sambandet proportionellt?",
+        "choices": [
+          "Om linjen är blå",
+          "Om linjen går uppåt",
+          "Om linjen går genom origo"
+        ],
+        "correct": 2,
+        "explanation": "En rät linje genom origo har formen y = kx.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur skriver du sambandet?",
+        "example": "Varje biljett kostar 20 kr, utan extra avgift",
+        "choices": [
+          "y = 20x",
+          "y = x + 20",
+          "y = 20 − x"
+        ],
+        "correct": 0,
+        "explanation": "Totalkostnaden är priset per biljett gånger antalet biljetter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur påverkar en fast extra avgift sambandet?",
+        "example": "y = 15x + 10",
+        "choices": [
+          "Det är fortfarande proportionellt",
+          "Det är inte proportionellt",
+          "Kostnaden är alltid tio kronor"
+        ],
+        "correct": 1,
+        "explanation": "Startvärdet är 10. Grafen går därför inte genom origo.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Alla räta linjer visar proportionalitet",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Linjen måste också gå genom origo.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En halverad mängd ger halverad kostnad vid fast styckepris utan extra avgift",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Båda storheterna ändras med samma faktor.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Om y = 3x är y ÷ x lika med 3 när x inte är noll",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Kvoten mellan y och x är konstant.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Proportionell betyder att båda storheterna alltid ökar med samma antal",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "De ändras med samma faktor. Antalet varor och kostnaden kan öka med olika antal.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "graphic": [
+      {
+        "prompt": "Vilken linje visar proportionalitet?",
+        "example": "Två räta linjer",
+        "choices": [
+          "A",
+          "B",
+          "Båda"
+        ],
+        "correct": 0,
+        "explanation": "A är en rät linje genom origo. B har startvärdet 2.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "functionGraph",
+          "lines": [
+            {
+              "k": 2,
+              "m": 0,
+              "label": "A"
+            },
+            {
+              "k": 1,
+              "m": 2,
+              "label": "B"
+            }
+          ],
+          "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linje A går genom (0, 0), (2, 4), (4, 8). Linje B går genom (0, 2), (2, 4), (4, 6)."
+        }
+      },
+      {
+        "prompt": "Vad händer från x = 1 till x = 2?",
+        "example": "Läs y-värdena",
+        "choices": [
+          "y är oförändrat",
+          "y dubblas",
+          "y halveras"
+        ],
+        "correct": 1,
+        "explanation": "y går från 2 till 4 när x går från 1 till 2.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "functionGraph",
+          "lines": [
+            {
+              "k": 2,
+              "m": 0,
+              "label": ""
+            }
+          ],
+          "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linjen går genom (0, 0), (1, 2), (2, 4) och (4, 8)."
+        }
+      },
+      {
+        "prompt": "Är sambandet proportionellt?",
+        "example": "Undersök startvärdet",
+        "choices": [
+          "Ja, för linjen är rak",
+          "Ja, för linjen stiger",
+          "Nej, linjen går inte genom origo"
+        ],
+        "correct": 2,
+        "explanation": "När x = 0 är y = 2. Sambandet är därför inte proportionellt.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "functionGraph",
+          "lines": [
+            {
+              "k": 1,
+              "m": 2,
+              "label": ""
+            }
+          ],
+          "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linjen går genom (0, 2), (2, 4) och (4, 6)."
+        }
+      },
+      {
+        "prompt": "Vilken linje har störst positiv lutning?",
+        "example": "Samma axlar och skalor",
+        "choices": [
+          "B",
+          "A",
+          "De har samma lutning"
+        ],
+        "correct": 0,
+        "explanation": "B:s y-värde ökar med två per x-steg. A:s ökar med ett.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "functionGraph",
+          "lines": [
+            {
+              "k": 1,
+              "m": 0,
+              "label": "A"
+            },
+            {
+              "k": 2,
+              "m": 0,
+              "label": "B"
+            }
+          ],
+          "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linje A går genom (0, 0) och (4, 4). Linje B går genom (0, 0) och (4, 8)."
+        }
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "unit-price",
+      "title": "Från styckepris till kostnad",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "rule",
+              "text": "15x"
+            }
+          ],
+          "text": "Varje vara kostar femton kronor utan extra avgift. x är antalet varor och y är kostnaden.",
+          "spoken": "y är lika med femton x."
+        },
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "rule",
+              "text": "15 × 2"
+            }
+          ],
+          "text": "Vi köper två varor och ersätter x med två. Styckepriset är oförändrat.",
+          "spoken": "y är lika med femton gånger två."
+        },
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "rule",
+              "text": "30"
+            }
+          ],
+          "text": "Totalkostnaden är trettio kronor. Vi har använt samma faktor för varje vara.",
+          "spoken": "y är lika med trettio."
+        }
+      ]
+    },
+    {
+      "id": "double",
+      "title": "Dubbla mängden",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "x",
+              "text": "x = 2"
+            },
+            {
+              "id": "arrow",
+              "text": "→"
+            },
+            {
+              "id": "y",
+              "text": "y = 30"
+            }
+          ],
+          "text": "Två varor kostar trettio kronor. Varje vara kostar femton kronor och ingen extra avgift tillkommer.",
+          "spoken": "x är två och y är trettio."
+        },
+        {
+          "parts": [
+            {
+              "id": "x",
+              "text": "x = 4"
+            },
+            {
+              "id": "arrow",
+              "text": "→"
+            },
+            {
+              "id": "y",
+              "text": "y = ?"
+            }
+          ],
+          "text": "Vi dubblar antalet varor från två till fyra. Då måste även kostnaden dubblas.",
+          "spoken": "x är fyra. Vilket y-värde hör till?"
+        },
+        {
+          "parts": [
+            {
+              "id": "x",
+              "text": "x = 4"
+            },
+            {
+              "id": "arrow",
+              "text": "→"
+            },
+            {
+              "id": "y",
+              "text": "y = 60"
+            }
+          ],
+          "text": "Fyra varor kostar sextio kronor. Både mängden och kostnaden har multiplicerats med två.",
+          "spoken": "x är fyra och y är sextio."
+        }
+      ]
+    }
+  ]
+},
+  linearLanguage: {
+  "title": "Räta linjens språk",
+  "description": "Tolka lutning, startvärde och formeln y = kx + m.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Två delar i sambandet",
+      "y = 2x + 3",
+      "I den här formeln anger 2 hur mycket y ökar när x ökar med ett. Talet 3 anger y-värdet när x är noll.",
+      "Formen är y = kx + m. k är lutningen och m är startvärdet, där linjen skär y-axeln."
+    ],
+    [
+      "Lutningen beskriver förändring",
+      "x ökar med 1 → y ökar med 2",
+      "För y = 2x + 3 innebär ett steg åt höger att y ökar med två. Lutningen är konstant.",
+      "Ett negativt k betyder att y minskar när x ökar. När k = 0 är y konstant."
+    ],
+    [
+      "Startvärdet läses vid noll",
+      "y = 2x + 3",
+      "När x är noll försvinner termen 2x. Då återstår startvärdet 3, där linjen möter y-axeln.",
+      "Startvärdet kan vara positivt, negativt eller noll. När m = 0 får vi ett proportionellt samband.",
+      {
+        "type": "functionGraph",
+        "lines": [
+          {
+            "k": 2,
+            "m": 3,
+            "label": ""
+          }
+        ],
+        "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linjen går genom (0, 3), (1, 5) och (2, 7), och når bildens överkant vid (2,5; 8)."
+      }
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad beskriver k?",
+        "example": "y = kx + m",
+        "choices": [
+          "Lutningen",
+          "Punktens namn",
+          "Startvärdet"
+        ],
+        "correct": 0,
+        "explanation": "k anger förändringen i y när x ökar med ett.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad beskriver m?",
+        "example": "y = kx + m",
+        "choices": [
+          "Antalet punkter",
+          "y-värdet när x = 0",
+          "Det största x-värdet"
+        ],
+        "correct": 1,
+        "explanation": "m är startvärdet och linjens skärning med y-axeln.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder negativ lutning?",
+        "example": "k < 0",
+        "choices": [
+          "y är alltid negativt",
+          "x måste minska",
+          "y minskar när x ökar"
+        ],
+        "correct": 2,
+        "explanation": "Negativt k beskriver riktningen på förändringen, inte tecknet på alla y-värden.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad betyder k = 0?",
+        "example": "y = 0x + 3",
+        "choices": [
+          "y är konstant",
+          "y är alltid noll",
+          "Grafen är lodrät"
+        ],
+        "correct": 0,
+        "explanation": "y = 3 för alla x. Grafen är en vågrät linje.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Hur hittar du startvärdet i formeln?",
+        "example": "y = 2x + 3",
+        "choices": [
+          "Sätt y till noll",
+          "Sätt x till noll",
+          "Multiplicera alla tal"
+        ],
+        "correct": 1,
+        "explanation": "När x = 0 blir y = 3, så m = 3.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur bestämmer du lutningen mellan två punkter?",
+        "example": "Samma räta linje, olika x-värden",
+        "choices": [
+          "Addera koordinaterna",
+          "Dela ändringen i x med ändringen i y",
+          "Dela ändringen i y med ändringen i x"
+        ],
+        "correct": 2,
+        "explanation": "Lutningen är förändringen i y per enhet x.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken formel beskriver avgiften?",
+        "example": "Startavgift 3 kr och 2 kr per minut",
+        "choices": [
+          "y = 2x + 3",
+          "y = 3x + 2",
+          "y = 5x"
+        ],
+        "correct": 0,
+        "explanation": "2x är den rörliga delen och 3 är den fasta delen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad gäller för två olika parallella linjer?",
+        "example": "Formen y = kx + m",
+        "choices": [
+          "Samma m, olika k",
+          "Samma k, olika m",
+          "Både k och m är samma"
+        ],
+        "correct": 1,
+        "explanation": "De har samma lutning men olika startvärden. Samma k och m skulle ge samma linje.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En linje med negativt k måste ligga under x-axeln",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Den sjunker när x ökar, men kan ha både positiva och negativa y-värden.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "m = 0 innebär att grafen går genom origo",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "När x = 0 är y = m, alltså noll.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En värdetabell visar par av x- och y-värden",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Varje par beskriver en punkt som hör till sambandet.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Startvärdet måste vara positivt",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "m kan vara positivt, negativt eller noll.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "graphic": [
+      {
+        "prompt": "Vilket är startvärdet?",
+        "example": "Läs där linjen möter y-axeln",
+        "choices": [
+          "2",
+          "4",
+          "0"
+        ],
+        "correct": 0,
+        "explanation": "Vid x = 0 är y = 2. Startvärdet m är alltså 2.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "functionGraph",
+          "lines": [
+            {
+              "k": 1,
+              "m": 2,
+              "label": ""
+            }
+          ],
+          "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linjen går genom (0, 2), (2, 4) och (4, 6)."
+        }
+      },
+      {
+        "prompt": "Hur mycket ökar y per x-steg?",
+        "example": "Läs skalan, inte bara rutorna",
+        "choices": [
+          "2",
+          "1",
+          "4"
+        ],
+        "correct": 1,
+        "explanation": "Från x = 0 till x = 2 ökar y från 2 till 4. Lutningen är 2 ÷ 2 = 1.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "functionGraph",
+          "lines": [
+            {
+              "k": 1,
+              "m": 2,
+              "label": ""
+            }
+          ],
+          "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linjen går genom (0, 2), (2, 4) och (4, 6)."
+        }
+      },
+      {
+        "prompt": "Vad visar linjens riktning?",
+        "example": "Följ linjen åt höger",
+        "choices": [
+          "Positiv lutning",
+          "Lutningen är noll",
+          "Negativ lutning"
+        ],
+        "correct": 2,
+        "explanation": "y minskar när x ökar, så k är negativt.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "functionGraph",
+          "lines": [
+            {
+              "k": -1,
+              "m": 6,
+              "label": ""
+            }
+          ],
+          "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linjen går genom (0, 6), (2, 4) och (4, 2)."
+        }
+      },
+      {
+        "prompt": "Varför är linjerna parallella?",
+        "example": "Jämför förändring och startvärde",
+        "choices": [
+          "Samma lutning, olika startvärden",
+          "Samma startvärde, olika lutningar",
+          "Båda går genom origo"
+        ],
+        "correct": 0,
+        "explanation": "Båda ökar lika mycket per x-steg men börjar på olika y-värden.",
+        "levels": [
+          "high"
+        ],
+        "visual": {
+          "type": "functionGraph",
+          "lines": [
+            {
+              "k": 1,
+              "m": 0,
+              "label": "A"
+            },
+            {
+              "k": 1,
+              "m": 2,
+              "label": "B"
+            }
+          ],
+          "alt": "Koordinatsystem: x från 0 till 4 i steg om 1, y från 0 till 8 i steg om 2. Linje A går genom (0, 0) och (4, 4). Linje B går genom (0, 2) och (4, 6)."
+        }
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "fixed-part",
+      "title": "Lägg till en startavgift",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "variable",
+              "text": "2x"
+            }
+          ],
+          "text": "Den rörliga kostnaden är två kronor per minut. x anger antalet minuter.",
+          "spoken": "y är lika med två x."
+        },
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "variable",
+              "text": "2x"
+            },
+            {
+              "id": "fixed",
+              "text": "+ 3"
+            }
+          ],
+          "text": "En startavgift på tre kronor tillkommer. Den delen är fast, oavsett antalet minuter.",
+          "spoken": "y är lika med två x plus tre."
+        },
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "variable",
+              "text": "2 × 4"
+            },
+            {
+              "id": "fixed",
+              "text": "+ 3"
+            }
+          ],
+          "text": "Efter fyra minuter ersätter vi x med fyra. Startavgiften läggs till en enda gång.",
+          "spoken": "y är lika med två gånger fyra plus tre."
+        },
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "result",
+              "text": "11"
+            }
+          ],
+          "text": "Totalkostnaden blir elva kronor: åtta kronor för tiden och tre kronor i startavgift.",
+          "spoken": "y är lika med elva."
+        }
+      ]
+    },
+    {
+      "id": "negative-slope",
+      "title": "En minskning per steg",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "rule",
+              "text": "−x + 6"
+            }
+          ],
+          "text": "Startvärdet är sex och lutningen är minus ett. y minskar med ett för varje steg som x ökar.",
+          "spoken": "y är lika med minus x plus sex."
+        },
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "rule",
+              "text": "−2 + 6"
+            }
+          ],
+          "text": "När x är två ersätter vi x med två. Minustecknet framför x finns kvar.",
+          "spoken": "y är lika med minus två plus sex."
+        },
+        {
+          "parts": [
+            {
+              "id": "y",
+              "text": "y ="
+            },
+            {
+              "id": "rule",
+              "text": "4"
+            }
+          ],
+          "text": "y blir fyra. Negativ lutning betyder minskning, inte att varje y-värde måste vara negativt.",
+          "spoken": "y är lika med fyra."
+        }
+      ]
+    }
+  ]
+},
+
+  volumeLanguage: {
+  "title": "Rätblock och volym",
+  "description": "Skilj mellan yta och volym och förstå basyta och höjd.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "Tre dimensioner",
+      "Längd · bredd · höjd",
+      "Volym beskriver hur mycket utrymme en kropp upptar eller hur mycket en behållare rymmer. Längd, bredd och höjd beskriver tre riktningar.",
+      "Area beskriver en ytas storlek. Volym beskriver ett tredimensionellt utrymme."
+    ],
+    [
+      "Börja med basytans area",
+      "B = 3 cm × 2 cm = 6 cm²",
+      "Ett rätblock har rektangulära sidoytor. Välj en basyta och beräkna dess area genom att multiplicera längd och bredd.",
+      "B står här för basytans area, inte för längden av en sida. Höjden mäts vinkelrätt mot basytan."
+    ],
+    [
+      "Bygg på höjden",
+      "V = B × h\n6 cm² × 4 cm = 24 cm³",
+      "Multiplicera basytans area med höjden för att få rätblockets volym.",
+      "Sambandet gäller även prismor och cylindrar. Det gäller inte direkt för exempelvis en kon eller pyramid."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad beskriver volym?",
+        "example": "En lådas innehåll",
+        "choices": [
+          "Hur mycket utrymme som ryms",
+          "Bara längden runt botten",
+          "Bara bottnens area"
+        ],
+        "correct": 0,
+        "explanation": "Volym beskriver tredimensionellt utrymme.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad menas med en kub?",
+        "example": "En särskild sorts rätblock",
+        "choices": [
+          "Ett rätblock med bara två sidor",
+          "Ett rätblock där alla kanter är lika långa",
+          "En kropp med cirkulär basyta"
+        ],
+        "correct": 1,
+        "explanation": "En kub har sex kvadratiska sidoytor och lika långa kanter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad står B för här?",
+        "example": "V = B × h",
+        "choices": [
+          "Basens omkrets",
+          "Breddens längd",
+          "Basytans area"
+        ],
+        "correct": 2,
+        "explanation": "B är en area. Multiplicerad med höjden ger den volymen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur mäts höjden?",
+        "example": "Från basyta till motstående yta i ett rätblock",
+        "choices": [
+          "Vinkelrätt mot basytan",
+          "Längs valfri diagonal",
+          "Runt basytans kant"
+        ],
+        "correct": 0,
+        "explanation": "Höjden är avståndet vinkelrätt mellan de parallella basytorna.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Vilket steg passar först?",
+        "example": "Beräkna ett rätblocks volym",
+        "choices": [
+          "Addera alla kanter",
+          "Beräkna basytans area",
+          "Räkna antalet hörn"
+        ],
+        "correct": 1,
+        "explanation": "Basytans area multipliceras sedan med höjden.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad behöver du utöver basytans area?",
+        "example": "V = B × h",
+        "choices": [
+          "Basens omkrets",
+          "Kroppens färg",
+          "Höjden"
+        ],
+        "correct": 2,
+        "explanation": "Höjden visar hur långt kroppen sträcker sig vinkelrätt mot basytan.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vad kontrollerar du före multiplikationen?",
+        "example": "Längder anges i cm och dm",
+        "choices": [
+          "Att längderna skrivs i samma enhet",
+          "Att alla tal är lika stora",
+          "Att bara det största talet används"
+        ],
+        "correct": 0,
+        "explanation": "Skriv längderna i samma enhet så att volymen får rätt kubikenhet.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur beräknar du en kubs volym?",
+        "example": "Kantlängden är s",
+        "choices": [
+          "s + s + s",
+          "s × s × s",
+          "s × s"
+        ],
+        "correct": 1,
+        "explanation": "Kuben har samma längd, bredd och höjd. Produkten av de tre ger volymen.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Area och volym beskriver samma sak",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Area beskriver en yta medan volym beskriver utrymme i tre dimensioner.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Varje kub är också ett rätblock",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "En kub är ett rätblock med lika långa kanter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "B × h ger volymen för alla geometriska kroppar",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Formeln gäller prismor och cylindrar. Koner och pyramider behöver också faktorn en tredjedel.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Ett rätblocks volym ändras när man vrider det",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Att vrida kroppen ändrar inte hur mycket utrymme den upptar.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "base-height",
+      "title": "Från basyta till volym",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "label",
+              "text": "B ="
+            },
+            {
+              "id": "value",
+              "text": "3 cm × 2 cm"
+            }
+          ],
+          "text": "Rätblockets basyta är tre centimeter lång och två centimeter bred. Vi börjar med att beräkna arean.",
+          "spoken": "B är lika med tre centimeter gånger två centimeter."
+        },
+        {
+          "parts": [
+            {
+              "id": "label",
+              "text": "B ="
+            },
+            {
+              "id": "value",
+              "text": "6 cm²"
+            }
+          ],
+          "text": "Basytans area är sex kvadratcentimeter. Det är en yta, ännu ingen volym.",
+          "spoken": "B är lika med sex kvadratcentimeter."
+        },
+        {
+          "parts": [
+            {
+              "id": "label",
+              "text": "V ="
+            },
+            {
+              "id": "value",
+              "text": "6 cm² × 4 cm"
+            }
+          ],
+          "text": "Höjden är fyra centimeter. Vi multiplicerar basytans area med höjden.",
+          "spoken": "V är lika med sex kvadratcentimeter gånger fyra centimeter."
+        },
+        {
+          "parts": [
+            {
+              "id": "label",
+              "text": "V ="
+            },
+            {
+              "id": "value",
+              "text": "24 cm³"
+            }
+          ],
+          "text": "Volymen blir tjugofyra kubikcentimeter. Kvadratcentimeter gånger centimeter ger kubikcentimeter.",
+          "spoken": "V är lika med tjugofyra kubikcentimeter."
+        }
+      ]
+    },
+    {
+      "id": "cube",
+      "title": "En kubs volym",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "side",
+              "text": "s = 3 cm"
+            }
+          ],
+          "text": "Kubens kant är tre centimeter. Längd, bredd och höjd är lika stora.",
+          "spoken": "s är lika med tre centimeter."
+        },
+        {
+          "parts": [
+            {
+              "id": "label",
+              "text": "V ="
+            },
+            {
+              "id": "product",
+              "text": "(3 × 3 × 3) cm³"
+            }
+          ],
+          "text": "Vi multiplicerar tre lika långa mått. Därför används kantlängden tre gånger som faktor.",
+          "spoken": "V är lika med tre gånger tre gånger tre kubikcentimeter."
+        },
+        {
+          "parts": [
+            {
+              "id": "label",
+              "text": "V ="
+            },
+            {
+              "id": "product",
+              "text": "27 cm³"
+            }
+          ],
+          "text": "Kubens volym är tjugosju kubikcentimeter. Det motsvarar tjugosju små kuber med kanten en centimeter.",
+          "spoken": "V är lika med tjugosju kubikcentimeter."
+        }
+      ]
+    }
+  ]
+},
+  volumeUnitsLanguage: {
+  "title": "Liter och kubikenheter",
+  "description": "Koppla ihop liter, kubikdecimeter och kubikcentimeter.",
+  "levels": [
+    "high"
+  ],
+  "languageFocused": true,
+  "walkthrough": [
+    [
+      "En kub som mått",
+      "1 cm × 1 cm × 1 cm = 1 cm³",
+      "En kubikcentimeter är volymen av en kub vars kanter är en centimeter. Trean visar att tre längder multipliceras.",
+      "cm mäter längd, cm² mäter area och cm³ mäter volym."
+    ],
+    [
+      "Koppla ihop systemen",
+      "1 l = 1 dm³\n1 ml = 1 cm³",
+      "Liter och kubikdecimeter är lika stora volymenheter. Milliliter och kubikcentimeter är också lika stora.",
+      "En liter består av tusen milliliter. En kubikdecimeter består av tusen kubikcentimeter."
+    ],
+    [
+      "Tusen i ett kubiksteg",
+      "1 dm³ = 1 000 cm³",
+      "En decimeter är tio centimeter. Tio gånger fler små längdenheter i tre riktningar ger tio gånger tio gånger tio små kuber.",
+      "Mellan m³ och dm³, eller mellan dm³ och cm³, är faktorn tusen. Det skiljer sig från längdenheternas faktor tio."
+    ]
+  ],
+  "modes": {
+    "rules": [
+      {
+        "prompt": "Vad betyder cm³?",
+        "example": "En volymenhet",
+        "choices": [
+          "Kubikcentimeter",
+          "Kvadratcentimeter",
+          "Tre centimeter"
+        ],
+        "correct": 0,
+        "explanation": "En kubikcentimeter är volymen av en kub med kantlängden en centimeter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken enhet är lika stor som en liter?",
+        "example": "1 l",
+        "choices": [
+          "1 cm³",
+          "1 dm³",
+          "1 m³"
+        ],
+        "correct": 1,
+        "explanation": "En liter motsvarar en kubikdecimeter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilken enhet är lika stor som en milliliter?",
+        "example": "1 ml",
+        "choices": [
+          "1 dm³",
+          "1 mm³",
+          "1 cm³"
+        ],
+        "correct": 2,
+        "explanation": "En milliliter motsvarar en kubikcentimeter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Varför blir faktorn tusen?",
+        "example": "Från dm³ till cm³",
+        "choices": [
+          "Tio gånger tio gånger tio",
+          "Tre gånger tio",
+          "Bara en längd ändras"
+        ],
+        "correct": 0,
+        "explanation": "Enheten delas i tio delar i var och en av tre riktningar: 10 × 10 × 10 = 1 000.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "methods": [
+      {
+        "prompt": "Hur byter du från dm³ till cm³?",
+        "example": "Samma volym, mindre enhet",
+        "choices": [
+          "Dividera med tusen",
+          "Multiplicera med tusen",
+          "Multiplicera med tio"
+        ],
+        "correct": 1,
+        "explanation": "Det ryms tusen kubikcentimeter i en kubikdecimeter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur byter du från cm³ till dm³?",
+        "example": "Samma volym, större enhet",
+        "choices": [
+          "Multiplicera med tusen",
+          "Dividera med tio",
+          "Dividera med tusen"
+        ],
+        "correct": 2,
+        "explanation": "Tusen kubikcentimeter bildar en kubikdecimeter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Hur jämför du 2 l och 1 500 cm³?",
+        "example": "Två olika volymenheter",
+        "choices": [
+          "Skriv båda i samma enhet",
+          "Jämför bara 2 och 1 500",
+          "Addera talen direkt"
+        ],
+        "correct": 0,
+        "explanation": "2 l = 2 000 cm³. Då går volymerna att jämföra direkt.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Vilket samband hjälper dig från m³ till liter?",
+        "example": "1 m³ = 1 000 dm³",
+        "choices": [
+          "1 cm³ = 1 l",
+          "1 dm³ = 1 l",
+          "1 m = 1 l"
+        ],
+        "correct": 1,
+        "explanation": "Varje kubikdecimeter är en liter. Därför är en kubikmeter tusen liter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ],
+    "truefalse": [
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En kubikdecimeter är tio kubikcentimeter",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "Det går tio små längdenheter i tre riktningar, alltså tusen små kuber.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "2 l och 2 dm³ beskriver samma volym",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "En liter och en kubikdecimeter är lika stora enheter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "Mätetalet blir större vid byte till en mindre volymenhet",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 0,
+        "explanation": "Samma volym kräver fler små enheter än stora enheter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      },
+      {
+        "prompt": "Sant eller falskt?",
+        "example": "En kubikmeter motsvarar hundra liter",
+        "choices": [
+          "Sant",
+          "Falskt"
+        ],
+        "correct": 1,
+        "explanation": "En kubikmeter är tusen kubikdecimeter och därmed tusen liter.",
+        "levels": [
+          "high"
+        ],
+        "visual": null
+      }
+    ]
+  },
+  "animations": [
+    {
+      "id": "cubic-step",
+      "title": "Varför tusen små kuber?",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "left",
+              "text": "1 dm"
+            },
+            {
+              "id": "equal",
+              "text": "="
+            },
+            {
+              "id": "right",
+              "text": "10 cm"
+            }
+          ],
+          "text": "En kub har kanten en decimeter. Längs varje kant får tio centimeter plats.",
+          "spoken": "En decimeter är lika med tio centimeter."
+        },
+        {
+          "parts": [
+            {
+              "id": "left",
+              "text": "1 dm³"
+            },
+            {
+              "id": "equal",
+              "text": "="
+            },
+            {
+              "id": "right",
+              "text": "(10 × 10 × 10) cm³"
+            }
+          ],
+          "text": "I tre riktningar blir det tio gånger tio gånger tio små kuber. Varje liten kub är en kubikcentimeter.",
+          "spoken": "En kubikdecimeter är lika med tio gånger tio gånger tio kubikcentimeter."
+        },
+        {
+          "parts": [
+            {
+              "id": "left",
+              "text": "1 dm³"
+            },
+            {
+              "id": "equal",
+              "text": "="
+            },
+            {
+              "id": "right",
+              "text": "1 000 cm³"
+            }
+          ],
+          "text": "Det blir tusen kubikcentimeter. Därför multiplicerar vi mätetalet med tusen vid detta enhetsbyte.",
+          "spoken": "En kubikdecimeter är lika med tusen kubikcentimeter."
+        }
+      ]
+    },
+    {
+      "id": "litres",
+      "title": "Från liter till kubikcentimeter",
+      "levels": [
+        "high"
+      ],
+      "compact": true,
+      "steps": [
+        {
+          "parts": [
+            {
+              "id": "amount",
+              "text": "2 l"
+            }
+          ],
+          "text": "Vi börjar med två liter. Vi vill beskriva samma volym i kubikcentimeter.",
+          "spoken": "Två liter."
+        },
+        {
+          "parts": [
+            {
+              "id": "amount",
+              "text": "2 l"
+            },
+            {
+              "id": "equal",
+              "text": "="
+            },
+            {
+              "id": "cubic",
+              "text": "2 dm³"
+            }
+          ],
+          "text": "En liter är en kubikdecimeter. Två liter är därför två kubikdecimeter.",
+          "spoken": "Två liter är lika med två kubikdecimeter."
+        },
+        {
+          "parts": [
+            {
+              "id": "amount",
+              "text": "2 l"
+            },
+            {
+              "id": "equal",
+              "text": "="
+            },
+            {
+              "id": "cubic",
+              "text": "2 000 cm³"
+            }
+          ],
+          "text": "Varje kubikdecimeter är tusen kubikcentimeter. Två liter blir två tusen kubikcentimeter.",
+          "spoken": "Två liter är lika med två tusen kubikcentimeter."
+        }
+      ]
+    }
+  ]
+},
+
   prefixLanguage: {
   "title": "Förstå prefix",
   "description": "Tolka kilo, hekto, deci, centi, milli och mega.",
@@ -2915,7 +5610,7 @@ const highCategories = [
     "id": "volume",
     "title": "Volym och rymdgeometri",
     "description": "Kroppar, volym och volymenheter.",
-    "topicIds": [],
+    "topicIds": ["volumeLanguage", "volumeUnitsLanguage"],
     "keywords": "rätblock kub cylinder liter deciliter centiliter milliliter"
   }
 ] },
@@ -2924,16 +5619,14 @@ const highCategories = [
     "id": "fractions",
     "title": "Bråk",
     "description": "Andelar, bråkformer och att räkna med bråk.",
-    "topicIds": ["fractionLanguage"],
+    "topicIds": ["fractionLanguage", "fractionMethodLanguage", "fractionPartLanguage"],
     "keywords": "täljare nämnare förkorta förlänga blandad form"
   },
   {
     "id": "percent-basics",
     "title": "Förstå procent",
     "description": "Hundradelar och sambandet mellan andel, del och helhet.",
-    "topicIds": [
-      "percent"
-    ],
+    "topicIds": ["percent", "fractionFormsLanguage"],
     "keywords": "procentform decimalform hälften fjärdedel"
   },
   {
@@ -3015,7 +5708,7 @@ const highCategories = [
     "id": "functions",
     "title": "Koordinater och funktioner",
     "description": "Koordinatsystem, linjära samband och proportionalitet.",
-    "topicIds": ["coordinateLanguage"],
+    "topicIds": ["coordinateLanguage", "proportionLanguage", "linearLanguage"],
     "keywords": "origo x-axel y-axel graf lutning startvärde räta linjens ekvation"
   }
 ] },
